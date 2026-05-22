@@ -1,0 +1,127 @@
+---
+title: Fumadocs UI Components
+description: Render smoke test for supported Fumadocs UI MDX components.
+---
+
+# Fumadocs UI Components
+
+<Banner variant="normal" changeLayout={false}>
+  Docuforge supports common Fumadocs UI components.
+</Banner>
+
+<Callout type="info" title="Info">
+  Informational callout.
+</Callout>
+
+<Callout type="warn" title="Warning">
+  Warning callout.
+</Callout>
+
+<Callout type="success" title="Success">
+  Success callout.
+</Callout>
+
+<Cards>
+  <Card title="Roadmap" href="https://example.com/roadmap">
+    Planned product work.
+  </Card>
+  <Card title="Authoring Rules" description="Controlled MDX writing rules." />
+</Cards>
+
+<Accordions>
+  <Accordion title="Can I use accordions?">
+    Yes. Use them for FAQ and secondary details.
+  </Accordion>
+  <Accordion title="Can I link an item?" id="accordion-linked-item">
+    Yes. `id` creates an anchor target.
+  </Accordion>
+</Accordions>
+
+<Steps>
+  <Step>
+    Open an MDX file.
+  </Step>
+  <Step>
+    Preview the rendered document.
+  </Step>
+</Steps>
+
+<Tabs items={["pnpm", "npm"]}>
+  <Tab>
+
+```bash
+pnpm install
+```
+
+  </Tab>
+  <Tab>
+
+```bash
+npm install
+```
+
+  </Tab>
+</Tabs>
+
+<Tabs defaultValue="one">
+  <TabsList>
+    <TabsTrigger value="one">One</TabsTrigger>
+    <TabsTrigger value="two">Two</TabsTrigger>
+  </TabsList>
+  <TabsContent value="one">Advanced tab one.</TabsContent>
+  <TabsContent value="two">Advanced tab two.</TabsContent>
+</Tabs>
+
+<Files>
+  <Folder name="src" defaultOpen>
+    <File name="App.tsx" />
+    <Folder name="components" defaultOpen>
+      <File name="MdxPreview.tsx" />
+      <File name="mdx.tsx" />
+    </Folder>
+  </Folder>
+  <File name="package.json" />
+</Files>
+
+<Heading as="h2" id="custom-heading">
+  Custom Heading
+</Heading>
+
+<InlineTOC
+  items={[
+    { title: "Overview", url: "#overview", depth: 2 },
+    { title: "Usage", url: "#usage", depth: 2 },
+    { title: "Advanced", url: "#advanced", depth: 3 }
+  ]}
+>
+  On this page
+</InlineTOC>
+
+<TypeTable
+  type={{
+    title: {
+      type: "string",
+      description: "Display title.",
+      required: true
+    },
+    disabled: {
+      type: "boolean",
+      description: "Disable interaction.",
+      default: "false"
+    },
+    onChange: {
+      type: "(value: string) => void",
+      description: "Called when value changes.",
+      parameters: [{ name: "value", description: "Next value." }],
+      returns: "void"
+    }
+  }}
+/>
+
+<ImageZoom src="https://placehold.co/640x360/png" alt="Placeholder image" width={640} height={360} />
+
+<DynamicCodeBlock
+  lang="ts"
+  code={'export function hello(name: string) {\n  return `Hello ${name}`\n}'}
+  codeblock={{ title: "hello.ts" }}
+/>

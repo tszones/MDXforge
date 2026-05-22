@@ -1,6 +1,5 @@
 const fs = require('node:fs')
 const path = require('node:path')
-const { pathToFileURL } = require('node:url')
 const matter = require('gray-matter')
 const React = require('react')
 const { renderToStaticMarkup } = require('react-dom/server')
@@ -12,16 +11,19 @@ async function main() {
   const defaultMdxComponents =
     'default' in fumadocsMdxComponents ? fumadocsMdxComponents.default : fumadocsMdxComponents
 
-  function fallback(name) {
-    return function FallbackComponent({ children }) {
-      return React.createElement(
-        'div',
-        { className: 'fallback' },
-        React.createElement('div', null, `<${name}>`),
-        children
-      )
-    }
-  }
+  const { Accordion, Accordions } = await import('fumadocs-ui/components/accordion')
+  const { Banner } = await import('fumadocs-ui/components/banner')
+  const { DynamicCodeBlock } = await import('fumadocs-ui/components/dynamic-codeblock')
+  const { File, Files, Folder } = await import('fumadocs-ui/components/files')
+  const { GithubInfo } = await import('fumadocs-ui/components/github-info')
+  const { Heading } = await import('fumadocs-ui/components/heading')
+  const ImageZoom = (props) => React.createElement('img', props)
+  const { InlineTOC } = await import('fumadocs-ui/components/inline-toc')
+  const { Step, Steps } = await import('fumadocs-ui/components/steps')
+  const { Tab, Tabs, TabsContent, TabsList, TabsTrigger } = await import(
+    'fumadocs-ui/components/tabs'
+  )
+  const { TypeTable } = await import('fumadocs-ui/components/type-table')
 
   const components = {
     ...defaultMdxComponents,
@@ -35,14 +37,25 @@ async function main() {
     CodeBlockTab: defaultMdxComponents.CodeBlockTab,
     CodeBlockTabsList: defaultMdxComponents.CodeBlockTabsList,
     CodeBlockTabsTrigger: defaultMdxComponents.CodeBlockTabsTrigger,
-    Accordion: fallback('Accordion'),
-    Accordions: fallback('Accordions'),
-    Step: fallback('Step'),
-    Steps: fallback('Steps'),
-    File: fallback('File'),
-    Files: fallback('Files'),
-    Tabs: fallback('Tabs'),
-    Tab: fallback('Tab'),
+    Accordion,
+    Accordions,
+    Banner,
+    DynamicCodeBlock,
+    File,
+    Files,
+    Folder,
+    GithubInfo,
+    Heading,
+    ImageZoom,
+    InlineTOC,
+    Step,
+    Steps,
+    Tab,
+    Tabs,
+    TabsContent,
+    TabsList,
+    TabsTrigger,
+    TypeTable,
     wrapper({ children }) {
       return React.createElement(React.Fragment, null, children)
     }

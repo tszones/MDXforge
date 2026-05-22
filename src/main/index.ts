@@ -1,6 +1,11 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join, resolve } from 'path'
+
+if (process.platform === 'win32') {
+  app.setPath('userData', join(app.getPath('temp'), 'docuforge-dev'))
+}
+
 import icon from '../../resources/icon.png?asset'
 import { getLastOpenFile, openMdxFile, readMdxFile, resolveMdxTarget, setLastOpenPath } from './mdx'
 

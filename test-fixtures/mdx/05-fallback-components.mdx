@@ -5,7 +5,7 @@ description: Allowed placeholder components that should not crash rendering.
 
 # Fallback Components
 
-These components are allowed for compatibility but currently render placeholders.
+These components are rendered by the built-in Fumadocs UI component set.
 
 <Accordions>
   <Accordion title="Fallback accordion">
@@ -27,7 +27,7 @@ These components are allowed for compatibility but currently render placeholders
   <File name="docs/roadmap.mdx" />
 </Files>
 
-<Tabs>
-  <Tab title="One">First tab content.</Tab>
-  <Tab title="Two">Second tab content.</Tab>
+<Tabs items={["One", "Two"]}>
+  <Tab>First tab content.</Tab>
+  <Tab>Second tab content.</Tab>
 </Tabs>

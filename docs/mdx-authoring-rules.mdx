@@ -119,48 +119,59 @@ function hello(name: string) {
 - `href` 可选。
 - `Card` 必须放在 `Cards` 内。
 
-### CodeBlockTabs / CodeBlockTab
+### Tabs / Tab
 
-用于多语言或多文件代码示例。
+用于普通内容标签页，例如不同平台、不同方案。
 
 ```mdx
-<CodeBlockTabs defaultValue="npm">
-  <CodeBlockTab value="npm">
-
-```bash
-npm install
-```
-
-  </CodeBlockTab>
-  <CodeBlockTab value="pnpm">
+<Tabs items={["pnpm", "npm"]}>
+  <Tab>
 
 ```bash
 pnpm install
 ```
 
-  </CodeBlockTab>
-</CodeBlockTabs>
+  </Tab>
+  <Tab>
+
+```bash
+npm install
+```
+
+  </Tab>
+</Tabs>
 ```
 
 规则：
 
-- `CodeBlockTab` 必须有 `value`。
-- 每个 tab 内推荐只放一个代码块。
+- `Tabs` 推荐使用 `items` 声明标签名称。
+- `Tab` 顺序必须和 `items` 对应。
+- 如果不用 `items`，每个 `Tab` 必须写 `value`。
 
-## 临时兼容组件
+### Accordions / Accordion
 
-以下组件当前只是占位兼容，允许临时使用，但渲染效果不是最终版：
+用于 FAQ、折叠说明。
 
-- `Accordion`
-- `Accordions`
-- `Step`
-- `Steps`
-- `File`
-- `Files`
-- `Tabs`
-- `Tab`
+```mdx
+<Accordions>
+  <Accordion title="为什么打不开？">
+    请确认文件后缀是 `.mdx` 或 `.md`。
+  </Accordion>
+  <Accordion title="是否支持本地图片？">
+    后续会支持相对路径资源解析。
+  </Accordion>
+</Accordions>
+```
 
-示例：
+规则：
+
+- `Accordion` 必须有 `title`。
+- `Accordion` 必须放在 `Accordions` 内。
+- 内容不要嵌套过深。
+
+### Steps / Step
+
+用于流程、教程、分步说明。
 
 ```mdx
 <Steps>
@@ -168,16 +179,164 @@ pnpm install
     第一步：打开文件。
   </Step>
   <Step>
-    第二步：预览内容。
+    第二步：查看预览。
   </Step>
 </Steps>
 ```
 
 规则：
 
-- AI 默认不要优先使用这些组件。
-- 除非用户明确要求步骤、折叠、文件树、标签页。
-- 后续项目会实现正式组件后再放开。
+- `Step` 必须放在 `Steps` 内。
+- 每个 `Step` 表达一个清晰动作。
+
+### Files / File / Folder
+
+用于文件列表或目录结构。
+
+```mdx
+<Files>
+  <Folder name="src" defaultOpen>
+    <File name="App.tsx" />
+    <File name="components/MdxPreview.tsx" />
+  </Folder>
+  <File name="package.json" />
+</Files>
+```
+
+规则：
+
+- `File` 必须有 `name`。
+- `Folder` 必须有 `name`。
+- `File` / `Folder` 必须放在 `Files` 内。
+
+### Banner
+
+用于顶部横幅提示。
+
+```mdx
+<Banner variant="normal" changeLayout={false}>
+  新版本已发布。
+</Banner>
+```
+
+规则：
+
+- 本地文档中必须写 `changeLayout={false}`，避免影响应用布局。
+- `variant` 可用 `normal` 或 `rainbow`。
+- 不要写 `id`，除非需要可关闭并记忆状态。
+
+### Heading
+
+用于显式控制标题级别。
+
+```mdx
+<Heading as="h2" id="usage">
+  使用方法
+</Heading>
+```
+
+规则：
+
+- `as` 可用 `h1` 到 `h6`。
+- 优先使用 Markdown 标题；只有需要组件能力时才用 `Heading`。
+
+### InlineTOC
+
+用于文档内小目录。
+
+```mdx
+<InlineTOC
+  items={[
+    { title: "概览", url: "#overview", depth: 2 },
+    { title: "使用", url: "#usage", depth: 2 }
+  ]}
+>
+  本页目录
+</InlineTOC>
+```
+
+规则：
+
+- `items` 是静态数组。
+- 每项必须有 `title`、`url`、`depth`。
+- 不要动态生成目录。
+
+### TypeTable
+
+用于展示组件 props、API 字段、配置项。
+
+```mdx
+<TypeTable
+  type={{
+    title: {
+      type: "string",
+      description: "显示标题。",
+      required: true
+    },
+    disabled: {
+      type: "boolean",
+      description: "是否禁用。",
+      default: "false"
+    }
+  }}
+/>
+```
+
+规则：
+
+- `type` 必须是静态对象。
+- 字段必须包含 `type`。
+- `description` 建议简短。
+
+### ImageZoom
+
+用于可放大的图片。
+
+```mdx
+<ImageZoom src="https://placehold.co/640x360/png" alt="示例图片" width={640} height={360} />
+```
+
+规则：
+
+- 必须写 `src` 和 `alt`。
+- 建议写 `width` / `height`。
+- 本地相对图片路径需等资源解析完善后再大量使用。
+
+### DynamicCodeBlock
+
+用于动态高亮代码块。
+
+```mdx
+<DynamicCodeBlock
+  lang="ts"
+  code={'export const message = "hello"'}
+  codeblock={{ title: "example.ts" }}
+/>
+```
+
+规则：
+
+- 优先使用普通 fenced code block。
+- 只有需要传 `title`、动态展示时才用。
+- `code` 必须是静态字符串。
+
+### GithubInfo
+
+用于展示 GitHub 仓库信息。
+
+```mdx
+<GithubInfo owner="fuma-nama" repo="fumadocs" />
+```
+
+规则：
+
+- 会发起网络请求；离线环境可能失败。
+- 默认不推荐 AI 自动使用。
+- 不要写 `token`。
+
+## 临时兼容组件
+
+暂无。未知组件会导致渲染失败，请不要使用。
 
 ## 禁止内容
 
