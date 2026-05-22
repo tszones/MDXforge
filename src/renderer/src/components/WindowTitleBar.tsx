@@ -1,7 +1,13 @@
-import { Maximize2, Minus, Square, X } from 'lucide-react'
+import { ArrowLeft, Maximize2, Minus, Settings, Square, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
-export function WindowTitleBar(): React.JSX.Element {
+export function WindowTitleBar({
+  viewMode,
+  onViewModeChange
+}: {
+  viewMode: 'preview' | 'settings'
+  onViewModeChange: (viewMode: 'preview' | 'settings') => void
+}): React.JSX.Element {
   const [maximized, setMaximized] = useState(false)
 
   useEffect(() => {
@@ -19,6 +25,16 @@ export function WindowTitleBar(): React.JSX.Element {
         <span className="truncate">Docuforge</span>
       </div>
       <div className="flex h-full [-webkit-app-region:no-drag]">
+        <TitleBarButton
+          label={viewMode === 'settings' ? '返回预览' : '设置'}
+          onClick={() => onViewModeChange(viewMode === 'settings' ? 'preview' : 'settings')}
+        >
+          {viewMode === 'settings' ? (
+            <ArrowLeft className="size-4" />
+          ) : (
+            <Settings className="size-4" />
+          )}
+        </TitleBarButton>
         <TitleBarButton label="最小化" onClick={() => void window.api.minimizeWindow()}>
           <Minus className="size-4" />
         </TitleBarButton>

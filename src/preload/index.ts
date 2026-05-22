@@ -12,6 +12,8 @@ const api = {
   openMdxPath: (filePath) => ipcRenderer.invoke('mdx:open-path', filePath),
   registerDefaultMdxApp: () => ipcRenderer.invoke('mdx:register-default-app'),
   isDefaultMdxApp: () => ipcRenderer.invoke('mdx:is-default-app'),
+  getSettings: () => ipcRenderer.invoke('settings:get'),
+  setSettings: (settings) => ipcRenderer.invoke('settings:set', settings),
   onMdxFileOpened: (callback) => {
     const listener = (_, file) => callback(file)
     ipcRenderer.on('mdx:file-opened', listener)

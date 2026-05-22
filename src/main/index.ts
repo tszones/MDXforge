@@ -16,6 +16,8 @@ import {
   setLastOpenPath
 } from './mdx'
 
+import { type AppColorMode, type AppThemeName, getAppSettings, setAppSettings } from './settings'
+
 let mainWindow: BrowserWindow | null = null
 
 function getMdxPathFromArgv(argv: string[]): string | null {
@@ -116,6 +118,12 @@ app.whenReady().then(() => {
   ipcMain.handle('mdx:open-path', (_, filePath: string) => readMdxWorkspace(filePath))
   ipcMain.handle('mdx:register-default-app', () => app.setAsDefaultProtocolClient('mdx'))
   ipcMain.handle('mdx:is-default-app', () => app.isDefaultProtocolClient('mdx'))
+  ipcMain.handle('settings:get', () => getAppSettings())
+  ipcMain.handle(
+    'settings:set',
+    (_, settings: Partial<{ theme: AppThemeName; colorMode: AppColorMode }>) =>
+      setAppSettings(settings)
+  )
 
   app.on('second-instance', (_, argv) => {
     const filePath = getMdxPathFromArgv(argv)
