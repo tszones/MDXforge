@@ -11,7 +11,7 @@ export default defineConfig({
   main: {
     build: {
       externalizeDeps: {
-        exclude: ['react', 'react-dom', 'fumadocs-ui']
+        exclude: ['@mdx-js/mdx', 'react', 'react-dom', 'fumadocs-ui', 'fumadocs-core']
       }
     }
   },

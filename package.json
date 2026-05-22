@@ -58,5 +58,9 @@
       "electron",
       "esbuild"
     ]
+  },
+  "volta": {
+    "node": "24.15.0",
+    "pnpm": "10.32.1"
   }
 }

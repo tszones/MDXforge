@@ -1,16 +1,13 @@
+import { compile } from '@mdx-js/mdx'
 import { app, dialog } from 'electron'
 import { readFileSync, writeFileSync } from 'fs'
 import matter from 'gray-matter'
-import { createRequire } from 'module'
 import { dirname } from 'path'
 import * as React from 'react'
 import { createElement } from 'react'
 import * as runtime from 'react/jsx-runtime'
 import { renderToStaticMarkup } from 'react-dom/server'
-import { pathToFileURL } from 'url'
 import { mdxComponents } from './mdx-components'
-
-const require = createRequire(import.meta.url)
 
 const wrappedMdxComponents = {
   ...mdxComponents,
@@ -88,8 +85,7 @@ export async function renderMdxFile(filePath: string): Promise<RenderedMdxFile> 
 }
 
 async function compileMdx(content: string): Promise<string> {
-  const mdx = await import(pathToFileURL(require.resolve('@mdx-js/mdx')).href)
-  const compiled = await mdx.compile(content, {
+  const compiled = await compile(content, {
     outputFormat: 'function-body',
     development: false
   })
