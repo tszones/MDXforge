@@ -16,7 +16,13 @@ import {
   setLastOpenPath
 } from './mdx'
 
-import { type AppColorMode, type AppThemeName, getAppSettings, setAppSettings } from './settings'
+import {
+  type AppColorMode,
+  type AppLanguage,
+  type AppThemeName,
+  getAppSettings,
+  setAppSettings
+} from './settings'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -121,8 +127,10 @@ app.whenReady().then(() => {
   ipcMain.handle('settings:get', () => getAppSettings())
   ipcMain.handle(
     'settings:set',
-    (_, settings: Partial<{ theme: AppThemeName; colorMode: AppColorMode }>) =>
-      setAppSettings(settings)
+    (
+      _,
+      settings: Partial<{ theme: AppThemeName; colorMode: AppColorMode; language: AppLanguage }>
+    ) => setAppSettings(settings)
   )
 
   app.on('second-instance', (_, argv) => {

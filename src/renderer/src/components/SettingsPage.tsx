@@ -1,63 +1,40 @@
-import { ArrowLeft, Check, Moon, Palette, Settings, Sun } from 'lucide-react'
+import { ArrowLeft, Check, Languages, Moon, Palette, Settings, Sun } from 'lucide-react'
 import { type ColorMode, FUMADOCS_THEMES, type FumadocsThemeName } from '../lib/theme'
+import { m } from '../paraglide/messages'
+import { APP_LANGUAGE_OPTIONS, type AppLanguage } from '../types'
 
-const THEME_META: Record<
-  FumadocsThemeName,
-  { label: string; description: string; colors: [string, string, string, string] }
-> = {
+const THEME_META: Record<FumadocsThemeName, { colors: [string, string, string, string] }> = {
   neutral: {
-    label: 'Neutral / 中性灰',
-    description: '默认灰阶，最接近 Fumadocs 基础外观。',
     colors: ['hsl(0 0% 96%)', 'hsl(0 0% 9%)', 'hsl(0 0% 93.1%)', 'hsl(0 0% 82%)']
   },
   black: {
-    label: 'Black / 纯黑',
-    description: '高对比黑白，深色模式更纯粹。',
     colors: ['hsl(0 0% 98%)', 'hsl(0 0% 9%)', 'hsl(0 0% 96.1%)', 'hsl(0 0% 94.1%)']
   },
   vitepress: {
-    label: 'VitePress / 蓝紫文档',
-    description: '白底蓝紫主色，接近 VitePress 文档风格。',
     colors: ['hsl(0 0% 100%)', 'hsl(226 55% 45%)', 'hsl(240 6% 97%)', 'hsl(0 0% 94.1%)']
   },
   dusk: {
-    label: 'Dusk / 暮色粉紫',
-    description: '低饱和紫灰底，玫粉主色。',
     colors: ['hsl(250 20% 92%)', 'hsl(340 40% 48%)', 'hsl(250 40% 94%)', 'hsl(250 30% 90%)']
   },
   catppuccin: {
-    label: 'Catppuccin / 奶油紫',
-    description: '柔和奶油色系，紫色主色。',
     colors: ['hsl(220 23% 95%)', 'hsl(266 85% 58%)', 'hsl(220 22% 92%)', 'hsl(223 16% 83%)']
   },
   ocean: {
-    label: 'Ocean / 海洋蓝',
-    description: '浅蓝灰卡片与深海蓝主色。',
     colors: ['hsl(0 0% 98%)', 'hsl(210 80% 20.2%)', 'hsl(220 90% 96.1%)', 'hsl(220 50% 94.1%)']
   },
   purple: {
-    label: 'Purple / 紫罗兰',
-    description: '明亮紫色主题，视觉更活泼。',
     colors: ['hsl(256 100% 96%)', 'hsl(270 100% 52%)', 'hsl(270 60% 90%)', 'hsl(270 40% 88%)']
   },
   solar: {
-    label: 'Solar / 纸张卡片',
-    description: '更像独立纸张/卡片的阅读版式。',
     colors: ['hsl(0 0% 97%)', 'oklch(0.487 0.083 262.691)', 'hsl(0 0% 96.1%)', 'hsl(0 0% 82%)']
   },
   emerald: {
-    label: 'Emerald / 翡翠绿',
-    description: '清爽绿色系，适合知识库/笔记。',
     colors: ['hsl(165 45% 96%)', 'hsl(168 70% 40%)', 'hsl(168 45% 88%)', 'hsl(165 50% 90%)']
   },
   ruby: {
-    label: 'Ruby / 宝石红',
-    description: '红宝石主色，醒目但不刺眼。',
     colors: ['hsl(0 0% 98%)', 'hsl(348 85% 45%)', 'hsl(348 55% 92%)', 'hsl(348 70% 95%)']
   },
   aspen: {
-    label: 'Aspen / 山林绿',
-    description: '偏自然的黄绿色，柔和耐看。',
     colors: ['hsl(75 45% 96%)', 'hsl(80 60% 40%)', 'hsl(80 45% 88%)', 'hsl(75 50% 90%)']
   }
 }
@@ -65,16 +42,20 @@ const THEME_META: Record<
 interface SettingsPageProps {
   theme: FumadocsThemeName
   mode: ColorMode
+  language: AppLanguage
   onThemeChange: (theme: FumadocsThemeName) => void
   onModeChange: (mode: ColorMode) => void
+  onLanguageChange: (language: AppLanguage) => void
   onBack: () => void
 }
 
 export function SettingsPage({
   theme,
   mode,
+  language,
   onThemeChange,
   onModeChange,
+  onLanguageChange,
   onBack
 }: SettingsPageProps): React.JSX.Element {
   return (
@@ -87,39 +68,62 @@ export function SettingsPage({
             className="inline-flex w-fit items-center gap-2 rounded-lg border bg-fd-background px-3 py-2 text-sm text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
           >
             <ArrowLeft className="size-4" />
-            返回首页
+            {m.settings_back_home()}
           </button>
           <div className="inline-flex items-center gap-2 text-sm font-medium text-fd-muted-foreground">
             <Settings className="size-4" />
-            设置
+            {m.settings_label()}
           </div>
-          <h1 className="text-3xl font-semibold tracking-tight">外观主题</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">{m.settings_appearance_title()}</h1>
           <p className="max-w-2xl text-fd-muted-foreground">
-            切换 Fumadocs UI 内置主题与亮暗色模式。设置会保存在本地。
+            {m.settings_appearance_description()}
           </p>
         </header>
 
         <section className="grid gap-3 rounded-xl border bg-fd-card p-4 shadow-sm">
           <div className="flex items-center gap-2 font-medium">
             <Sun className="size-4" />
-            颜色模式
+            {m.settings_color_mode()}
           </div>
           <div className="flex flex-wrap gap-2">
-            <ModeButton active={mode === 'light'} onClick={() => onModeChange('light')}>
+            <OptionButton active={mode === 'light'} onClick={() => onModeChange('light')}>
               <Sun className="size-4" />
-              浅色
-            </ModeButton>
-            <ModeButton active={mode === 'dark'} onClick={() => onModeChange('dark')}>
+              {m.settings_light()}
+            </OptionButton>
+            <OptionButton active={mode === 'dark'} onClick={() => onModeChange('dark')}>
               <Moon className="size-4" />
-              深色
-            </ModeButton>
+              {m.settings_dark()}
+            </OptionButton>
+          </div>
+        </section>
+
+        <section className="grid gap-3 rounded-xl border bg-fd-card p-4 shadow-sm">
+          <div>
+            <div className="flex items-center gap-2 font-medium">
+              <Languages className="size-4" />
+              {m.settings_language()}
+            </div>
+            <p className="mt-1 text-sm text-fd-muted-foreground">
+              {m.settings_language_description()}
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {APP_LANGUAGE_OPTIONS.map((item) => (
+              <OptionButton
+                key={item}
+                active={language === item}
+                onClick={() => onLanguageChange(item)}
+              >
+                {languageLabel(item)}
+              </OptionButton>
+            ))}
           </div>
         </section>
 
         <section className="grid gap-4">
           <div className="flex items-center gap-2 font-medium">
             <Palette className="size-4" />
-            Fumadocs 主题
+            {m.settings_fumadocs_theme()}
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {FUMADOCS_THEMES.map((item) => (
@@ -138,7 +142,7 @@ export function SettingsPage({
   )
 }
 
-function ModeButton({
+function OptionButton({
   active,
   onClick,
   children
@@ -159,6 +163,12 @@ function ModeButton({
   )
 }
 
+function languageLabel(language: AppLanguage): string {
+  if (language === 'zh-CN') return m.settings_language_chinese()
+  if (language === 'en-US') return m.settings_language_english()
+  return m.settings_language_system()
+}
+
 function ThemeCard({
   name,
   active,
@@ -171,6 +181,12 @@ function ThemeCard({
   onClick: () => void
 }): React.JSX.Element {
   const meta = THEME_META[name]
+  const swatchLabels = [
+    m.settings_swatch_background(),
+    m.settings_swatch_primary(),
+    m.settings_swatch_secondary(),
+    m.settings_swatch_accent()
+  ]
 
   return (
     <button
@@ -199,17 +215,17 @@ function ThemeCard({
       <div className="p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <span className="font-medium">{meta.label}</span>
+            <span className="font-medium">{themeLabel(name)}</span>
             <code className="mt-1 block text-xs text-fd-muted-foreground">{name}</code>
           </div>
           <span className="inline-flex items-center gap-1 rounded-full bg-fd-muted px-2 py-0.5 text-xs text-fd-muted-foreground">
             {active ? <Check className="size-3" /> : null}
-            {active ? '当前' : '选择'}
+            {active ? m.settings_current() : m.settings_select()}
           </span>
         </div>
-        <p className="mt-3 text-sm text-fd-muted-foreground">{meta.description}</p>
+        <p className="mt-3 text-sm text-fd-muted-foreground">{themeDescription(name)}</p>
         <div className="mt-4 grid grid-cols-4 gap-1.5 text-[10px] text-fd-muted-foreground">
-          {['背景', '主色', '次级', '强调'].map((label, index) => (
+          {swatchLabels.map((label, index) => (
             <div key={label} className="min-w-0">
               <div
                 className="mb-1 h-6 rounded-md border"
@@ -220,9 +236,65 @@ function ThemeCard({
           ))}
         </div>
         <p className="mt-3 text-xs text-fd-muted-foreground">
-          预览模式：{mode === 'dark' ? '深色' : '浅色'}
+          {m.settings_preview_mode({
+            mode: mode === 'dark' ? m.settings_dark() : m.settings_light()
+          })}
         </p>
       </div>
     </button>
   )
+}
+
+function themeLabel(name: FumadocsThemeName): string {
+  switch (name) {
+    case 'black':
+      return m.theme_black_label()
+    case 'vitepress':
+      return m.theme_vitepress_label()
+    case 'dusk':
+      return m.theme_dusk_label()
+    case 'catppuccin':
+      return m.theme_catppuccin_label()
+    case 'ocean':
+      return m.theme_ocean_label()
+    case 'purple':
+      return m.theme_purple_label()
+    case 'solar':
+      return m.theme_solar_label()
+    case 'emerald':
+      return m.theme_emerald_label()
+    case 'ruby':
+      return m.theme_ruby_label()
+    case 'aspen':
+      return m.theme_aspen_label()
+    case 'neutral':
+      return m.theme_neutral_label()
+  }
+}
+
+function themeDescription(name: FumadocsThemeName): string {
+  switch (name) {
+    case 'black':
+      return m.theme_black_description()
+    case 'vitepress':
+      return m.theme_vitepress_description()
+    case 'dusk':
+      return m.theme_dusk_description()
+    case 'catppuccin':
+      return m.theme_catppuccin_description()
+    case 'ocean':
+      return m.theme_ocean_description()
+    case 'purple':
+      return m.theme_purple_description()
+    case 'solar':
+      return m.theme_solar_description()
+    case 'emerald':
+      return m.theme_emerald_description()
+    case 'ruby':
+      return m.theme_ruby_description()
+    case 'aspen':
+      return m.theme_aspen_description()
+    case 'neutral':
+      return m.theme_neutral_description()
+  }
 }

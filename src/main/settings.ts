@@ -14,10 +14,12 @@ export type AppThemeName =
   | 'aspen'
 
 export type AppColorMode = 'light' | 'dark'
+export type AppLanguage = 'system' | 'zh-CN' | 'en-US'
 
 export interface AppSettings {
   theme: AppThemeName
   colorMode: AppColorMode
+  language: AppLanguage
 }
 
 type StoreConstructor = new <T extends object>(options: {
@@ -34,19 +36,22 @@ const ElectronStore = (
 const store = new ElectronStore<AppSettings>({
   defaults: {
     theme: 'neutral',
-    colorMode: 'light'
+    colorMode: 'light',
+    language: 'system'
   }
 })
 
 export function getAppSettings(): AppSettings {
   return {
     theme: store.get('theme'),
-    colorMode: store.get('colorMode')
+    colorMode: store.get('colorMode'),
+    language: store.get('language')
   }
 }
 
 export function setAppSettings(settings: Partial<AppSettings>): AppSettings {
   if (settings.theme) store.set('theme', settings.theme)
   if (settings.colorMode) store.set('colorMode', settings.colorMode)
+  if (settings.language) store.set('language', settings.language)
   return getAppSettings()
 }

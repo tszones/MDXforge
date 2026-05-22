@@ -1,3 +1,7 @@
+export const APP_LANGUAGE_OPTIONS = ['system', 'zh-CN', 'en-US'] as const
+
+export type AppLanguage = (typeof APP_LANGUAGE_OPTIONS)[number]
+
 export interface MdxFile {
   path: string
   name: string

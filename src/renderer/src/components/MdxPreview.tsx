@@ -14,6 +14,7 @@ import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/p
 import { BookOpen, FileText, FolderOpen, PanelLeftClose, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
+import { m } from '../paraglide/messages'
 import type { MdxFolderEntry, MdxWorkspace } from '../types'
 import { MdxDocsLayout, MdxPageContainer } from './MdxDocsLayout'
 import { getMDXComponents } from './mdx'
@@ -148,7 +149,7 @@ function PreviewSidebar({
             {onCollapseSidebar ? (
               <button
                 type="button"
-                aria-label="收起侧边栏"
+                aria-label={m.preview_collapse_sidebar()}
                 onClick={onCollapseSidebar}
                 className="mb-auto flex size-8 items-center justify-center rounded-lg text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
               >
@@ -163,7 +164,7 @@ function PreviewSidebar({
             className="inline-flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent disabled:opacity-60"
           >
             <FileText className="size-4 text-fd-muted-foreground" />
-            {opening ? '打开中…' : '打开 MDX 文件'}
+            {opening ? m.actions_opening() : m.actions_open_mdx_file()}
           </button>
           <button
             type="button"
@@ -172,19 +173,21 @@ function PreviewSidebar({
             className="inline-flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent disabled:opacity-60"
           >
             <FolderOpen className="size-4 text-fd-muted-foreground" />
-            打开文件夹
+            {m.actions_open_folder()}
           </button>
           <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground">
             <Search className="size-4" />
             <span>
-              {workspace.folder ? `${workspace.folder.files.length} 个文档` : '单文件预览'}
+              {workspace.folder
+                ? m.preview_documents_count({ count: workspace.folder.files.length })
+                : m.preview_single_file_preview()}
             </span>
           </div>
         </div>
 
         <div className="fd-scroll-container min-h-0 flex-1 overflow-auto px-3 py-2 [mask:linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]">
           <p className="mb-1 px-2 text-xs font-medium text-fd-muted-foreground">
-            {workspace.folder ? workspace.folder.name : '当前文件'}
+            {workspace.folder ? workspace.folder.name : m.preview_current_file()}
           </p>
           {tree.length > 0 ? (
             <div className="flex flex-col gap-0.5">

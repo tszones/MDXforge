@@ -14,7 +14,8 @@
     "lint": "biome ci .",
     "lint:fix": "biome check --write .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
-    "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
+    "paraglide:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/renderer/src/paraglide --strategy localStorage preferredLanguage baseLocale --emit-ts-declarations --output-structure locale-modules --silent",
+    "typecheck:web": "npm run paraglide:compile && tsc --noEmit -p tsconfig.web.json --composite false",
     "typecheck": "npm run typecheck:node && npm run typecheck:web",
     "test:fixtures": "node scripts/render-mdx-fixtures.cjs",
     "start": "electron-vite preview",
@@ -47,6 +48,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.4.15",
     "@electron-toolkit/tsconfig": "^2.0.0",
+    "@inlang/paraglide-js": "^2.18.1",
     "@types/node": "^22.19.1",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",

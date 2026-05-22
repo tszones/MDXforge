@@ -2,31 +2,35 @@ import { useEffect, useState } from 'react'
 import { MdxPreview } from './components/MdxPreview'
 import { SettingsPage } from './components/SettingsPage'
 import { WindowTitleBar } from './components/WindowTitleBar'
+import { applyLanguage, normalizeStoredLanguage } from './lib/language'
 import {
   applyFumadocsTheme,
   type ColorMode,
   type FumadocsThemeName,
   isFumadocsThemeName
 } from './lib/theme'
-import type { MdxWorkspace } from './types'
+import { m } from './paraglide/messages'
+import type { AppLanguage, MdxWorkspace } from './types'
 
 type ViewMode = 'preview' | 'settings'
 
 function App(): React.JSX.Element {
-  const [workspace, setWorkspace] = useState<MdxWorkspace | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [viewMode, setViewMode] = useState<ViewMode>('preview')
   const [theme, setThemeState] = useState<FumadocsThemeName>('neutral')
   const [colorMode, setColorModeState] = useState<ColorMode>('light')
+  const [language, setLanguageState] = useState<AppLanguage>('system')
+  const [, rerenderForLocaleChange] = useState(0)
 
   useEffect(() => {
     void window.api.getSettings().then((settings) => {
       const nextTheme = isFumadocsThemeName(settings.theme) ? settings.theme : 'neutral'
       const nextColorMode = settings.colorMode === 'dark' ? 'dark' : 'light'
+      const nextLanguage = normalizeStoredLanguage(settings.language)
       setThemeState(nextTheme)
       setColorModeState(nextColorMode)
+      setLanguageState(nextLanguage)
       applyFumadocsTheme(nextTheme, nextColorMode)
+      applyLanguage(nextLanguage)
+      rerenderForLocaleChange((version) => version + 1)
     })
   }, [])
 
@@ -45,6 +49,49 @@ function App(): React.JSX.Element {
     const settings = await window.api.setSettings({ colorMode: mode })
     setColorModeState(settings.colorMode === 'dark' ? 'dark' : 'light')
   }
+
+  async function setLanguage(languageName: AppLanguage): Promise<void> {
+    setLanguageState(languageName)
+    applyLanguage(languageName)
+    rerenderForLocaleChange((version) => version + 1)
+    const settings = await window.api.setSettings({ language: languageName })
+    const storedLanguage = normalizeStoredLanguage(settings.language)
+    setLanguageState(storedLanguage)
+    applyLanguage(storedLanguage)
+    rerenderForLocaleChange((version) => version + 1)
+  }
+
+  return (
+    <AppContent
+      theme={theme}
+      colorMode={colorMode}
+      language={language}
+      onThemeChange={(nextTheme) => void setTheme(nextTheme)}
+      onColorModeChange={(nextMode) => void setColorMode(nextMode)}
+      onLanguageChange={(nextLanguage) => void setLanguage(nextLanguage)}
+    />
+  )
+}
+
+function AppContent({
+  theme,
+  colorMode,
+  language,
+  onThemeChange,
+  onColorModeChange,
+  onLanguageChange
+}: {
+  theme: FumadocsThemeName
+  colorMode: ColorMode
+  language: AppLanguage
+  onThemeChange: (theme: FumadocsThemeName) => void
+  onColorModeChange: (mode: ColorMode) => void
+  onLanguageChange: (language: AppLanguage) => void
+}): React.JSX.Element {
+  const [workspace, setWorkspace] = useState<MdxWorkspace | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [viewMode, setViewMode] = useState<ViewMode>('preview')
 
   useEffect(() => {
     void window.api.registerDefaultMdxApp()
@@ -119,8 +166,10 @@ function App(): React.JSX.Element {
         <SettingsPage
           theme={theme}
           mode={colorMode}
-          onThemeChange={(nextTheme) => void setTheme(nextTheme)}
-          onModeChange={(nextMode) => void setColorMode(nextMode)}
+          language={language}
+          onThemeChange={onThemeChange}
+          onModeChange={onColorModeChange}
+          onLanguageChange={onLanguageChange}
           onBack={() => setViewMode('preview')}
         />
       ) : (
@@ -133,7 +182,7 @@ function App(): React.JSX.Element {
                 disabled={loading}
                 className="rounded-md bg-fd-primary px-3 py-2 text-sm font-medium text-fd-primary-foreground disabled:opacity-60"
               >
-                {loading ? '打开中…' : '打开 MDX 文件'}
+                {loading ? m.actions_opening() : m.actions_open_mdx_file()}
               </button>
               <button
                 type="button"
@@ -141,7 +190,7 @@ function App(): React.JSX.Element {
                 disabled={loading}
                 className="rounded-md border px-3 py-2 text-sm font-medium disabled:opacity-60"
               >
-                打开文件夹
+                {m.actions_open_folder()}
               </button>
             </header>
           )}
@@ -164,9 +213,7 @@ function App(): React.JSX.Element {
             <section className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-8 text-center">
               <div>
                 <h1 className="mb-2 text-3xl font-semibold">Docuforge</h1>
-                <p className="mb-6 text-fd-muted-foreground">
-                  AI-native MDX docs workspace. 选择一个 .mdx/.md 文件或文件夹并渲染。
-                </p>
+                <p className="mb-6 text-fd-muted-foreground">{m.home_description()}</p>
                 <div className="flex justify-center gap-3">
                   <button
                     type="button"
@@ -174,7 +221,7 @@ function App(): React.JSX.Element {
                     disabled={loading}
                     className="rounded-md bg-fd-primary px-4 py-2 font-medium text-fd-primary-foreground disabled:opacity-60"
                   >
-                    选择文件
+                    {m.actions_select_file()}
                   </button>
                   <button
                     type="button"
@@ -182,7 +229,7 @@ function App(): React.JSX.Element {
                     disabled={loading}
                     className="rounded-md border px-4 py-2 font-medium disabled:opacity-60"
                   >
-                    选择文件夹
+                    {m.actions_select_folder()}
                   </button>
                 </div>
               </div>

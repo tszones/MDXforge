@@ -10,6 +10,7 @@ import { TOCItem, TOCItems } from 'fumadocs-ui/components/toc/clerk'
 import { ChevronDown, PanelLeft, SidebarIcon, Text } from 'lucide-react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useState } from 'react'
+import { m } from '../paraglide/messages'
 
 interface MdxDocsLayoutProps {
   toc: TOCItemType[]
@@ -110,7 +111,7 @@ function MdxToc(): React.JSX.Element {
         className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground"
       >
         <Text className="size-4" />
-        目录
+        {m.docs_toc()}
       </h3>
       <TOCScrollArea>
         <TOCItems>
@@ -134,7 +135,7 @@ function MdxTocPopover(): React.JSX.Element {
           className="flex h-10 w-full items-center gap-2.5 px-4 py-2.5 text-start text-sm text-fd-muted-foreground focus-visible:outline-none md:px-6 [&_svg]:size-4"
         >
           <PanelLeft className="shrink-0" />
-          <span className="truncate">目录</span>
+          <span className="truncate">{m.docs_toc()}</span>
           <ChevronDown
             className="ms-auto shrink-0 transition-transform data-[open=true]:rotate-180"
             data-open={open}

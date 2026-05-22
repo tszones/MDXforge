@@ -1,5 +1,6 @@
 import { ArrowLeft, Maximize2, Minus, Settings, Square, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { m } from '../paraglide/messages'
 
 export function WindowTitleBar({
   viewMode,
@@ -26,7 +27,7 @@ export function WindowTitleBar({
       </div>
       <div className="flex h-full [-webkit-app-region:no-drag]">
         <TitleBarButton
-          label={viewMode === 'settings' ? '返回预览' : '设置'}
+          label={viewMode === 'settings' ? m.title_bar_back_to_preview() : m.title_bar_settings()}
           onClick={() => onViewModeChange(viewMode === 'settings' ? 'preview' : 'settings')}
         >
           {viewMode === 'settings' ? (
@@ -35,13 +36,23 @@ export function WindowTitleBar({
             <Settings className="size-4" />
           )}
         </TitleBarButton>
-        <TitleBarButton label="最小化" onClick={() => void window.api.minimizeWindow()}>
+        <TitleBarButton
+          label={m.title_bar_minimize()}
+          onClick={() => void window.api.minimizeWindow()}
+        >
           <Minus className="size-4" />
         </TitleBarButton>
-        <TitleBarButton label={maximized ? '还原' : '最大化'} onClick={() => void toggleMaximize()}>
+        <TitleBarButton
+          label={maximized ? m.title_bar_restore() : m.title_bar_maximize()}
+          onClick={() => void toggleMaximize()}
+        >
           {maximized ? <Square className="size-3.5" /> : <Maximize2 className="size-3.5" />}
         </TitleBarButton>
-        <TitleBarButton label="关闭" danger onClick={() => void window.api.closeWindow()}>
+        <TitleBarButton
+          label={m.title_bar_close()}
+          danger
+          onClick={() => void window.api.closeWindow()}
+        >
           <X className="size-4" />
         </TitleBarButton>
       </div>

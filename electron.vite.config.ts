@@ -1,3 +1,4 @@
+import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'electron-vite'
@@ -28,6 +29,13 @@ export default defineConfig({
           return null
         }
       },
+      paraglideVitePlugin({
+        project: './project.inlang',
+        outdir: './src/renderer/src/paraglide',
+        strategy: ['localStorage', 'preferredLanguage', 'baseLocale'],
+        emitTsDeclarations: true,
+        outputStructure: 'locale-modules'
+      }),
       tsconfigPaths(),
       mdx(),
       tailwindcss(),

@@ -29,6 +29,7 @@ export interface MdxWorkspace {
 export interface AppSettings {
   theme: AppThemeName
   colorMode: AppColorMode
+  language: AppLanguage
 }
 
 export type AppThemeName =
@@ -45,6 +46,7 @@ export type AppThemeName =
   | 'aspen'
 
 export type AppColorMode = 'light' | 'dark'
+export type AppLanguage = 'system' | 'zh-CN' | 'en-US'
 
 export interface AppAPI {
   minimizeWindow: () => Promise<void>
