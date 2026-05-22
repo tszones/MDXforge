@@ -1,6 +1,7 @@
 {
   "extends": "@electron-toolkit/tsconfig/tsconfig.web.json",
   "include": [
+    ".source/**/*",
     "src/renderer/src/env.d.ts",
     "src/renderer/src/**/*",
     "src/renderer/src/**/*.tsx",
@@ -12,6 +13,9 @@
     "baseUrl": ".",
     "paths": {
       "@renderer/*": [
+        "src/renderer/src/*"
+      ],
+      "@/*": [
         "src/renderer/src/*"
       ]
     }

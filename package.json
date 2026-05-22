@@ -23,7 +23,15 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.2",
     "@electron-toolkit/utils": "^4.0.0",
-    "electron-updater": "^6.3.9"
+    "@mdx-js/react": "^3.1.1",
+    "@react-router/dev": "^7.15.1",
+    "@tailwindcss/vite": "^4.3.0",
+    "electron-updater": "^6.3.9",
+    "fumadocs-core": "^16.9.0",
+    "fumadocs-mdx": "^15.0.7",
+    "fumadocs-ui": "^16.9.0",
+    "react-router": "^7.15.1",
+    "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
@@ -44,7 +52,8 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "typescript": "^5.9.3",
-    "vite": "^7.2.6"
+    "vite": "^7.2.6",
+    "vite-tsconfig-paths": "^6.1.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

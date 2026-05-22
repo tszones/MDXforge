@@ -1,16 +1,37 @@
 import { resolve } from 'path'
 import { defineConfig } from 'electron-vite'
 import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+import mdx from 'fumadocs-mdx/vite'
+import tsconfigPaths from 'vite-tsconfig-paths'
 
-export default defineConfig({
+const pathShim = resolve('src/renderer/src/lib/path-browser.ts')
+
+export default defineConfig(async () => ({
   main: {},
   preload: {},
   renderer: {
     resolve: {
       alias: {
-        '@renderer': resolve('src/renderer/src')
+        path: pathShim,
+        'node:path': pathShim,
+        '@renderer': resolve('src/renderer/src'),
+        '@': resolve('src/renderer/src')
       }
     },
-    plugins: [react()]
+    plugins: [
+      {
+        name: 'renderer-node-path-shim',
+        enforce: 'pre',
+        resolveId(id) {
+          if (id === 'node:path' || id === 'path') return pathShim
+          return null
+        }
+      },
+      tsconfigPaths(),
+      ...(await mdx()),
+      tailwindcss(),
+      react()
+    ]
   }
-})
+}))
