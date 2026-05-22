@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { MdxPreview } from './components/MdxPreview'
-import type { RenderedMdxFile } from './types'
+import type { MdxFile } from './types'
 
 function App(): React.JSX.Element {
-  const [file, setFile] = useState<RenderedMdxFile | null>(null)
+  const [file, setFile] = useState<MdxFile | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 

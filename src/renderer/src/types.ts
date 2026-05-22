@@ -1,7 +1,7 @@
-export interface RenderedMdxFile {
+export interface MdxFile {
   path: string
   name: string
   frontmatter: Record<string, unknown>
-  html: string
+  content: string
   raw: string
 }
