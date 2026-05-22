@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import type { RenderedMdxFile } from './types'
 import { MdxPreview } from './components/MdxPreview'
+import type { RenderedMdxFile } from './types'
 
 function App(): React.JSX.Element {
   const [file, setFile] = useState<RenderedMdxFile | null>(null)
@@ -35,7 +35,11 @@ function App(): React.JSX.Element {
         {file ? <span className="truncate text-sm text-muted-foreground">{file.name}</span> : null}
       </header>
 
-      {error ? <pre className="m-4 overflow-auto rounded-md border bg-destructive/10 p-4 text-sm text-destructive">{error}</pre> : null}
+      {error ? (
+        <pre className="m-4 overflow-auto rounded-md border bg-destructive/10 p-4 text-sm text-destructive">
+          {error}
+        </pre>
+      ) : null}
 
       {file ? (
         <MdxPreview file={file} />
@@ -43,7 +47,9 @@ function App(): React.JSX.Element {
         <section className="flex min-h-[calc(100vh-57px)] items-center justify-center p-8 text-center">
           <div>
             <h1 className="mb-2 text-3xl font-semibold">Docuforge</h1>
-            <p className="mb-6 text-muted-foreground">AI-native MDX docs workspace. 选择一个 .mdx/.md 文件并渲染。</p>
+            <p className="mb-6 text-muted-foreground">
+              AI-native MDX docs workspace. 选择一个 .mdx/.md 文件并渲染。
+            </p>
             <button
               type="button"
               onClick={openFile}

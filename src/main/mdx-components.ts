@@ -1,5 +1,5 @@
 import fumadocsMdxComponents from 'fumadocs-ui/mdx'
-import { createElement, type ComponentType, type ReactNode } from 'react'
+import { type ComponentType, createElement, type ReactNode } from 'react'
 
 const defaultMdxComponents = (
   'default' in fumadocsMdxComponents ? fumadocsMdxComponents.default : fumadocsMdxComponents
@@ -16,7 +16,11 @@ function fallback(name: string): ComponentType<{ children?: ReactNode }> {
         className:
           'my-4 rounded-lg border border-dashed border-fd-border bg-fd-muted/30 p-4 text-sm'
       },
-      createElement('div', { className: 'mb-2 font-mono text-xs text-fd-muted-foreground' }, `<${name}>`),
+      createElement(
+        'div',
+        { className: 'mb-2 font-mono text-xs text-fd-muted-foreground' },
+        `<${name}>`
+      ),
       children
     )
   }

@@ -1,6 +1,6 @@
+import { useFumadocsLoader } from 'fumadocs-core/source/client'
 import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page'
-import { useFumadocsLoader } from 'fumadocs-core/source/client'
 import { useMDXComponents } from './components/mdx'
 import { baseOptions } from './lib/layout.shared'
 import { source } from './lib/source'

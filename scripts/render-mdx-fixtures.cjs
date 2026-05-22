@@ -49,7 +49,10 @@ async function main() {
   }
 
   const dir = path.resolve(__dirname, '..', 'test-fixtures', 'mdx')
-  const files = fs.readdirSync(dir).filter((file) => file.endsWith('.mdx')).sort()
+  const files = fs
+    .readdirSync(dir)
+    .filter((file) => file.endsWith('.mdx'))
+    .sort()
   let failed = 0
 
   for (const file of files) {

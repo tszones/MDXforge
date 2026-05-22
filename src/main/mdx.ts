@@ -1,13 +1,13 @@
 import { app, dialog } from 'electron'
-import { dirname } from 'path'
 import { readFileSync, writeFileSync } from 'fs'
-import { pathToFileURL } from 'url'
 import matter from 'gray-matter'
 import { createRequire } from 'module'
+import { dirname } from 'path'
 import * as React from 'react'
 import { createElement } from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
 import * as runtime from 'react/jsx-runtime'
+import { renderToStaticMarkup } from 'react-dom/server'
+import { pathToFileURL } from 'url'
 import { mdxComponents } from './mdx-components'
 
 const require = createRequire(import.meta.url)
@@ -32,7 +32,11 @@ function getLastOpenPath(): string {
 
 function setLastOpenPath(filePath: string): void {
   try {
-    writeFileSync(statePath(), JSON.stringify({ lastOpenPath: dirname(filePath) }, null, 2), 'utf-8')
+    writeFileSync(
+      statePath(),
+      JSON.stringify({ lastOpenPath: dirname(filePath) }, null, 2),
+      'utf-8'
+    )
   } catch {
     // ignore
   }
@@ -70,7 +74,9 @@ export async function renderMdxFile(filePath: string): Promise<RenderedMdxFile> 
   const parsed = matter(raw)
   const compiled = await compileMdx(parsed.content)
   const module = evaluateMdx(compiled)
-  const html = renderToStaticMarkup(createElement(module.default, { components: wrappedMdxComponents }))
+  const html = renderToStaticMarkup(
+    createElement(module.default, { components: wrappedMdxComponents })
+  )
 
   return {
     path: filePath,
