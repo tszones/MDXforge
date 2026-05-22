@@ -10,8 +10,8 @@ const pathShim = resolve('src/renderer/src/lib/path-browser.ts')
 export default defineConfig({
   main: {
     build: {
-      rollupOptions: {
-        external: ['react', 'react-dom/server', 'react/jsx-runtime', 'fumadocs-ui/mdx']
+      externalizeDeps: {
+        exclude: ['react', 'react-dom', 'fumadocs-ui']
       }
     }
   },
