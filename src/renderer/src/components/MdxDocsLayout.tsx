@@ -7,7 +7,7 @@ import {
 } from 'fumadocs-ui/components/sidebar/base'
 import { TOCProvider, TOCScrollArea, useTOCItems } from 'fumadocs-ui/components/toc'
 import { TOCItem, TOCItems } from 'fumadocs-ui/components/toc/clerk'
-import { ChevronDown, PanelLeft, Search, SidebarIcon, Text } from 'lucide-react'
+import { ChevronDown, PanelLeft, SidebarIcon, Text } from 'lucide-react'
 import type { CSSProperties, ReactNode } from 'react'
 import { useState } from 'react'
 
@@ -81,13 +81,6 @@ function MdxSidebarSlot({ children }: { children: ReactNode }): React.JSX.Elemen
             <BaseSidebarCollapseTrigger className="flex size-8 items-center justify-center rounded-lg transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground">
               <SidebarIcon className="size-4" />
             </BaseSidebarCollapseTrigger>
-            <button
-              type="button"
-              aria-label="搜索"
-              className="flex size-8 items-center justify-center rounded-lg transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
-            >
-              <Search className="size-4" />
-            </button>
           </div>
         </>
       )}
