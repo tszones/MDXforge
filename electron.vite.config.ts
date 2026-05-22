@@ -7,8 +7,14 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 
 const pathShim = resolve('src/renderer/src/lib/path-browser.ts')
 
-export default defineConfig(async () => ({
-  main: {},
+export default defineConfig({
+  main: {
+    build: {
+      rollupOptions: {
+        external: ['react', 'react-dom/server', 'react/jsx-runtime', 'fumadocs-ui/mdx']
+      }
+    }
+  },
   preload: {},
   renderer: {
     resolve: {
@@ -29,9 +35,9 @@ export default defineConfig(async () => ({
         }
       },
       tsconfigPaths(),
-      ...(await mdx()),
+      mdx(),
       tailwindcss(),
       react()
     ]
   }
-}))
+})

@@ -16,9 +16,7 @@ function DocsRoute(): React.JSX.Element {
     return <div>Not found</div>
   }
 
-  const { path, pageTree: tree } = useFumadocsLoader({
-    path: page.path,
-    url: page.url,
+  const { pageTree: tree } = useFumadocsLoader({
     pageTree
   })
 
