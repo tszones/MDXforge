@@ -3,8 +3,15 @@ import { rehypeCode } from 'fumadocs-core/mdx-plugins/rehype-code'
 import { rehypeToc } from 'fumadocs-core/mdx-plugins/rehype-toc'
 import { remarkHeading } from 'fumadocs-core/mdx-plugins/remark-heading'
 import type { TOCItemType } from 'fumadocs-core/toc'
+import {
+  SidebarFolder,
+  SidebarFolderContent,
+  SidebarFolderTrigger,
+  SidebarItem,
+  useFolderDepth
+} from 'fumadocs-ui/components/sidebar/base'
 import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page'
-import { BookOpen, FileText, FolderOpen, Search } from 'lucide-react'
+import { BookOpen, FileText, FolderOpen, PanelLeftClose, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
 import type { MdxFolderEntry, MdxWorkspace } from '../types'
@@ -23,6 +30,10 @@ type MdxModule = {
   default: React.ComponentType<{ components?: ReturnType<typeof getMDXComponents> }>
   toc?: TOCItemType[]
 }
+
+type FileTreeNode =
+  | { type: 'file'; entry: MdxFolderEntry }
+  | { type: 'folder'; name: string; path: string; children: FileTreeNode[] }
 
 const mdxComponents = getMDXComponents()
 
@@ -76,15 +87,16 @@ export function MdxPreview({
   return (
     <MdxDocsLayout
       toc={toc}
-      sidebar={
+      sidebar={({ collapseSidebar }) => (
         <PreviewSidebar
           workspace={workspace}
           onOpenFile={onOpenFile}
           onOpenFolder={onOpenFolder}
           onOpenPath={onOpenPath}
           opening={opening}
+          onCollapseSidebar={collapseSidebar}
         />
-      }
+      )}
     >
       <MdxPageContainer>
         <DocsTitle>{title}</DocsTitle>
@@ -111,24 +123,38 @@ function PreviewSidebar({
   onOpenFile,
   onOpenFolder,
   onOpenPath,
-  opening
+  opening,
+  onCollapseSidebar
 }: {
   workspace: MdxWorkspace
   onOpenFile: () => void
   onOpenFolder: () => void
   onOpenPath: (filePath: string) => void
   opening: boolean
+  onCollapseSidebar?: () => void
 }): React.JSX.Element {
   const file = workspace.file
-  const files = useMemo(() => groupFolderEntries(workspace.folder?.files ?? []), [workspace.folder])
+  const tree = useMemo(() => buildFileTree(workspace.folder?.files ?? []), [workspace.folder])
 
   return (
-    <aside className="hidden h-full min-h-0 border-r bg-fd-card text-sm md:block [grid-area:sidebar]">
+    <div className="h-full min-h-0 bg-fd-card text-sm">
       <div className="flex h-full w-[268px] flex-col">
         <div className="flex flex-col gap-3 p-4 pb-2">
-          <div className="flex items-center gap-2.5 font-medium text-[0.9375rem]">
-            <BookOpen className="size-4 text-fd-primary" />
-            <span>Docuforge</span>
+          <div className="flex">
+            <div className="me-auto inline-flex items-center gap-2.5 font-medium text-[0.9375rem]">
+              <BookOpen className="size-4 text-fd-primary" />
+              <span>Docuforge</span>
+            </div>
+            {onCollapseSidebar ? (
+              <button
+                type="button"
+                aria-label="收起侧边栏"
+                onClick={onCollapseSidebar}
+                className="mb-auto flex size-8 items-center justify-center rounded-lg text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
+              >
+                <PanelLeftClose className="size-4" />
+              </button>
+            ) : null}
           </div>
           <button
             type="button"
@@ -150,21 +176,23 @@ function PreviewSidebar({
           </button>
           <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground">
             <Search className="size-4" />
-            <span>{workspace.folder ? `${files.length} 个文档` : '单文件预览'}</span>
+            <span>
+              {workspace.folder ? `${workspace.folder.files.length} 个文档` : '单文件预览'}
+            </span>
           </div>
         </div>
 
-        <div className="fd-scroll-container flex-1 overflow-auto px-3 py-2">
+        <div className="fd-scroll-container min-h-0 flex-1 overflow-auto px-3 py-2 [mask:linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]">
           <p className="mb-1 px-2 text-xs font-medium text-fd-muted-foreground">
             {workspace.folder ? workspace.folder.name : '当前文件'}
           </p>
-          {files.length > 0 ? (
+          {tree.length > 0 ? (
             <div className="flex flex-col gap-0.5">
-              {files.map((entry) => (
-                <FileTreeItem
-                  key={entry.path}
-                  entry={entry}
-                  active={entry.path === file.path}
+              {tree.map((node) => (
+                <FileTreeNodeView
+                  key={node.type === 'file' ? node.entry.path : node.path}
+                  node={node}
+                  activePath={file.path}
                   onOpenPath={onOpenPath}
                 />
               ))}
@@ -180,7 +208,63 @@ function PreviewSidebar({
           </p>
         </div>
       </div>
-    </aside>
+    </div>
+  )
+}
+
+function FileTreeNodeView({
+  node,
+  activePath,
+  onOpenPath
+}: {
+  node: FileTreeNode
+  activePath: string
+  onOpenPath: (filePath: string) => void
+}): React.JSX.Element {
+  if (node.type === 'file') {
+    return (
+      <FileTreeItem
+        entry={node.entry}
+        active={node.entry.path === activePath}
+        onOpenPath={onOpenPath}
+      />
+    )
+  }
+
+  return <FileTreeFolder node={node} activePath={activePath} onOpenPath={onOpenPath} />
+}
+
+function FileTreeFolder({
+  node,
+  activePath,
+  onOpenPath
+}: {
+  node: Extract<FileTreeNode, { type: 'folder' }>
+  activePath: string
+  onOpenPath: (filePath: string) => void
+}): React.JSX.Element {
+  const active = nodeContainsPath(node, activePath)
+
+  return (
+    <SidebarFolder active={active} defaultOpen={active}>
+      <SidebarFolderTrigger
+        className="relative flex w-full flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors wrap-anywhere hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:text-fd-foreground [&_svg]:size-4 [&_svg]:shrink-0"
+        data-active={active}
+      >
+        <FolderOpen className="size-4 shrink-0" />
+        <span className="truncate">{node.name}</span>
+      </SidebarFolderTrigger>
+      <SidebarFolderContent className="relative flex flex-col gap-0.5 pt-0.5 before:absolute before:inset-y-1 before:inset-s-2.5 before:w-px before:bg-fd-border before:content-['']">
+        {node.children.map((child) => (
+          <FileTreeNodeView
+            key={child.type === 'file' ? child.entry.path : child.path}
+            node={child}
+            activePath={activePath}
+            onOpenPath={onOpenPath}
+          />
+        ))}
+      </SidebarFolderContent>
+    </SidebarFolder>
   )
 }
 
@@ -193,23 +277,74 @@ function FileTreeItem({
   active: boolean
   onOpenPath: (filePath: string) => void
 }): React.JSX.Element {
-  const depth = Math.max(0, entry.relativePath.split('/').length - 1)
+  const depth = useFolderDepth()
 
   return (
-    <button
-      type="button"
-      onClick={() => onOpenPath(entry.path)}
-      data-active={active}
+    <SidebarItem
+      href="#"
+      active={active}
+      icon={<FileText className="size-4 shrink-0" />}
       title={entry.relativePath}
-      className="relative flex flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors wrap-anywhere hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary"
-      style={{ paddingInlineStart: `calc(${2 + 3 * depth} * var(--spacing))` }}
+      onClick={(event) => {
+        event.preventDefault()
+        onOpenPath(entry.path)
+      }}
+      className="relative flex w-full flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors wrap-anywhere hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors data-[active=true]:before:absolute data-[active=true]:before:inset-y-2.5 data-[active=true]:before:inset-s-2.5 data-[active=true]:before:w-px data-[active=true]:before:bg-fd-primary data-[active=true]:before:content-[''] [&_svg]:size-4 [&_svg]:shrink-0"
+      style={{ paddingInlineStart: getItemOffset(depth) }}
     >
-      <FileText className="size-4 shrink-0" />
       <span className="truncate">{entry.title ?? entry.name}</span>
-    </button>
+    </SidebarItem>
   )
 }
 
-function groupFolderEntries(entries: MdxFolderEntry[]): MdxFolderEntry[] {
-  return [...entries].sort((a, b) => a.relativePath.localeCompare(b.relativePath))
+function buildFileTree(entries: MdxFolderEntry[]): FileTreeNode[] {
+  const root: Array<FileTreeNode> = []
+
+  for (const entry of [...entries].sort((a, b) => a.relativePath.localeCompare(b.relativePath))) {
+    const parts = entry.relativePath.split('/')
+    let current = root
+    let currentPath = ''
+
+    for (const [index, part] of parts.entries()) {
+      const isFile = index === parts.length - 1
+      currentPath = currentPath ? `${currentPath}/${part}` : part
+
+      if (isFile) {
+        current.push({ type: 'file', entry })
+        continue
+      }
+
+      let folder = current.find(
+        (node): node is Extract<FileTreeNode, { type: 'folder' }> =>
+          node.type === 'folder' && node.name === part
+      )
+
+      if (!folder) {
+        folder = { type: 'folder', name: part, path: currentPath, children: [] }
+        current.push(folder)
+      }
+
+      current = folder.children
+    }
+  }
+
+  return sortTree(root)
+}
+
+function sortTree(nodes: FileTreeNode[]): FileTreeNode[] {
+  return nodes.sort((a, b) => {
+    if (a.type !== b.type) return a.type === 'folder' ? -1 : 1
+    const aName = a.type === 'file' ? a.entry.name : a.name
+    const bName = b.type === 'file' ? b.entry.name : b.name
+    return aName.localeCompare(bName)
+  })
+}
+
+function nodeContainsPath(node: FileTreeNode, activePath: string): boolean {
+  if (node.type === 'file') return node.entry.path === activePath
+  return node.children.some((child) => nodeContainsPath(child, activePath))
+}
+
+function getItemOffset(depth: number): string {
+  return `calc(${2 + 3 * depth} * var(--spacing))`
 }
