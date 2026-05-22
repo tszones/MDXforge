@@ -10,6 +10,10 @@ export interface RenderedMdxFile {
 
 export interface AppAPI {
   openMdxFile: () => Promise<RenderedMdxFile | null>
+  registerDefaultMdxApp: () => Promise<boolean>
+  isDefaultMdxApp: () => Promise<boolean>
+  onMdxFileOpened: (callback: (file: RenderedMdxFile) => void) => () => void
+  onMdxFileOpenError: (callback: (message: string) => void) => () => void
 }
 
 declare global {

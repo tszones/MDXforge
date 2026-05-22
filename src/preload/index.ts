@@ -3,7 +3,19 @@ import { contextBridge, ipcRenderer } from 'electron'
 
 // Custom APIs for renderer
 const api = {
-  openMdxFile: () => ipcRenderer.invoke('mdx:open-file')
+  openMdxFile: () => ipcRenderer.invoke('mdx:open-file'),
+  registerDefaultMdxApp: () => ipcRenderer.invoke('mdx:register-default-app'),
+  isDefaultMdxApp: () => ipcRenderer.invoke('mdx:is-default-app'),
+  onMdxFileOpened: (callback) => {
+    const listener = (_, file) => callback(file)
+    ipcRenderer.on('mdx:file-opened', listener)
+    return () => ipcRenderer.removeListener('mdx:file-opened', listener)
+  },
+  onMdxFileOpenError: (callback) => {
+    const listener = (_, message) => callback(message)
+    ipcRenderer.on('mdx:file-open-error', listener)
+    return () => ipcRenderer.removeListener('mdx:file-open-error', listener)
+  }
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

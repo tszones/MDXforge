@@ -1,12 +1,39 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
-import { join } from 'path'
+import { extname, join } from 'path'
 import icon from '../../resources/icon.png?asset'
-import { openMdxFile } from './mdx'
+import { openMdxFile, renderMdxFile } from './mdx'
+
+let mainWindow: BrowserWindow | null = null
+
+function getMdxPathFromArgv(argv: string[]): string | null {
+  return argv.find((arg) => ['.md', '.mdx'].includes(extname(arg).toLowerCase())) ?? null
+}
+
+async function openMdxPath(filePath: string): Promise<void> {
+  if (!mainWindow) return
+
+  try {
+    const file = await renderMdxFile(filePath)
+    mainWindow.webContents.send('mdx:file-opened', file)
+  } catch (cause) {
+    mainWindow.webContents.send(
+      'mdx:file-open-error',
+      cause instanceof Error ? cause.message : String(cause)
+    )
+  }
+}
+
+const pendingOpenPath = getMdxPathFromArgv(process.argv)
+const gotLock = app.requestSingleInstanceLock()
+
+if (!gotLock) {
+  app.quit()
+}
 
 function createWindow(): void {
   // Create the browser window.
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
     width: 900,
     height: 670,
     show: false,
@@ -19,7 +46,8 @@ function createWindow(): void {
   })
 
   mainWindow.on('ready-to-show', () => {
-    mainWindow.show()
+    mainWindow?.show()
+    if (pendingOpenPath) void openMdxPath(pendingOpenPath)
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
@@ -53,6 +81,19 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
   ipcMain.handle('mdx:open-file', () => openMdxFile())
+  ipcMain.handle('mdx:register-default-app', () => app.setAsDefaultProtocolClient('mdx'))
+  ipcMain.handle('mdx:is-default-app', () => app.isDefaultProtocolClient('mdx'))
+
+  app.on('second-instance', (_, argv) => {
+    const filePath = getMdxPathFromArgv(argv)
+
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
+
+    if (filePath) void openMdxPath(filePath)
+  })
 
   createWindow()
 

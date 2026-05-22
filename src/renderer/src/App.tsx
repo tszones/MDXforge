@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MdxPreview } from './components/MdxPreview'
 import type { RenderedMdxFile } from './types'
 
@@ -6,6 +6,23 @@ function App(): React.JSX.Element {
   const [file, setFile] = useState<RenderedMdxFile | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    void window.api.registerDefaultMdxApp()
+
+    const removeOpenedListener = window.api.onMdxFileOpened((openedFile) => {
+      setFile(openedFile)
+      setError(null)
+    })
+    const removeErrorListener = window.api.onMdxFileOpenError((message) => {
+      setError(message)
+    })
+
+    return () => {
+      removeOpenedListener()
+      removeErrorListener()
+    }
+  }, [])
 
   async function openFile(): Promise<void> {
     setLoading(true)
