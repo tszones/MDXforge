@@ -1,7 +1,13 @@
 import { app, dialog } from 'electron'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs'
 import matter from 'gray-matter'
-import { dirname, extname, join, relative, resolve } from 'path'
+import { dirname, extname, join, resolve } from 'path'
+import {
+  type MdxFolder,
+  type MdxFolderEntry,
+  type MdxFolderTreeNode,
+  readMdxFolder
+} from './page-tree'
 
 const statePath = () => `${app.getPath('userData')}/state.json`
 
@@ -48,18 +54,7 @@ export interface MdxFile {
   raw: string
 }
 
-export interface MdxFolderEntry {
-  path: string
-  name: string
-  relativePath: string
-  title?: string
-}
-
-export interface MdxFolder {
-  rootPath: string
-  name: string
-  files: MdxFolderEntry[]
-}
+export type { MdxFolder, MdxFolderEntry, MdxFolderTreeNode }
 
 export interface MdxWorkspace {
   file: MdxFile
@@ -149,59 +144,6 @@ function getWorkspaceRoot(inputPath: string, filePath: string): string | null {
   return parent && existsSync(parent) ? parent : null
 }
 
-function readMdxFolder(rootPath: string): MdxFolder {
-  const files = collectMdxFiles(rootPath)
-
-  return {
-    rootPath,
-    name: rootPath.split(/[\\/]/).filter(Boolean).at(-1) ?? rootPath,
-    files
-  }
-}
-
-function collectMdxFiles(rootPath: string): MdxFolderEntry[] {
-  const ignored = new Set(['.git', 'node_modules', 'dist', 'build', '.next', 'out'])
-  const output: MdxFolderEntry[] = []
-
-  function walk(dir: string): void {
-    const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
-      a.name.localeCompare(b.name)
-    )
-
-    for (const entry of entries) {
-      if (entry.name.startsWith('.') && entry.name !== '.vitepress') continue
-      if (ignored.has(entry.name)) continue
-
-      const fullPath = join(dir, entry.name)
-      if (entry.isDirectory()) {
-        walk(fullPath)
-        continue
-      }
-
-      if (!entry.isFile() || !['.md', '.mdx'].includes(extname(entry.name).toLowerCase())) continue
-
-      const relativePath = relative(rootPath, fullPath).replace(/\\/g, '/')
-      output.push({
-        path: fullPath,
-        name: entry.name,
-        relativePath,
-        title: readMdxTitle(fullPath)
-      })
-    }
-  }
-
-  walk(rootPath)
-  return output
-}
-
-function readMdxTitle(filePath: string): string | undefined {
-  try {
-    const parsed = matter(readFileSync(filePath, 'utf-8'))
-    return typeof parsed.data.title === 'string' ? parsed.data.title : undefined
-  } catch {
-    return undefined
-  }
-}
 export function resolveMdxTarget(inputPath: string): string | null {
   const targetPath = resolve(inputPath)
   if (!existsSync(targetPath)) return null

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
+@import "fumadocs-twoslash/twoslash.css";
+@import "katex/dist/katex.css";
 @import "./fumadocs-themes.css";
 
 html,
@@ -44,4 +46,23 @@ body {
 
 *::-webkit-scrollbar-corner {
   background: transparent;
+}
+
+.docuforge-mermaid {
+  display: flex;
+  min-height: 4rem;
+  overflow-x: auto;
+  padding-block: 0.75rem;
+}
+
+.docuforge-mermaid:empty {
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.5rem;
+  background: color-mix(in oklab, var(--color-fd-muted) 55%, transparent);
+}
+
+.docuforge-mermaid svg {
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
 }

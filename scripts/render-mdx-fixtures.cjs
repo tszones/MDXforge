@@ -7,6 +7,14 @@ const runtime = require('react/jsx-runtime')
 
 async function main() {
   const { compile } = await import('@mdx-js/mdx')
+  const rehypeKatex = (await import('rehype-katex')).default
+  const { rehypeCode, rehypeCodeDefaultOptions } = await import(
+    'fumadocs-core/mdx-plugins/rehype-code'
+  )
+  const { remarkMdxMermaid } = await import('fumadocs-core/mdx-plugins/remark-mdx-mermaid')
+  const { transformerTwoslash } = await import('fumadocs-twoslash')
+  const remarkMath = (await import('remark-math')).default
+  const Twoslash = await import('fumadocs-twoslash/ui')
   const fumadocsMdxComponents = require('fumadocs-ui/mdx')
   const defaultMdxComponents =
     'default' in fumadocsMdxComponents ? fumadocsMdxComponents.default : fumadocsMdxComponents
@@ -56,6 +64,10 @@ async function main() {
     TabsList,
     TabsTrigger,
     TypeTable,
+    Mermaid({ chart }) {
+      return React.createElement('div', { 'data-docuforge-mermaid': '' }, chart)
+    },
+    ...Twoslash,
     wrapper({ children }) {
       return React.createElement(React.Fragment, null, children)
     }
@@ -73,12 +85,28 @@ async function main() {
     const raw = fs.readFileSync(fullPath, 'utf8')
     const parsed = matter(raw)
     const expectError = parsed.data.expected === 'error' || file.startsWith('99-')
+    const mustContain = typeof parsed.data.mustContain === 'string' ? parsed.data.mustContain : null
 
     try {
       const compiled = String(
         await compile(parsed.content, {
           outputFormat: 'function-body',
-          development: false
+          development: false,
+          remarkPlugins: [remarkMdxMermaid, remarkMath],
+          rehypePlugins: [
+            rehypeKatex,
+            [
+              rehypeCode,
+              {
+                ...rehypeCodeDefaultOptions,
+                transformers: [
+                  ...(rehypeCodeDefaultOptions.transformers ?? []),
+                  transformerTwoslash()
+                ],
+                langs: ['js', 'jsx', 'ts', 'tsx']
+              }
+            ]
+          ]
         })
       )
       const mod = new Function(String(compiled))(runtime)
@@ -86,6 +114,9 @@ async function main() {
 
       if (expectError) {
         console.error(`FAIL ${file}: expected error but rendered ${html.length} chars`)
+        failed++
+      } else if (mustContain && !html.includes(mustContain)) {
+        console.error(`FAIL ${file}: rendered output does not contain ${mustContain}`)
         failed++
       } else {
         console.log(`PASS ${file}: ${html.length} chars`)

@@ -1,3 +1,4 @@
+import * as Twoslash from 'fumadocs-twoslash/ui'
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion'
 import { Banner } from 'fumadocs-ui/components/banner'
 import { DynamicCodeBlock } from 'fumadocs-ui/components/dynamic-codeblock'
@@ -9,6 +10,7 @@ import { InlineTOC } from 'fumadocs-ui/components/inline-toc'
 import { Step, Steps } from 'fumadocs-ui/components/steps'
 import { Tab, Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs'
 import { TypeTable } from 'fumadocs-ui/components/type-table'
+import { Mermaid } from './Mermaid'
 
 export const docuforgeMdxComponents = {
   Accordion,
@@ -22,6 +24,7 @@ export const docuforgeMdxComponents = {
   Heading,
   ImageZoom,
   InlineTOC,
+  Mermaid,
   Step,
   Steps,
   Tab,
@@ -29,5 +32,6 @@ export const docuforgeMdxComponents = {
   TabsContent,
   TabsList,
   TabsTrigger,
-  TypeTable
+  TypeTable,
+  ...Twoslash
 }
