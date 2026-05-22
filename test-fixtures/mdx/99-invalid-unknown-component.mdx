@@ -1,0 +1,13 @@
+---
+title: Invalid Unknown Component
+description: Negative fixture; should fail until unknown-component fallback is implemented.
+expected: error
+---
+
+# Invalid Unknown Component
+
+This fixture intentionally uses an unsupported component.
+
+<UnknownComponent>
+  This should not render unless unknown-component fallback is implemented.
+</UnknownComponent>

@@ -1,0 +1,32 @@
+---
+title: Edge Cases
+description: Text edge cases that should compile and render safely.
+---
+
+# Edge Cases
+
+## Escaped Characters
+
+Use braces as text: \{not an expression\}.
+
+Use angle brackets as text: `HTML <tag> example`.
+
+## Long Text
+
+This paragraph is intentionally long to verify wrapping behavior in the renderer. Docuforge should handle long paragraphs gracefully without horizontal overflow, layout breaks, or unexpected clipping in the preview area.
+
+## Unicode
+
+中文内容、emoji 🚀、em dash —, arrows →, quotes “like this”.
+
+## Inline HTML
+
+<br />
+
+This line appears after an HTML break.
+
+## Empty Callout
+
+<Callout title="Empty-ish" type="info">
+
+</Callout>

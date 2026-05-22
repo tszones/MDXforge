@@ -1,0 +1,53 @@
+---
+title: Code Blocks
+description: Fenced code blocks and tabbed code examples.
+---
+
+# Code Blocks
+
+## TypeScript
+
+```ts
+export function greet(name: string): string {
+  return `Hello, ${name}`
+}
+```
+
+## Bash
+
+```bash
+pnpm install
+pnpm dev
+```
+
+## JSON
+
+```json
+{
+  "name": "docuforge",
+  "format": "mdx"
+}
+```
+
+## Tabbed Install Commands
+
+<CodeBlockTabs defaultValue="pnpm">
+  <CodeBlockTabsList>
+    <CodeBlockTabsTrigger value="pnpm">pnpm</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="npm">npm</CodeBlockTabsTrigger>
+  </CodeBlockTabsList>
+  <CodeBlockTab value="pnpm">
+
+```bash
+pnpm install
+```
+
+  </CodeBlockTab>
+  <CodeBlockTab value="npm">
+
+```bash
+npm install
+```
+
+  </CodeBlockTab>
+</CodeBlockTabs>

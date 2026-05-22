@@ -1,0 +1,63 @@
+---
+title: Mixed Document
+description: Realistic AI-generated technical document using supported MDX.
+---
+
+# Mixed Document
+
+This file simulates a realistic AI-generated technical doc.
+
+<Callout title="Goal" type="info">
+Use MDX as the default authoring format for Docuforge documents.
+</Callout>
+
+## Why MDX
+
+- Easier to read than HTML
+- More expressive than plain Markdown
+- More controllable than arbitrary React
+- Good fit for AI-generated documentation
+
+## Workflow
+
+```txt
+AI prompt -> MDX file -> Docuforge renderer -> local preview
+```
+
+## Options
+
+<Cards>
+  <Card title="Write Docs">
+    Generate structured `.mdx` files with frontmatter.
+  </Card>
+  <Card title="Preview Locally">
+    Open files directly from disk.
+  </Card>
+</Cards>
+
+## Install
+
+<CodeBlockTabs defaultValue="pnpm">
+  <CodeBlockTabsList>
+    <CodeBlockTabsTrigger value="pnpm">pnpm</CodeBlockTabsTrigger>
+    <CodeBlockTabsTrigger value="npm">npm</CodeBlockTabsTrigger>
+  </CodeBlockTabsList>
+  <CodeBlockTab value="pnpm">
+
+```bash
+pnpm install
+```
+
+  </CodeBlockTab>
+  <CodeBlockTab value="npm">
+
+```bash
+npm install
+```
+
+  </CodeBlockTab>
+</CodeBlockTabs>
+
+<Callout title="Constraint" type="warn">
+Unknown components should not be used in AI output.
+</Callout>
