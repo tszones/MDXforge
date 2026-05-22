@@ -8,11 +8,31 @@ export interface MdxFile {
   raw: string
 }
 
+export interface MdxFolderEntry {
+  path: string
+  name: string
+  relativePath: string
+  title?: string
+}
+
+export interface MdxFolder {
+  rootPath: string
+  name: string
+  files: MdxFolderEntry[]
+}
+
+export interface MdxWorkspace {
+  file: MdxFile
+  folder?: MdxFolder
+}
+
 export interface AppAPI {
-  openMdxFile: () => Promise<MdxFile | null>
+  openMdxFile: () => Promise<MdxWorkspace | null>
+  openMdxFolder: () => Promise<MdxWorkspace | null>
+  openMdxPath: (filePath: string) => Promise<MdxWorkspace>
   registerDefaultMdxApp: () => Promise<boolean>
   isDefaultMdxApp: () => Promise<boolean>
-  onMdxFileOpened: (callback: (file: MdxFile) => void) => () => void
+  onMdxFileOpened: (callback: (workspace: MdxWorkspace) => void) => () => void
   onMdxFileOpenError: (callback: (message: string) => void) => () => void
 }
 

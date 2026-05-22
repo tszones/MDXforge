@@ -1,13 +1,14 @@
 import { app, dialog } from 'electron'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs'
 import matter from 'gray-matter'
-import { dirname, extname, join, resolve } from 'path'
+import { dirname, extname, join, relative, resolve } from 'path'
 
 const statePath = () => `${app.getPath('userData')}/state.json`
 
 interface MdxState {
   lastOpenDir?: string
   lastOpenFile?: string
+  lastOpenFolder?: string
 }
 
 function readState(): MdxState {
@@ -47,7 +48,25 @@ export interface MdxFile {
   raw: string
 }
 
-export async function openMdxFile(): Promise<MdxFile | null> {
+export interface MdxFolderEntry {
+  path: string
+  name: string
+  relativePath: string
+  title?: string
+}
+
+export interface MdxFolder {
+  rootPath: string
+  name: string
+  files: MdxFolderEntry[]
+}
+
+export interface MdxWorkspace {
+  file: MdxFile
+  folder?: MdxFolder
+}
+
+export async function openMdxFile(): Promise<MdxWorkspace | null> {
   const result = await dialog.showOpenDialog({
     title: 'Open MDX file',
     defaultPath: getLastOpenPath(),
@@ -63,7 +82,46 @@ export async function openMdxFile(): Promise<MdxFile | null> {
   const filePath = result.filePaths[0]
   setLastOpenPath(filePath)
 
-  return readMdxFile(filePath)
+  return readMdxWorkspace(filePath)
+}
+
+export async function openMdxFolder(): Promise<MdxWorkspace | null> {
+  const result = await dialog.showOpenDialog({
+    title: 'Open MDX folder',
+    defaultPath: readState().lastOpenFolder ?? getLastOpenPath(),
+    properties: ['openDirectory']
+  })
+
+  if (result.canceled || result.filePaths.length === 0) return null
+
+  const folderPath = result.filePaths[0]
+  setLastOpenFolder(folderPath)
+
+  return readMdxWorkspace(folderPath)
+}
+
+export async function readMdxWorkspace(inputPath: string): Promise<MdxWorkspace> {
+  const resolvedPath = resolve(inputPath)
+  const file = await readMdxFile(resolvedPath)
+  const folderRoot = getWorkspaceRoot(resolvedPath, file.path)
+
+  return {
+    file,
+    folder: folderRoot ? readMdxFolder(folderRoot) : undefined
+  }
+}
+
+function setLastOpenFolder(folderPath: string): void {
+  const state = readState()
+  try {
+    writeFileSync(
+      statePath(),
+      JSON.stringify({ ...state, lastOpenFolder: folderPath, lastOpenDir: folderPath }, null, 2),
+      'utf-8'
+    )
+  } catch {
+    // ignore
+  }
 }
 
 export async function readMdxFile(filePath: string): Promise<MdxFile> {
@@ -82,6 +140,68 @@ export async function readMdxFile(filePath: string): Promise<MdxFile> {
   }
 }
 
+function getWorkspaceRoot(inputPath: string, filePath: string): string | null {
+  if (!existsSync(inputPath)) return null
+  const stat = statSync(inputPath)
+  if (stat.isDirectory()) return inputPath
+
+  const parent = dirname(filePath)
+  return parent && existsSync(parent) ? parent : null
+}
+
+function readMdxFolder(rootPath: string): MdxFolder {
+  const files = collectMdxFiles(rootPath)
+
+  return {
+    rootPath,
+    name: rootPath.split(/[\\/]/).filter(Boolean).at(-1) ?? rootPath,
+    files
+  }
+}
+
+function collectMdxFiles(rootPath: string): MdxFolderEntry[] {
+  const ignored = new Set(['.git', 'node_modules', 'dist', 'build', '.next', 'out'])
+  const output: MdxFolderEntry[] = []
+
+  function walk(dir: string): void {
+    const entries = readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    )
+
+    for (const entry of entries) {
+      if (entry.name.startsWith('.') && entry.name !== '.vitepress') continue
+      if (ignored.has(entry.name)) continue
+
+      const fullPath = join(dir, entry.name)
+      if (entry.isDirectory()) {
+        walk(fullPath)
+        continue
+      }
+
+      if (!entry.isFile() || !['.md', '.mdx'].includes(extname(entry.name).toLowerCase())) continue
+
+      const relativePath = relative(rootPath, fullPath).replace(/\\/g, '/')
+      output.push({
+        path: fullPath,
+        name: entry.name,
+        relativePath,
+        title: readMdxTitle(fullPath)
+      })
+    }
+  }
+
+  walk(rootPath)
+  return output
+}
+
+function readMdxTitle(filePath: string): string | undefined {
+  try {
+    const parsed = matter(readFileSync(filePath, 'utf-8'))
+    return typeof parsed.data.title === 'string' ? parsed.data.title : undefined
+  } catch {
+    return undefined
+  }
+}
 export function resolveMdxTarget(inputPath: string): string | null {
   const targetPath = resolve(inputPath)
   if (!existsSync(targetPath)) return null

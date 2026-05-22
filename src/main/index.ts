@@ -7,7 +7,14 @@ if (process.platform === 'win32') {
 }
 
 import icon from '../../resources/icon.png?asset'
-import { getLastOpenFile, openMdxFile, readMdxFile, resolveMdxTarget, setLastOpenPath } from './mdx'
+import {
+  getLastOpenFile,
+  openMdxFile,
+  openMdxFolder,
+  readMdxWorkspace,
+  resolveMdxTarget,
+  setLastOpenPath
+} from './mdx'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -24,9 +31,9 @@ async function openMdxPath(filePath: string): Promise<void> {
   if (!mainWindow) return
 
   try {
-    const file = await readMdxFile(filePath)
-    setLastOpenPath(file.path)
-    mainWindow.webContents.send('mdx:file-opened', file)
+    const workspace = await readMdxWorkspace(filePath)
+    setLastOpenPath(workspace.file.path)
+    mainWindow.webContents.send('mdx:file-opened', workspace)
   } catch (cause) {
     mainWindow.webContents.send(
       'mdx:file-open-error',
@@ -94,6 +101,8 @@ app.whenReady().then(() => {
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
   ipcMain.handle('mdx:open-file', () => openMdxFile())
+  ipcMain.handle('mdx:open-folder', () => openMdxFolder())
+  ipcMain.handle('mdx:open-path', (_, filePath: string) => readMdxWorkspace(filePath))
   ipcMain.handle('mdx:register-default-app', () => app.setAsDefaultProtocolClient('mdx'))
   ipcMain.handle('mdx:is-default-app', () => app.isDefaultProtocolClient('mdx'))
 
