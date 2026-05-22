@@ -1,6 +1,6 @@
 import { compile } from '@mdx-js/mdx'
 import { app, dialog } from 'electron'
-import { readFileSync, writeFileSync } from 'fs'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
 import matter from 'gray-matter'
 import { dirname } from 'path'
 import * as React from 'react'
@@ -18,20 +18,33 @@ const wrappedMdxComponents = {
 
 const statePath = () => `${app.getPath('userData')}/state.json`
 
-function getLastOpenPath(): string {
+interface MdxState {
+  lastOpenDir?: string
+  lastOpenFile?: string
+}
+
+function readState(): MdxState {
   try {
-    const state = JSON.parse(readFileSync(statePath(), 'utf-8')) as { lastOpenPath?: string }
-    return state.lastOpenPath ?? app.getPath('documents')
+    return JSON.parse(readFileSync(statePath(), 'utf-8')) as MdxState
   } catch {
-    return app.getPath('documents')
+    return {}
   }
 }
 
-function setLastOpenPath(filePath: string): void {
+function getLastOpenPath(): string {
+  return readState().lastOpenDir ?? app.getPath('documents')
+}
+
+export function getLastOpenFile(): string | null {
+  const filePath = readState().lastOpenFile
+  return filePath && existsSync(filePath) ? filePath : null
+}
+
+export function setLastOpenPath(filePath: string): void {
   try {
     writeFileSync(
       statePath(),
-      JSON.stringify({ lastOpenPath: dirname(filePath) }, null, 2),
+      JSON.stringify({ lastOpenDir: dirname(filePath), lastOpenFile: filePath }, null, 2),
       'utf-8'
     )
   } catch {
