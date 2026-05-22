@@ -1,4 +1,3 @@
-import { compile } from '@mdx-js/mdx'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import {
   SidebarFolder,
@@ -11,7 +10,6 @@ import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/p
 import { BookOpen, ExternalLink, FileText, FolderOpen, PanelLeftClose, Search } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
-import { getDocuforgeRehypePlugins, getDocuforgeRemarkPlugins } from '../lib/mdx-options'
 import { m } from '../paraglide/messages'
 import type { MdxFolderEntry, MdxFolderTreeNode, MdxWorkspace } from '../types'
 import { MdxDocsLayout, MdxPageContainer } from './MdxDocsLayout'
@@ -70,13 +68,7 @@ export function MdxPreview({
       setError(null)
 
       try {
-        const compiled = await compile(file.content, {
-          outputFormat: 'function-body',
-          development: false,
-          remarkPlugins: getDocuforgeRemarkPlugins(),
-          rehypePlugins: getDocuforgeRehypePlugins()
-        })
-        const fn = new Function(String(compiled))
+        const fn = new Function(file.compiledSource)
         const nextModule = fn(runtime) as MdxModule
 
         if (!canceled) setModule(nextModule)
@@ -90,7 +82,7 @@ export function MdxPreview({
     return () => {
       canceled = true
     }
-  }, [file.content])
+  }, [file.compiledSource])
 
   const Mdx = module?.default
   const toc = module?.toc?.filter((item) => item.depth > 1) ?? []

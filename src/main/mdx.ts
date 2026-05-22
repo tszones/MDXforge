@@ -1,7 +1,9 @@
+import { compile } from '@mdx-js/mdx'
 import { app, dialog } from 'electron'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs'
 import matter from 'gray-matter'
 import { dirname, extname, join, resolve } from 'path'
+import { getDocuforgeRehypePlugins, getDocuforgeRemarkPlugins } from './mdx-options'
 import {
   type MdxFolder,
   type MdxFolderEntry,
@@ -51,6 +53,7 @@ export interface MdxFile {
   name: string
   frontmatter: Record<string, unknown>
   content: string
+  compiledSource: string
   raw: string
 }
 
@@ -125,14 +128,27 @@ export async function readMdxFile(filePath: string): Promise<MdxFile> {
 
   const raw = readFileSync(resolvedPath, 'utf-8')
   const parsed = matter(raw)
+  const compiledSource = await compileMdxSource(parsed.content)
 
   return {
     path: resolvedPath,
     name: resolvedPath.split(/[\\/]/).pop() ?? resolvedPath,
     frontmatter: parsed.data,
     content: parsed.content,
+    compiledSource,
     raw
   }
+}
+
+async function compileMdxSource(source: string): Promise<string> {
+  return String(
+    await compile(source, {
+      outputFormat: 'function-body',
+      development: false,
+      remarkPlugins: getDocuforgeRemarkPlugins(),
+      rehypePlugins: getDocuforgeRehypePlugins()
+    })
+  )
 }
 
 function getWorkspaceRoot(inputPath: string, filePath: string): string | null {

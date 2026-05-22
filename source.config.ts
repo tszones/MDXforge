@@ -3,7 +3,7 @@ import {
   getDocuforgeRehypeCodeOptions,
   withDocuforgeRehypePlugins,
   withDocuforgeRemarkPlugins
-} from './src/renderer/src/lib/mdx-options'
+} from './src/main/mdx-options'
 
 export const docs = defineDocs({
   dir: 'content/docs'

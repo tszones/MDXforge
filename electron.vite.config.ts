@@ -9,7 +9,19 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 const pathShim = resolve('src/renderer/src/lib/path-browser.ts')
 
 export default defineConfig({
-  main: {},
+  main: {
+    build: {
+      externalizeDeps: {
+        exclude: [
+          '@mdx-js/mdx',
+          'fumadocs-core',
+          'fumadocs-twoslash',
+          'rehype-katex',
+          'remark-math'
+        ]
+      }
+    }
+  },
   preload: {},
   renderer: {
     resolve: {
