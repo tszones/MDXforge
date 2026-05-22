@@ -2,7 +2,7 @@ import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { extname, join } from 'path'
 import icon from '../../resources/icon.png?asset'
-import { openMdxFile, renderMdxFile } from './mdx'
+import { getLastOpenFile, openMdxFile, renderMdxFile, setLastOpenPath } from './mdx'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -15,6 +15,7 @@ async function openMdxPath(filePath: string): Promise<void> {
 
   try {
     const file = await renderMdxFile(filePath)
+    setLastOpenPath(filePath)
     mainWindow.webContents.send('mdx:file-opened', file)
   } catch (cause) {
     mainWindow.webContents.send(
@@ -48,7 +49,8 @@ function createWindow(): void {
 
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show()
-    if (pendingOpenPath) void openMdxPath(pendingOpenPath)
+    const initialPath = pendingOpenPath ?? getLastOpenFile()
+    if (initialPath) void openMdxPath(initialPath)
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
