@@ -1,34 +1,31 @@
-# mdx-preview
+# Docuforge
 
-An Electron application with React and TypeScript
+AI-native MDX docs workspace.
 
-## Recommended IDE Setup
+Docuforge lets AI write structured MDX documentation that is easier to read than plain Markdown, more token-efficient than HTML, and safer to render through a controlled component whitelist.
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+## Features
 
-## Project Setup
+- Open local `.mdx` / `.md` files
+- Render MDX with project-approved components
+- Remember last opened directory
+- Use a controlled MDX authoring rule set for AI-generated docs
 
-### Install
-
-```bash
-$ pnpm install
-```
-
-### Development
+## Development
 
 ```bash
-$ pnpm dev
+pnpm install
+pnpm dev
 ```
 
-### Build
+## Build
 
 ```bash
-# For windows
-$ pnpm build:win
-
-# For macOS
-$ pnpm build:mac
-
-# For Linux
-$ pnpm build:linux
+pnpm build:win
+pnpm build:mac
+pnpm build:linux
 ```
+
+## MDX Rules
+
+See `docs/mdx-authoring-rules.md`.

@@ -1,10 +1,10 @@
 {
-  "name": "mdx-preview",
+  "name": "docuforge",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "AI-native MDX docs workspace",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "Docuforge",
+  "homepage": "https://github.com/docuforge/docuforge",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint --cache .",

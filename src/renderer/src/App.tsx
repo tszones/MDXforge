@@ -42,8 +42,8 @@ function App(): React.JSX.Element {
       ) : (
         <section className="flex min-h-[calc(100vh-57px)] items-center justify-center p-8 text-center">
           <div>
-            <h1 className="mb-2 text-3xl font-semibold">本地 MDX 预览</h1>
-            <p className="mb-6 text-muted-foreground">先做第 1 步：选择一个 .mdx/.md 文件并渲染。</p>
+            <h1 className="mb-2 text-3xl font-semibold">Docuforge</h1>
+            <p className="mb-6 text-muted-foreground">AI-native MDX docs workspace. 选择一个 .mdx/.md 文件并渲染。</p>
             <button
               type="button"
               onClick={openFile}
