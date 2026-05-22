@@ -1,0 +1,172 @@
+# Docuforge Roadmap
+
+Docuforge is an AI-native MDX docs workspace. The long-term goal is not just previewing MDX, but creating a controlled document protocol that AI can write safely and users can extend.
+
+## Current Focus
+
+### Phase 1: Local MDX Preview
+
+- Open a local `.mdx` / `.md` file.
+- Compile and render it locally.
+- Use a controlled default component set.
+- Remember the last opened path.
+- Provide AI authoring rules for supported MDX syntax and components.
+
+### Phase 2: Folder Workspace
+
+- Open a folder containing multiple MDX files.
+- List available MDX files in a sidebar.
+- Switch between files.
+- Preserve current selected file.
+- Resolve relative assets from the opened folder.
+
+## Long-term Plan: Plugin System
+
+Docuforge should reserve a plugin system for user customization. This is not part of the immediate implementation, but the architecture should avoid blocking it.
+
+### Why Plugins Matter
+
+AI-generated MDX must be both expressive and controlled. Different teams will need different document components, rules, themes, and transforms. A plugin system lets Docuforge stay small while allowing users to extend it for their own documentation workflows.
+
+### Planned Extension Points
+
+#### 1. Custom MDX Components
+
+Plugins should be able to register project-specific components, for example:
+
+```ts
+components: {
+  Mermaid,
+  Diagram,
+  APIEndpoint,
+  Video,
+  Tweet,
+  FileTree,
+}
+```
+
+Use cases:
+
+- Internal product docs
+- API docs
+- Architecture diagrams
+- Design specs
+- Rich media embeds
+
+#### 2. Component Allowlist Rules
+
+A plugin should provide AI-readable rules for every component it registers.
+
+Example:
+
+```ts
+{
+  name: 'Mermaid',
+  props: {
+    chart: 'string'
+  },
+  examples: [
+    '<Mermaid chart={`graph TD; A-->B`} />'
+  ]
+}
+```
+
+This keeps AI output predictable and renderable.
+
+#### 3. MDX Compile Plugins
+
+Reserve support for `remarkPlugins` and `rehypePlugins`.
+
+Potential uses:
+
+- GFM tables/tasks
+- Mermaid transforms
+- Heading anchors
+- Code highlighting
+- Link rewriting
+- Image handling
+
+#### 4. Resource Resolution Plugins
+
+Plugins may customize how assets are resolved.
+
+Examples:
+
+```mdx
+![Image](./assets/image.png)
+[Download](./files/spec.pdf)
+```
+
+Potential behavior:
+
+- Resolve relative paths
+- Copy/cache local files
+- Serve local assets securely
+- Handle PDFs, videos, images, and attachments
+
+#### 5. Theme Plugins
+
+Allow users to customize:
+
+- Typography
+- Code theme
+- Brand colors
+- Page layout
+- Component styling
+
+#### 6. AI Authoring Rule Plugins
+
+Each plugin should be able to append AI writing rules.
+
+Example:
+
+```md
+## Mermaid Rules
+
+Use only `<Mermaid chart={...} />`.
+Do not write raw `<script>` tags.
+Do not use unknown diagram components.
+```
+
+Docuforge can merge these rules into the active project authoring guide.
+
+## Possible Plugin Interface
+
+```ts
+export interface DocuforgePlugin {
+  name: string
+  components?: Record<string, React.ComponentType<any>>
+  rules?: string
+  componentRules?: ComponentRule[]
+  remarkPlugins?: unknown[]
+  rehypePlugins?: unknown[]
+  transformMdx?: (source: string) => string | Promise<string>
+  transformHtml?: (html: string) => string | Promise<string>
+}
+```
+
+## Minimal First Version
+
+When implementation begins, start with a simple plugin model:
+
+```ts
+export default {
+  name: 'my-plugin',
+  components: {},
+  rules: ''
+}
+```
+
+Docuforge should initially do only three things:
+
+1. Load plugins.
+2. Merge component maps.
+3. Merge AI authoring rules.
+
+## Design Principle
+
+Do not implement the full plugin system now. But current code should avoid hard-coding decisions that would make plugins difficult later.
+
+Docuforge should evolve toward:
+
+> AI-first MDX authoring + controlled component protocol + local renderer + extensible plugin system.

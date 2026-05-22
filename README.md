@@ -28,4 +28,8 @@ pnpm build:linux
 
 ## MDX Rules
 
-See `docs/mdx-authoring-rules.md`.
+See `docs/mdx-authoring-rules.mdx`.
+
+## Roadmap
+
+See `docs/roadmap.mdx`.
