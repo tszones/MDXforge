@@ -1,7 +1,7 @@
 import { app, dialog } from 'electron'
-import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs'
 import matter from 'gray-matter'
-import { dirname } from 'path'
+import { dirname, extname, join, resolve } from 'path'
 
 const statePath = () => `${app.getPath('userData')}/state.json`
 
@@ -67,14 +67,42 @@ export async function openMdxFile(): Promise<MdxFile | null> {
 }
 
 export async function readMdxFile(filePath: string): Promise<MdxFile> {
-  const raw = readFileSync(filePath, 'utf-8')
+  const resolvedPath = resolveMdxTarget(filePath)
+  if (!resolvedPath) throw new Error(`No MDX / Markdown file found: ${filePath}`)
+
+  const raw = readFileSync(resolvedPath, 'utf-8')
   const parsed = matter(raw)
 
   return {
-    path: filePath,
-    name: filePath.split(/[\\/]/).pop() ?? filePath,
+    path: resolvedPath,
+    name: resolvedPath.split(/[\\/]/).pop() ?? resolvedPath,
     frontmatter: parsed.data,
     content: parsed.content,
     raw
   }
+}
+
+export function resolveMdxTarget(inputPath: string): string | null {
+  const targetPath = resolve(inputPath)
+  if (!existsSync(targetPath)) return null
+
+  const stat = statSync(targetPath)
+  if (stat.isFile()) {
+    return ['.md', '.mdx'].includes(extname(targetPath).toLowerCase()) ? targetPath : null
+  }
+
+  if (!stat.isDirectory()) return null
+
+  const preferredFiles = ['README.mdx', 'README.md', 'index.mdx', 'index.md']
+  for (const fileName of preferredFiles) {
+    const candidate = join(targetPath, fileName)
+    if (existsSync(candidate) && statSync(candidate).isFile()) return candidate
+  }
+
+  const firstMdxFile = readdirSync(targetPath)
+    .filter((fileName) => ['.mdx', '.md'].includes(extname(fileName).toLowerCase()))
+    .sort((a, b) => a.localeCompare(b))
+    .at(0)
+
+  return firstMdxFile ? join(targetPath, firstMdxFile) : null
 }

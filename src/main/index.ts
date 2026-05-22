@@ -1,13 +1,18 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
-import { extname, join } from 'path'
+import { join, resolve } from 'path'
 import icon from '../../resources/icon.png?asset'
-import { getLastOpenFile, openMdxFile, readMdxFile, setLastOpenPath } from './mdx'
+import { getLastOpenFile, openMdxFile, readMdxFile, resolveMdxTarget, setLastOpenPath } from './mdx'
 
 let mainWindow: BrowserWindow | null = null
 
 function getMdxPathFromArgv(argv: string[]): string | null {
-  return argv.find((arg) => ['.md', '.mdx'].includes(extname(arg).toLowerCase())) ?? null
+  return (
+    argv
+      .filter((arg) => !arg.startsWith('-'))
+      .map((arg) => resolveMdxTarget(resolve(arg)))
+      .find((filePath) => filePath !== null) ?? null
+  )
 }
 
 async function openMdxPath(filePath: string): Promise<void> {
@@ -15,7 +20,7 @@ async function openMdxPath(filePath: string): Promise<void> {
 
   try {
     const file = await readMdxFile(filePath)
-    setLastOpenPath(filePath)
+    setLastOpenPath(file.path)
     mainWindow.webContents.send('mdx:file-opened', file)
   } catch (cause) {
     mainWindow.webContents.send(

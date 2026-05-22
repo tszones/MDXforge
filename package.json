@@ -5,6 +5,10 @@
   "main": "./out/main/index.js",
   "author": "Docuforge",
   "homepage": "https://github.com/docuforge/docuforge",
+  "bin": {
+    "docuforge": "bin/docuforge.cjs",
+    "df": "bin/docuforge.cjs"
+  },
   "scripts": {
     "format": "biome format --write .",
     "lint": "biome ci .",
