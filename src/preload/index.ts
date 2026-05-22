@@ -3,6 +3,10 @@ import { contextBridge, ipcRenderer } from 'electron'
 
 // Custom APIs for renderer
 const api = {
+  minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
+  maximizeWindow: () => ipcRenderer.invoke('window:maximize'),
+  closeWindow: () => ipcRenderer.invoke('window:close'),
+  isWindowMaximized: () => ipcRenderer.invoke('window:is-maximized'),
   openMdxFile: () => ipcRenderer.invoke('mdx:open-file'),
   openMdxFolder: () => ipcRenderer.invoke('mdx:open-folder'),
   openMdxPath: (filePath) => ipcRenderer.invoke('mdx:open-path', filePath),

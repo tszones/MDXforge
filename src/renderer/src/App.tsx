@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { MdxPreview } from './components/MdxPreview'
+import { WindowTitleBar } from './components/WindowTitleBar'
 import type { MdxWorkspace } from './types'
 
 function App(): React.JSX.Element {
@@ -66,9 +67,10 @@ function App(): React.JSX.Element {
   }
 
   return (
-    <main className="min-h-screen bg-background text-foreground">
+    <main className="flex h-screen flex-col overflow-hidden bg-background pt-10 text-foreground">
+      <WindowTitleBar />
       {workspace ? null : (
-        <header className="sticky top-0 z-10 flex items-center gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur">
+        <header className="flex shrink-0 items-center gap-3 border-b bg-background/95 px-4 py-3 backdrop-blur">
           <button
             type="button"
             onClick={openFile}
@@ -89,7 +91,7 @@ function App(): React.JSX.Element {
       )}
 
       {error ? (
-        <pre className="m-4 overflow-auto rounded-md border bg-destructive/10 p-4 text-sm text-destructive">
+        <pre className="m-4 shrink-0 overflow-auto rounded-md border bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </pre>
       ) : null}
@@ -103,7 +105,7 @@ function App(): React.JSX.Element {
           opening={loading}
         />
       ) : (
-        <section className="flex min-h-[calc(100vh-57px)] items-center justify-center p-8 text-center">
+        <section className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-8 text-center">
           <div>
             <h1 className="mb-2 text-3xl font-semibold">Docuforge</h1>
             <p className="mb-6 text-muted-foreground">

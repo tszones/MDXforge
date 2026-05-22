@@ -15,7 +15,7 @@ export function MdxDocsLayout({ toc, sidebar, children }: MdxDocsLayoutProps): R
     <TOCProvider toc={toc}>
       <div
         id="nd-docs-layout"
-        className="grid min-h-(--fd-docs-height) overflow-x-clip [--fd-docs-height:100dvh] [--fd-docs-row-1:0px] [--fd-docs-row-2:0px] [--fd-layout-width:97rem] [--fd-sidebar-col:var(--fd-sidebar-width)] [--fd-sidebar-width:0px] [--fd-toc-popover-height:0px] [--fd-toc-width:0px] md:[--fd-sidebar-width:268px] xl:[--fd-toc-width:268px]"
+        className="grid min-h-0 flex-1 overflow-hidden [--fd-docs-height:calc(100dvh-40px)] [--fd-docs-row-1:0px] [--fd-docs-row-2:0px] [--fd-layout-width:97rem] [--fd-sidebar-col:var(--fd-sidebar-width)] [--fd-sidebar-width:0px] [--fd-toc-popover-height:0px] [--fd-toc-width:0px] md:[--fd-sidebar-width:268px] xl:[--fd-toc-width:268px]"
         style={{
           gridTemplate: `"sidebar sidebar header toc toc"
 "sidebar sidebar toc-popover toc toc"
@@ -35,7 +35,7 @@ export function MdxPageContainer({ children }: { children: ReactNode }): React.J
   return (
     <article
       id="nd-page"
-      className="flex w-full max-w-[900px] flex-col gap-4 px-4 py-6 md:px-6 md:pt-8 xl:px-8 xl:pt-14 [grid-area:main] mx-auto"
+      className="flex min-h-0 w-full max-w-[900px] flex-col gap-4 overflow-auto px-4 py-6 md:px-6 md:pt-8 xl:px-8 xl:pt-14 [grid-area:main] mx-auto"
     >
       {children}
     </article>

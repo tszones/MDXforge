@@ -123,7 +123,7 @@ function PreviewSidebar({
   const files = useMemo(() => groupFolderEntries(workspace.folder?.files ?? []), [workspace.folder])
 
   return (
-    <aside className="sticky top-0 hidden h-screen border-r bg-fd-card text-sm md:block [grid-area:sidebar]">
+    <aside className="hidden h-full min-h-0 border-r bg-fd-card text-sm md:block [grid-area:sidebar]">
       <div className="flex h-full w-[268px] flex-col">
         <div className="flex flex-col gap-3 p-4 pb-2">
           <div className="flex items-center gap-2.5 font-medium text-[0.9375rem]">
