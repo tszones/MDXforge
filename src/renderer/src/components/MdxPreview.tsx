@@ -42,7 +42,6 @@ type FileTreeNode =
       type: 'folder'
       name: string
       path: string
-      indexEntry?: MdxFolderEntry
       description?: string
       icon?: string
       root?: boolean
@@ -215,7 +214,7 @@ function PreviewSidebar({
             {searching
               ? m.preview_search_results({ count: searchResults.length })
               : workspace.folder
-                ? m.preview_docs_nav()
+                ? m.preview_files_nav()
                 : m.preview_current_file()}
           </p>
           {searching ? (
@@ -332,8 +331,6 @@ function FileTreeFolder({
   onOpenPath: (filePath: string) => void
 }): React.JSX.Element {
   const active = nodeContainsPath(node, activePath)
-  const selfActive = node.indexEntry?.path === activePath
-  const folderLabel = node.indexEntry?.title ?? node.name
   const depth = useFolderDepth()
 
   return (
@@ -346,16 +343,10 @@ function FileTreeFolder({
         className="relative flex w-full flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors wrap-anywhere hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:text-fd-foreground [&_svg]:size-4 [&_svg]:shrink-0"
         data-active={active}
         title={node.description ?? node.path}
-        onClick={(event) => {
-          if (!node.indexEntry) return
-          event.preventDefault()
-          onOpenPath(node.indexEntry.path)
-        }}
         style={{ paddingInlineStart: getItemOffset(depth) }}
       >
         <FolderOpen className="size-4 shrink-0" />
-        <span className="truncate">{folderLabel}</span>
-        {selfActive ? <span className="ms-auto h-1.5 w-1.5 rounded-full bg-fd-primary" /> : null}
+        <span className="truncate">{node.name}</span>
       </SidebarFolderTrigger>
       <SidebarFolderContent className="relative flex flex-col gap-0.5 pt-0.5 before:absolute before:inset-y-1 before:inset-s-2.5 before:w-px before:bg-fd-border before:content-['']">
         {node.children.map((child, index) => (
@@ -456,7 +447,6 @@ function buildFileTreeFromPageTree(
         type: 'folder',
         name: node.name,
         path: node.path,
-        indexEntry: node.indexPath ? filesByPath.get(node.indexPath) : undefined,
         description: node.description,
         icon: node.icon,
         root: node.root,
@@ -522,10 +512,7 @@ function sortTree(nodes: FileTreeNode[]): FileTreeNode[] {
 function nodeContainsPath(node: FileTreeNode, activePath: string): boolean {
   if (node.type === 'file') return node.entry.path === activePath
   if (node.type !== 'folder') return false
-  return (
-    node.indexEntry?.path === activePath ||
-    node.children.some((child) => nodeContainsPath(child, activePath))
-  )
+  return node.children.some((child) => nodeContainsPath(child, activePath))
 }
 
 function getTreeNodeKey(node: FileTreeNode, index: number): string {
@@ -537,7 +524,7 @@ function getTreeNodeKey(node: FileTreeNode, index: number): string {
 
 function getTreeNodeSortName(node: FileTreeNode): string {
   if (node.type === 'file') return getDisplayName(node.entry)
-  if (node.type === 'folder') return node.indexEntry?.title ?? node.name
+  if (node.type === 'folder') return node.name
   if (node.type === 'link') return node.label
   return node.label
 }
@@ -547,19 +534,9 @@ function getItemOffset(depth: number): string {
 }
 
 function getDisplayName(entry: MdxFolderEntry): string {
-  const title = entry.title?.trim()
-  if (title) return title
-
   const path = entry.displayPath ?? entry.relativePath
   const name = path.split('/').filter(Boolean).at(-1)
-  if (name && name !== 'index') return cleanDisplayName(name)
+  if (name) return name
 
-  return cleanDisplayName(entry.name.replace(/\.(mdx?|markdown)$/i, ''))
-}
-
-function cleanDisplayName(value: string): string {
-  return value
-    .replace(/^\d+[-_.\s]+/, '')
-    .replace(/[-_]+/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase())
+  return entry.name
 }

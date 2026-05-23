@@ -133,8 +133,10 @@ try {
       description: 'API reference',
       icon: 'Box',
       defaultOpen: true,
-      children: [{ type: 'file', path: path.join(root, 'api/reference.mdx') }],
-      indexPath: path.join(root, 'api/index.mdx')
+      children: [
+        { type: 'file', path: path.join(root, 'api/index.mdx') },
+        { type: 'file', path: path.join(root, 'api/reference.mdx') }
+      ]
     },
     { type: 'file', path: path.join(root, 'advanced/setup.mdx') },
     {

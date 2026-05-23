@@ -52,6 +52,7 @@
   "preview_clear_search": "清空搜索",
   "preview_search_results": "{count} 个结果",
   "preview_docs_nav": "文档",
+  "preview_files_nav": "文件",
   "docs_toc": "目录",
   "theme_neutral_label": "Neutral / 中性灰",
   "theme_neutral_description": "默认灰阶，最接近 Fumadocs 基础外观。",

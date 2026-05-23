@@ -52,6 +52,7 @@
   "preview_clear_search": "Clear search",
   "preview_search_results": "{count} results",
   "preview_docs_nav": "Docs",
+  "preview_files_nav": "Files",
   "docs_toc": "On this page",
   "theme_neutral_label": "Neutral",
   "theme_neutral_description": "Default grayscale, closest to the base Fumadocs look.",
