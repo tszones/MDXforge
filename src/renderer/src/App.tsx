@@ -15,15 +15,15 @@ import type { AppLanguage, MdxWorkspace } from './types'
 type ViewMode = 'preview' | 'settings'
 
 function App(): React.JSX.Element {
-  const [theme, setThemeState] = useState<FumadocsThemeName>('neutral')
-  const [colorMode, setColorModeState] = useState<ColorMode>('light')
-  const [language, setLanguageState] = useState<AppLanguage>('system')
+  const [theme, setThemeState] = useState<FumadocsThemeName>('purple')
+  const [colorMode, setColorModeState] = useState<ColorMode>('dark')
+  const [language, setLanguageState] = useState<AppLanguage>('en-US')
   const [, rerenderForLocaleChange] = useState(0)
 
   useEffect(() => {
     void window.api.getSettings().then((settings) => {
-      const nextTheme = isFumadocsThemeName(settings.theme) ? settings.theme : 'neutral'
-      const nextColorMode = settings.colorMode === 'dark' ? 'dark' : 'light'
+      const nextTheme = isFumadocsThemeName(settings.theme) ? settings.theme : 'purple'
+      const nextColorMode = settings.colorMode === 'light' ? 'light' : 'dark'
       const nextLanguage = normalizeStoredLanguage(settings.language)
       setThemeState(nextTheme)
       setColorModeState(nextColorMode)

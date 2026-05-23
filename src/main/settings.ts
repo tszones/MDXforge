@@ -35,9 +35,9 @@ const ElectronStore = (
 
 const store = new ElectronStore<AppSettings>({
   defaults: {
-    theme: 'neutral',
-    colorMode: 'light',
-    language: 'system'
+    theme: 'purple',
+    colorMode: 'dark',
+    language: 'en-US'
   }
 })
 

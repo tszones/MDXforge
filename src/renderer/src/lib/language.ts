@@ -7,7 +7,7 @@ export function isAppLanguage(value: unknown): value is AppLanguage {
 
 export function resolveLocalePreference(language: AppLanguage): Locale {
   if (language !== 'system') return language
-  return extractLocaleFromNavigator() ?? 'zh-CN'
+  return extractLocaleFromNavigator() ?? 'en-US'
 }
 
 export function applyLanguage(language: AppLanguage): Locale {
@@ -19,5 +19,5 @@ export function applyLanguage(language: AppLanguage): Locale {
 
 export function normalizeStoredLanguage(value: unknown): AppLanguage {
   if (value === 'system') return 'system'
-  return toLocale(value) ?? 'system'
+  return toLocale(value) ?? 'en-US'
 }
