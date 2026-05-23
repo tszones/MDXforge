@@ -1,5 +1,3 @@
-import { ElectronAPI } from '@electron-toolkit/preload'
-
 export interface MdxFile {
   path: string
   name: string
@@ -88,11 +86,18 @@ export interface UpdateState {
   message?: string
 }
 
+export interface AppVersions {
+  chrome?: string
+  electron?: string
+  node?: string
+}
+
 export interface AppAPI {
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<boolean>
   closeWindow: () => Promise<void>
   isWindowMaximized: () => Promise<boolean>
+  getVersions: () => AppVersions
   openMdxFile: () => Promise<MdxWorkspace | null>
   openMdxFolder: () => Promise<MdxWorkspace | null>
   openMdxPath: (filePath: string) => Promise<MdxWorkspace>
@@ -110,7 +115,6 @@ export interface AppAPI {
 
 declare global {
   interface Window {
-    electron: ElectronAPI
     api: AppAPI
   }
 }
