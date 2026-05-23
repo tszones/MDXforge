@@ -134,7 +134,7 @@ export function MdxPreview({
     return () => {
       canceled = true
     }
-  }, [file.compiledSource])
+  }, [file.compiledSource, file.compileError])
 
   const Mdx = module?.default
   const toc = module?.toc?.filter((item) => item.depth > 1) ?? []
