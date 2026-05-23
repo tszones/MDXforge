@@ -45,6 +45,7 @@
   "settings_updates_latest": "You are on the latest version.",
   "settings_updates_error": "Update failed: {message}",
   "preview_collapse_sidebar": "Collapse sidebar",
+  "preview_expand_sidebar": "Expand sidebar",
   "preview_documents_count": "{count} docs",
   "preview_single_file_preview": "Single-file preview",
   "preview_current_file": "Current file",

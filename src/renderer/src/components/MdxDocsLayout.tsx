@@ -14,7 +14,13 @@ import { m } from '../paraglide/messages'
 
 interface MdxDocsLayoutProps {
   toc: TOCItemType[]
-  sidebar: ReactNode | ((state: { collapseSidebar: () => void }) => ReactNode)
+  sidebar:
+    | ReactNode
+    | ((state: {
+        collapsed: boolean
+        collapseSidebar: () => void
+        expandSidebar: () => void
+      }) => ReactNode)
   children: ReactNode
 }
 
@@ -46,7 +52,11 @@ function MdxDocsLayoutInner({ toc, sidebar, children }: MdxDocsLayoutProps): Rea
       >
         <MdxSidebarSlot>
           {typeof sidebar === 'function'
-            ? sidebar({ collapseSidebar: () => setCollapsed(true) })
+            ? sidebar({
+                collapsed,
+                collapseSidebar: () => setCollapsed(true),
+                expandSidebar: () => setCollapsed(false)
+              })
             : sidebar}
         </MdxSidebarSlot>
         {toc.length > 0 ? <MdxTocPopover /> : null}

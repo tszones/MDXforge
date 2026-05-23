@@ -12,6 +12,7 @@ import {
   ExternalLink,
   FileText,
   FolderOpen,
+  PanelLeft,
   PanelLeftClose,
   Search,
   X
@@ -139,14 +140,16 @@ export function MdxPreview({
   return (
     <MdxDocsLayout
       toc={toc}
-      sidebar={({ collapseSidebar }) => (
+      sidebar={({ collapsed, collapseSidebar, expandSidebar }) => (
         <PreviewSidebar
           workspace={workspace}
           onOpenFile={onOpenFile}
           onOpenFolder={onOpenFolder}
           onOpenPath={onOpenPath}
           opening={opening}
+          collapsed={collapsed}
           onCollapseSidebar={collapseSidebar}
+          onExpandSidebar={expandSidebar}
         />
       )}
     >
@@ -178,14 +181,18 @@ function PreviewSidebar({
   onOpenFolder,
   onOpenPath,
   opening,
-  onCollapseSidebar
+  collapsed,
+  onCollapseSidebar,
+  onExpandSidebar
 }: {
   workspace: MdxWorkspace
   onOpenFile: () => void
   onOpenFolder: () => void
   onOpenPath: (filePath: string, workspaceRoot?: string) => void
   opening: boolean
+  collapsed?: boolean
   onCollapseSidebar?: () => void
+  onExpandSidebar?: () => void
 }): React.JSX.Element {
   const file = workspace.file
   const [query, setQuery] = useState('')
@@ -216,11 +223,15 @@ function PreviewSidebar({
             {onCollapseSidebar ? (
               <button
                 type="button"
-                aria-label={m.preview_collapse_sidebar()}
-                onClick={onCollapseSidebar}
+                aria-label={collapsed ? m.preview_expand_sidebar() : m.preview_collapse_sidebar()}
+                onClick={collapsed ? onExpandSidebar : onCollapseSidebar}
                 className="mb-auto flex size-8 items-center justify-center rounded-lg text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
               >
-                <PanelLeftClose className="size-4" />
+                {collapsed ? (
+                  <PanelLeft className="size-4" />
+                ) : (
+                  <PanelLeftClose className="size-4" />
+                )}
               </button>
             ) : null}
           </div>

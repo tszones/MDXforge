@@ -45,6 +45,7 @@
   "settings_updates_latest": "当前已是最新版本。",
   "settings_updates_error": "更新失败：{message}",
   "preview_collapse_sidebar": "收起侧边栏",
+  "preview_expand_sidebar": "展开侧边栏",
   "preview_documents_count": "{count} 个文档",
   "preview_single_file_preview": "单文件预览",
   "preview_current_file": "当前文件",
