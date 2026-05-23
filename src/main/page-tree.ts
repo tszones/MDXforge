@@ -19,7 +19,6 @@ export type MdxFolderTreeNode =
       type: 'folder'
       name: string
       path: string
-      indexPath?: string
       description?: string
       icon?: string
       root?: boolean
@@ -194,18 +193,13 @@ function buildFolderChildren(folder: FolderScan): MdxFolderTreeNode[] {
     if (isGroupFolder(item.folder.relativePath.split('/').at(-1) ?? '')) return children
     if (children.length === 0) return []
 
-    const indexFile = item.folder.files.find((file) => isIndexStem(file.stem))
     const folderPath = item.folder.displayPath || item.folder.relativePath
     const folderNode: Extract<MdxFolderTreeNode, { type: 'folder' }> = {
       type: 'folder',
       name: item.folder.meta.title ?? item.folder.name,
       path: folderPath,
-      children: indexFile
-        ? children.filter((child) => child.type !== 'file' || child.path !== indexFile.path)
-        : children
+      children
     }
-
-    if (indexFile) folderNode.indexPath = indexFile.path
 
     assignFolderMetadata(folderNode, item.folder.meta)
     if (item.folder.meta.defaultOpen !== undefined)
