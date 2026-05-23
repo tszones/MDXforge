@@ -1,9 +1,67 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 @import "fumadocs-ui/css/neutral.css";
 @import "fumadocs-ui/css/preset.css";
 @import "fumadocs-twoslash/twoslash.css";
 @import "katex/dist/katex.css";
 @import "./fumadocs-themes.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--color-fd-background);
+  --color-foreground: var(--color-fd-foreground);
+  --color-card: var(--color-fd-card);
+  --color-card-foreground: var(--color-fd-card-foreground);
+  --color-popover: var(--color-fd-popover);
+  --color-popover-foreground: var(--color-fd-popover-foreground);
+  --color-primary: var(--color-fd-primary);
+  --color-primary-foreground: var(--color-fd-primary-foreground);
+  --color-secondary: var(--color-fd-secondary);
+  --color-secondary-foreground: var(--color-fd-secondary-foreground);
+  --color-muted: var(--color-fd-muted);
+  --color-muted-foreground: var(--color-fd-muted-foreground);
+  --color-accent: var(--color-fd-accent);
+  --color-accent-foreground: var(--color-fd-accent-foreground);
+  --color-border: var(--color-fd-border);
+  --color-input: var(--color-fd-border);
+  --color-ring: var(--color-fd-ring);
+  --color-destructive: var(--color-red-600);
+  --color-sidebar: var(--color-fd-card);
+  --color-sidebar-foreground: var(--color-fd-card-foreground);
+  --color-sidebar-primary: var(--color-fd-primary);
+  --color-sidebar-primary-foreground: var(--color-fd-primary-foreground);
+  --color-sidebar-accent: var(--color-fd-accent);
+  --color-sidebar-accent-foreground: var(--color-fd-accent-foreground);
+  --color-sidebar-border: var(--color-fd-border);
+  --color-sidebar-ring: var(--color-fd-ring);
+  --color-chart-1: var(--color-fd-primary);
+  --color-chart-2: var(--color-blue-500);
+  --color-chart-3: var(--color-emerald-500);
+  --color-chart-4: var(--color-amber-500);
+  --color-chart-5: var(--color-rose-500);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+}
+
+:root {
+  --radius: 0.625rem;
+}
+
+.dark {
+  --color-destructive: var(--color-red-500);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+}
 
 html,
 body,
