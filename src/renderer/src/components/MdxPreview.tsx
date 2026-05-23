@@ -112,7 +112,9 @@ export function MdxPreview({
 
     async function compileMdx(): Promise<void> {
       setModule(null)
-      setError(null)
+      setError(file.compileError ?? null)
+
+      if (file.compileError) return
 
       try {
         const fn = new Function(file.compiledSource)

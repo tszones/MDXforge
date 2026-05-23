@@ -4,6 +4,7 @@ export interface MdxFile {
   frontmatter: Record<string, unknown>
   content: string
   compiledSource: string
+  compileError?: string
   raw: string
 }
 

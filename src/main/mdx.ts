@@ -54,6 +54,7 @@ export interface MdxFile {
   frontmatter: Record<string, unknown>
   content: string
   compiledSource: string
+  compileError?: string
   raw: string
 }
 
@@ -130,17 +131,47 @@ export async function readMdxFile(filePath: string): Promise<MdxFile> {
   if (!resolvedPath) throw new Error(`No MDX / Markdown file found: ${filePath}`)
 
   const raw = readFileSync(resolvedPath, 'utf-8')
-  const parsed = matter(raw)
-  const compiledSource = await compileMdxSource(parsed.content)
+  let parsed: matter.GrayMatterFile<string>
 
-  return {
-    path: resolvedPath,
-    name: resolvedPath.split(/[\\/]/).pop() ?? resolvedPath,
-    frontmatter: parsed.data,
-    content: parsed.content,
-    compiledSource,
-    raw
+  try {
+    parsed = matter(raw)
+  } catch (cause) {
+    return {
+      path: resolvedPath,
+      name: resolvedPath.split(/[\\/]/).pop() ?? resolvedPath,
+      frontmatter: {},
+      content: raw,
+      compiledSource: '',
+      compileError: formatMdxError(cause),
+      raw
+    }
   }
+
+  try {
+    return {
+      path: resolvedPath,
+      name: resolvedPath.split(/[\\/]/).pop() ?? resolvedPath,
+      frontmatter: parsed.data,
+      content: parsed.content,
+      compiledSource: await compileMdxSource(parsed.content),
+      raw
+    }
+  } catch (cause) {
+    return {
+      path: resolvedPath,
+      name: resolvedPath.split(/[\\/]/).pop() ?? resolvedPath,
+      frontmatter: parsed.data,
+      content: parsed.content,
+      compiledSource: '',
+      compileError: formatMdxError(cause),
+      raw
+    }
+  }
+}
+
+function formatMdxError(cause: unknown): string {
+  const message = cause instanceof Error ? cause.message : String(cause)
+  return `MDX compile error:\n${message}`
 }
 
 async function compileMdxSource(source: string): Promise<string> {

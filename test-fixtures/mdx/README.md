@@ -14,7 +14,12 @@ Use these files to manually verify MDXForge rendering behavior.
 
 ## Negative Fixtures
 
-- `99-invalid-unknown-component.mdx` — intentionally uses `UnknownComponent`; should fail or show a controlled error until unknown-component fallback exists.
+- `99-invalid-closing-tag.mdx` — intentionally uses a closing JSX tag without an opener.
+- `99-invalid-html-closing-slash.mdx` — intentionally uses invalid HTML-style `</br>` syntax.
+- `99-invalid-mismatched-tags.mdx` — intentionally opens one component and closes another.
+- `99-invalid-unknown-component.mdx` — intentionally uses `UnknownComponent`; should fail or show a controlled render error.
+- `99-invalid-unescaped-angle-text.mdx` — intentionally leaves angle-bracket prose unescaped.
+- `99-invalid-unterminated-component.mdx` — intentionally leaves a component unclosed.
 
 ## Manual Test Flow
 
