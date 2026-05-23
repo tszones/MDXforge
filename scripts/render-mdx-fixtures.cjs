@@ -114,6 +114,28 @@ async function main() {
         )
       )
     },
+    TodoList({ title, description, children }) {
+      return React.createElement(
+        'section',
+        { 'data-mdxforge-todo-list': '' },
+        title ? React.createElement('h3', null, title) : null,
+        description ? React.createElement('p', null, description) : null,
+        React.createElement('ul', null, children)
+      )
+    },
+    Todo({ checked, status, children }) {
+      return React.createElement(
+        'li',
+        { 'data-mdxforge-todo': '', 'data-status': status ?? (checked ? 'done' : 'todo') },
+        children
+      )
+    },
+    ToDoList({ title, description, children }) {
+      return components.TodoList({ title, description, children })
+    },
+    ToDo({ checked, status, children }) {
+      return components.Todo({ checked, status, children })
+    },
     Mermaid({ chart }) {
       return React.createElement('div', { 'data-mdxforge-mermaid': '' }, chart)
     },

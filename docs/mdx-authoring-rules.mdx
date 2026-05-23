@@ -123,7 +123,7 @@ function hello(name: string) {
 
 用于普通内容标签页，例如不同平台、不同方案。
 
-```mdx
+````mdx
 <Tabs items={["pnpm", "npm"]}>
   <Tab>
 
@@ -140,7 +140,7 @@ npm install
 
   </Tab>
 </Tabs>
-```
+````
 
 规则：
 
@@ -188,6 +188,27 @@ npm install
 
 - `Step` 必须放在 `Steps` 内。
 - 每个 `Step` 表达一个清晰动作。
+
+### TodoList / Todo
+
+用于展示任务清单、发布检查项、阅读计划。
+
+```mdx
+<TodoList title="发布检查清单" description="用于跟踪当前文档或版本的准备状态。">
+  <Todo checked>完成 MDX 初稿。</Todo>
+  <Todo status="active">检查本地预览效果。</Todo>
+  <Todo status="blocked">等待发布包签名。</Todo>
+  <Todo>补充发布说明。</Todo>
+</TodoList>
+```
+
+规则：
+
+- `Todo` 必须放在 `TodoList` 内。
+- 已完成任务可写 `checked`，等价于 `status="done"`。
+- `status` 可用 `todo`、`active`、`done`、`blocked`。
+- 这是静态阅读组件，不会保存勾选状态；需要可编辑任务时使用外部任务工具。
+- 简单任务也可以用 Markdown GFM 写法：`- [ ] 待办` / `- [x] 已完成`。
 
 ### Files / File / Folder
 
@@ -381,7 +402,7 @@ AI 生成 MDX 时必须：
 
 ## 推荐模板
 
-```mdx
+````mdx
 ---
 title: 标题
 description: 一句话描述
@@ -410,4 +431,4 @@ console.log('example')
     资源描述。
   </Card>
 </Cards>
-```
+````

@@ -20,7 +20,7 @@ MDX 保留了 Markdown 的低成本写作体验，同时允许文档使用受控
 
 这意味着：
 
-- 比 Markdown 更有表现力：文档可以使用 `Callout`、`Card`、`Tabs`、`Steps`、`FileTree` 等结构化组件。
+- 比 Markdown 更有表现力：文档可以使用 `Callout`、`Card`、`Tabs`、`Steps`、`TodoList`、`FileTree` 等结构化组件。
 - 比 HTML 更省 token：内容仍然主要是 Markdown，不需要大量 `<div>`、`class`、闭合标签。
 - 比任意 HTML 更可控：MDXForge 只渲染白名单组件，不鼓励任意 HTML 注入。
 - 分发方式接近 Markdown：一个 `.mdx` 文件就是一个文档；一个文件夹就是一个文档库。

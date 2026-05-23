@@ -15,6 +15,7 @@ import { MetricCard } from './MetricCard'
 import { SimpleBarChart } from './SimpleBarChart'
 import { SimpleLineChart } from './SimpleLineChart'
 import { StatGrid } from './StatGrid'
+import { Todo, TodoList } from './Todo'
 import {
   Table,
   TableBody,
@@ -50,6 +51,10 @@ export const mdxforgeMdxComponents = {
   TabsContent,
   TabsList,
   TabsTrigger,
+  ToDo: Todo,
+  ToDoList: TodoList,
+  Todo,
+  TodoList,
   Table,
   TableBody,
   TableCaption,

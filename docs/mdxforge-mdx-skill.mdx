@@ -166,6 +166,27 @@ Rules:
 - `CodeBlockTabsTrigger` must include matching `value`.
 - Prefer one code block per tab.
 
+### TodoList / Todo
+
+Use for task lists, release checklists, and document review plans.
+
+```mdx
+<TodoList title="Release checklist" description="Track the visible state of each task.">
+  <Todo checked>Write the MDX draft.</Todo>
+  <Todo status="active">Review the local preview.</Todo>
+  <Todo status="blocked">Wait for package signing.</Todo>
+  <Todo>Publish the release notes.</Todo>
+</TodoList>
+```
+
+Rules:
+
+- Put `Todo` inside `TodoList`.
+- Use `checked` or `status="done"` for completed tasks.
+- `status`: `todo`, `active`, `done`, or `blocked`.
+- This is a static reading component; it does not persist edits or checkbox changes.
+- For simple tasks, Markdown GFM task lists are also allowed: `- [ ] Todo` / `- [x] Done`.
+
 ## Supported Base Elements
 
 MDXForge also supports customized rendering for normal Markdown elements:
@@ -236,6 +257,7 @@ function CustomComponent() {
 - If the user asks for a note, warning, or limitation, use `Callout`.
 - If the user asks for links/resources/options, use `Cards` and `Card`.
 - If the user asks for multiple install methods or language variants, use `CodeBlockTabs`.
+- If the user asks for tasks/checklists/todos, use `TodoList` and `Todo`.
 - If a component is not in the supported list, do not use it.
 - If unsure, use plain Markdown.
 

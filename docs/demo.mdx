@@ -23,7 +23,7 @@ MDXForge turns MDX into a local document surface: expressive enough for real pro
 
 <Cards>
   <Card title="Markdown-simple" description="Files stay editable, portable, and readable in plain text." />
-  <Card title="Docs-site rich" description="Callouts, tabs, steps, file trees, API tables, images, and code blocks render locally." />
+  <Card title="Docs-site rich" description="Callouts, tabs, steps, todos, file trees, API tables, images, and code blocks render locally." />
   <Card title="AI-controlled" description="A component whitelist gives AI a safe protocol instead of arbitrary JSX." />
 </Cards>
 
@@ -104,6 +104,13 @@ MDX keeps the authoring surface small while preserving intent.
     **Preview the handoff locally** in MDXForge before opening a pull request.
   </Step>
 </Steps>
+
+<TodoList title="Handoff checklist" description="Static task state for the reader, not an editable project tracker.">
+  <Todo checked>Endpoint implementation committed.</Todo>
+  <Todo status="active">Preview the handoff in MDXForge.</Todo>
+  <Todo status="blocked">Wait for staging webhook secrets.</Todo>
+  <Todo>Attach final rollout notes.</Todo>
+</TodoList>
 
 <Files>
   <Folder name="docs" defaultOpen>
