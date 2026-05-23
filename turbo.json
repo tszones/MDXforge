@@ -62,7 +62,7 @@
     },
     "build": {
       "dependsOn": ["^build", "typecheck"],
-      "outputs": ["out/**"]
+      "outputs": ["out/**", "dist/**", ".output/**", ".vercel/output/**"]
     },
     "build:unpack": {
       "dependsOn": ["build"],

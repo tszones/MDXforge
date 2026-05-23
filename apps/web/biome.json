@@ -1,0 +1,28 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.15/schema.json",
+  "extends": ["../../biome.json"],
+  "files": {
+    "includes": [
+      "src/**",
+      "*.ts",
+      "*.json",
+      "*.jsonc",
+      "*.md",
+      "!src/routeTree.gen.ts",
+      "!dist",
+      "!node_modules"
+    ],
+    "ignoreUnknown": true
+  },
+  "vcs": {
+    "enabled": false,
+    "clientKind": "git",
+    "useIgnoreFile": false
+  },
+  "css": {
+    "parser": {
+      "cssModules": true,
+      "tailwindDirectives": true
+    }
+  }
+}

@@ -30,7 +30,10 @@
     "test:mdx-raw-source": "turbo run test:mdx-raw-source --filter=@mdxforge/desktop",
     "test:search": "turbo run test:search --filter=@mdxforge/desktop",
     "test:extensions": "turbo run test:extensions --filter=@mdxforge/desktop",
-    "test:fixtures": "turbo run test:fixtures --filter=@mdxforge/desktop"
+    "test:fixtures": "turbo run test:fixtures --filter=@mdxforge/desktop",
+    "dev:web": "turbo run dev --filter=@mdxforge/web",
+    "start:web": "turbo run start --filter=@mdxforge/web",
+    "build:web": "turbo run build --filter=@mdxforge/web"
   },
   "devDependencies": {
     "electron": "^39.2.6",
