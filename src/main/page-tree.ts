@@ -19,6 +19,7 @@ export type MdxFolderTreeNode =
       type: 'folder'
       name: string
       path: string
+      indexPath?: string
       description?: string
       icon?: string
       root?: boolean
@@ -200,12 +201,11 @@ function buildFolderChildren(folder: FolderScan): MdxFolderTreeNode[] {
       name: item.folder.meta.title ?? item.folder.name,
       path: folderPath,
       children: indexFile
-        ? [
-            { type: 'file', path: indexFile.path },
-            ...children.filter((child) => child.type !== 'file' || child.path !== indexFile.path)
-          ]
+        ? children.filter((child) => child.type !== 'file' || child.path !== indexFile.path)
         : children
     }
+
+    if (indexFile) folderNode.indexPath = indexFile.path
 
     assignFolderMetadata(folderNode, item.folder.meta)
     if (item.folder.meta.defaultOpen !== undefined)

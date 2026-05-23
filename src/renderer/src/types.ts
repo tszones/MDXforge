@@ -28,6 +28,7 @@ export type MdxFolderTreeNode =
       type: 'folder'
       name: string
       path: string
+      indexPath?: string
       description?: string
       icon?: string
       root?: boolean

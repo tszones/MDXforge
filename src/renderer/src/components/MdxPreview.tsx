@@ -7,7 +7,15 @@ import {
   useFolderDepth
 } from 'fumadocs-ui/components/sidebar/base'
 import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page'
-import { BookOpen, ExternalLink, FileText, FolderOpen, PanelLeftClose, Search } from 'lucide-react'
+import {
+  BookOpen,
+  ExternalLink,
+  FileText,
+  FolderOpen,
+  PanelLeftClose,
+  Search,
+  X
+} from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
 import { m } from '../paraglide/messages'
@@ -34,6 +42,7 @@ type FileTreeNode =
       type: 'folder'
       name: string
       path: string
+      indexEntry?: MdxFolderEntry
       description?: string
       icon?: string
       root?: boolean
@@ -137,19 +146,30 @@ function PreviewSidebar({
   onCollapseSidebar?: () => void
 }): React.JSX.Element {
   const file = workspace.file
+  const [query, setQuery] = useState('')
   const tree = useMemo(
     () => buildFileTree(workspace.folder?.files ?? [], workspace.folder?.tree),
     [workspace.folder]
   )
+  const searchResults = useMemo(
+    () => filterEntries(workspace.folder?.files ?? [], query),
+    [workspace.folder?.files, query]
+  )
+  const searching = query.trim().length > 0
 
   return (
     <div className="h-full min-h-0 bg-fd-card text-sm">
       <div className="flex h-full w-[268px] flex-col">
-        <div className="flex flex-col gap-3 p-4 pb-2">
+        <div className="flex flex-col gap-3 border-b p-4 pb-3">
           <div className="flex">
-            <div className="me-auto inline-flex items-center gap-2.5 font-medium text-[0.9375rem]">
-              <BookOpen className="size-4 text-fd-primary" />
-              <span>MDXForge</span>
+            <div className="me-auto min-w-0">
+              <div className="inline-flex items-center gap-2.5 font-medium text-[0.9375rem]">
+                <BookOpen className="size-4 shrink-0 text-fd-primary" />
+                <span>MDXForge</span>
+              </div>
+              <p className="mt-1 truncate text-xs text-fd-muted-foreground">
+                {workspace.folder ? workspace.folder.name : m.preview_single_file_preview()}
+              </p>
             </div>
             {onCollapseSidebar ? (
               <button
@@ -162,39 +182,54 @@ function PreviewSidebar({
               </button>
             ) : null}
           </div>
-          <button
-            type="button"
-            onClick={onOpenFile}
-            disabled={opening}
-            className="inline-flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent disabled:opacity-60"
-          >
-            <FileText className="size-4 text-fd-muted-foreground" />
-            {opening ? m.actions_opening() : m.actions_open_mdx_file()}
-          </button>
-          <button
-            type="button"
-            onClick={onOpenFolder}
-            disabled={opening}
-            className="inline-flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-start text-fd-secondary-foreground transition-colors hover:bg-fd-accent disabled:opacity-60"
-          >
-            <FolderOpen className="size-4 text-fd-muted-foreground" />
-            {m.actions_open_folder()}
-          </button>
-          <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground">
-            <Search className="size-4" />
-            <span>
-              {workspace.folder
-                ? m.preview_documents_count({ count: workspace.folder.files.length })
-                : m.preview_single_file_preview()}
-            </span>
-          </div>
+          {workspace.folder ? (
+            <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground focus-within:border-fd-primary/50 focus-within:text-fd-foreground">
+              <Search className="size-4 shrink-0" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder={m.preview_search_placeholder()}
+                className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-fd-muted-foreground"
+              />
+              {query ? (
+                <button
+                  type="button"
+                  onClick={() => setQuery('')}
+                  className="rounded p-0.5 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground"
+                  aria-label={m.preview_clear_search()}
+                >
+                  <X className="size-3.5" />
+                </button>
+              ) : null}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground">
+              <FileText className="size-4" />
+              <span>{m.preview_single_file_preview()}</span>
+            </div>
+          )}
         </div>
 
         <div className="fd-scroll-container min-h-0 flex-1 overflow-auto px-3 py-2 [mask:linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]">
           <p className="mb-1 px-2 text-xs font-medium text-fd-muted-foreground">
-            {workspace.folder ? workspace.folder.name : m.preview_current_file()}
+            {searching
+              ? m.preview_search_results({ count: searchResults.length })
+              : workspace.folder
+                ? m.preview_docs_nav()
+                : m.preview_current_file()}
           </p>
-          {tree.length > 0 ? (
+          {searching ? (
+            <div className="flex flex-col gap-0.5">
+              {searchResults.map((entry) => (
+                <SearchResultItem
+                  key={entry.path}
+                  entry={entry}
+                  active={entry.path === file.path}
+                  onOpenPath={onOpenPath}
+                />
+              ))}
+            </div>
+          ) : tree.length > 0 ? (
             <div className="flex flex-col gap-0.5">
               {tree.map((node, index) => (
                 <FileTreeNodeView
@@ -211,9 +246,32 @@ function PreviewSidebar({
               <span className="truncate">{file.name}</span>
             </div>
           )}
-          <p className="mt-3 px-2 text-xs leading-5 text-fd-muted-foreground wrap-anywhere">
+        </div>
+
+        <div className="border-t p-3">
+          <p className="mb-2 line-clamp-2 px-1 text-xs leading-5 text-fd-muted-foreground wrap-anywhere">
             {file.path}
           </p>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onOpenFile}
+              disabled={opening}
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border bg-fd-secondary/50 px-2 py-1.5 text-xs text-fd-secondary-foreground transition-colors hover:bg-fd-accent disabled:opacity-60"
+            >
+              <FileText className="size-3.5 text-fd-muted-foreground" />
+              {opening ? m.actions_opening() : m.actions_open_mdx_file()}
+            </button>
+            <button
+              type="button"
+              onClick={onOpenFolder}
+              disabled={opening}
+              className="inline-flex items-center justify-center gap-1.5 rounded-lg border bg-fd-secondary/50 px-2 py-1.5 text-xs text-fd-secondary-foreground transition-colors hover:bg-fd-accent disabled:opacity-60"
+            >
+              <FolderOpen className="size-3.5 text-fd-muted-foreground" />
+              {m.actions_open_folder()}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -274,6 +332,9 @@ function FileTreeFolder({
   onOpenPath: (filePath: string) => void
 }): React.JSX.Element {
   const active = nodeContainsPath(node, activePath)
+  const selfActive = node.indexEntry?.path === activePath
+  const folderLabel = node.indexEntry?.title ?? node.name
+  const depth = useFolderDepth()
 
   return (
     <SidebarFolder
@@ -284,9 +345,17 @@ function FileTreeFolder({
       <SidebarFolderTrigger
         className="relative flex w-full flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors wrap-anywhere hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:text-fd-foreground [&_svg]:size-4 [&_svg]:shrink-0"
         data-active={active}
+        title={node.description ?? node.path}
+        onClick={(event) => {
+          if (!node.indexEntry) return
+          event.preventDefault()
+          onOpenPath(node.indexEntry.path)
+        }}
+        style={{ paddingInlineStart: getItemOffset(depth) }}
       >
         <FolderOpen className="size-4 shrink-0" />
-        <span className="truncate">{node.name}</span>
+        <span className="truncate">{folderLabel}</span>
+        {selfActive ? <span className="ms-auto h-1.5 w-1.5 rounded-full bg-fd-primary" /> : null}
       </SidebarFolderTrigger>
       <SidebarFolderContent className="relative flex flex-col gap-0.5 pt-0.5 before:absolute before:inset-y-1 before:inset-s-2.5 before:w-px before:bg-fd-border before:content-['']">
         {node.children.map((child, index) => (
@@ -387,6 +456,7 @@ function buildFileTreeFromPageTree(
         type: 'folder',
         name: node.name,
         path: node.path,
+        indexEntry: node.indexPath ? filesByPath.get(node.indexPath) : undefined,
         description: node.description,
         icon: node.icon,
         root: node.root,
@@ -396,6 +466,50 @@ function buildFileTreeFromPageTree(
       }
     })
     .filter((node): node is FileTreeNode => node !== null)
+}
+
+function SearchResultItem({
+  entry,
+  active,
+  onOpenPath
+}: {
+  entry: MdxFolderEntry
+  active: boolean
+  onOpenPath: (filePath: string) => void
+}): React.JSX.Element {
+  return (
+    <button
+      type="button"
+      title={entry.relativePath}
+      onClick={() => onOpenPath(entry.path)}
+      className="relative flex w-full flex-col rounded-lg p-2 text-start text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary"
+      data-active={active}
+    >
+      <span className="truncate text-sm font-medium">{entry.title ?? getDisplayName(entry)}</span>
+      <span className="mt-0.5 truncate text-xs opacity-70">
+        {entry.displayPath || entry.relativePath}
+      </span>
+    </button>
+  )
+}
+
+function filterEntries(entries: MdxFolderEntry[], query: string): MdxFolderEntry[] {
+  const normalizedQuery = normalizeSearchText(query)
+  if (!normalizedQuery) return []
+
+  return entries
+    .filter((entry) =>
+      normalizeSearchText(
+        [entry.title, entry.description, entry.displayPath, entry.relativePath, entry.name]
+          .filter(Boolean)
+          .join(' ')
+      ).includes(normalizedQuery)
+    )
+    .slice(0, 50)
+}
+
+function normalizeSearchText(value: string): string {
+  return value.trim().toLowerCase()
 }
 
 function sortTree(nodes: FileTreeNode[]): FileTreeNode[] {
@@ -408,7 +522,10 @@ function sortTree(nodes: FileTreeNode[]): FileTreeNode[] {
 function nodeContainsPath(node: FileTreeNode, activePath: string): boolean {
   if (node.type === 'file') return node.entry.path === activePath
   if (node.type !== 'folder') return false
-  return node.children.some((child) => nodeContainsPath(child, activePath))
+  return (
+    node.indexEntry?.path === activePath ||
+    node.children.some((child) => nodeContainsPath(child, activePath))
+  )
 }
 
 function getTreeNodeKey(node: FileTreeNode, index: number): string {
@@ -419,8 +536,8 @@ function getTreeNodeKey(node: FileTreeNode, index: number): string {
 }
 
 function getTreeNodeSortName(node: FileTreeNode): string {
-  if (node.type === 'file') return node.entry.name
-  if (node.type === 'folder') return node.name
+  if (node.type === 'file') return getDisplayName(node.entry)
+  if (node.type === 'folder') return node.indexEntry?.title ?? node.name
   if (node.type === 'link') return node.label
   return node.label
 }
@@ -430,7 +547,19 @@ function getItemOffset(depth: number): string {
 }
 
 function getDisplayName(entry: MdxFolderEntry): string {
+  const title = entry.title?.trim()
+  if (title) return title
+
   const path = entry.displayPath ?? entry.relativePath
   const name = path.split('/').filter(Boolean).at(-1)
-  return name && name !== 'index' ? name : entry.name
+  if (name && name !== 'index') return cleanDisplayName(name)
+
+  return cleanDisplayName(entry.name.replace(/\.(mdx?|markdown)$/i, ''))
+}
+
+function cleanDisplayName(value: string): string {
+  return value
+    .replace(/^\d+[-_.\s]+/, '')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (char) => char.toUpperCase())
 }
