@@ -207,6 +207,152 @@ mdxforge ./docs
 
 ## Visual Proof
 
+<Callout type="info" title="Diagram-ready docs">
+  MDXForge renders Mermaid directly from fenced code blocks, so AI can ship architecture diagrams, flowcharts, Gantt plans, and engineering visuals in the same local `.mdx` file.
+</Callout>
+
+### Flowchart: from AI output to reviewed document
+
+```mermaid
+flowchart LR
+  A[AI writes structured MDX] --> B[Open locally in MDXForge]
+  B --> C{Safe component whitelist}
+  C -->|Allowed| D[Render docs-site preview]
+  C -->|Unknown| E[Show controlled error]
+  D --> F[Human reviews]
+  F --> G[Share as plain files]
+```
+
+### Sequence: local MDX rendering pipeline
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant Renderer
+  participant Main as Electron Main
+  participant Compiler as MDX Compiler
+  participant FileSystem as Local Files
+
+  User->>Renderer: Open .mdx / .md
+  Renderer->>Main: Request file content
+  Main->>FileSystem: Read local document
+  FileSystem-->>Main: Raw MDX
+  Main->>Compiler: Compile with safe plugins
+  Compiler-->>Main: Renderable module
+  Main-->>Renderer: Compiled result
+  Renderer-->>User: Docs-style preview
+```
+
+### Gantt: product roadmap in one document
+
+```mermaid
+gantt
+  title MDXForge Launch Roadmap
+  dateFormat  YYYY-MM-DD
+  axisFormat  %m/%d
+
+  section Core Reader
+  Open local MDX files       :done,    core1, 2026-05-01, 4d
+  Render Markdown and MDX    :done,    core2, after core1, 5d
+  Safe component whitelist   :done,    core3, after core2, 3d
+
+  section Workspace
+  Folder sidebar             :active,  ws1, 2026-05-12, 6d
+  Page tree from local files  :         ws2, after ws1, 5d
+  Recent documents            :         ws3, after ws2, 3d
+
+  section Launch
+  Demo documents              :active,  launch1, 2026-05-20, 4d
+  Cross-platform packages     :         launch2, after launch1, 6d
+```
+
+### Architecture: app responsibilities
+
+```mermaid
+flowchart TB
+  subgraph Desktop[Electron Desktop App]
+    Main[Main Process\nFile access + MDX compile]
+    Preload[Preload Bridge\nSafe IPC API]
+    Renderer[React Renderer\nPreview + navigation]
+  end
+
+  Local[(Local .mdx / .md files)] --> Main
+  Main --> Preload
+  Preload --> Renderer
+  Renderer --> Preview[Fumadocs-style reading UI]
+  Renderer --> Sidebar[Folder sidebar]
+  Renderer --> Toc[Table of contents]
+```
+
+### ER diagram: document model
+
+```mermaid
+erDiagram
+  WORKSPACE ||--o{ DOCUMENT : contains
+  DOCUMENT ||--o{ HEADING : has
+  DOCUMENT ||--o{ ASSET : references
+
+  WORKSPACE {
+    string rootPath
+    string entryFile
+  }
+
+  DOCUMENT {
+    string path
+    string title
+    string description
+    string format
+  }
+
+  HEADING {
+    string id
+    string text
+    int depth
+  }
+
+  ASSET {
+    string path
+    string kind
+  }
+```
+
+### State diagram: preview lifecycle
+
+```mermaid
+stateDiagram-v2
+  [*] --> Empty
+  Empty --> Loading: open file
+  Loading --> Compiled: MDX compile success
+  Loading --> Error: compile failed
+  Compiled --> Rendered: React render success
+  Rendered --> Loading: switch document
+  Error --> Loading: retry / choose another file
+```
+
+### Git graph: docs evolve with code
+
+```mermaid
+gitGraph
+  commit id: "init app"
+  branch docs-demo
+  checkout docs-demo
+  commit id: "add MDX guide"
+  commit id: "add diagrams"
+  checkout main
+  merge docs-demo
+  commit id: "ship launch demo"
+```
+
+### Pie chart: launch-message focus
+
+```mermaid
+pie title Why MDXForge is easy to explain
+  "Open local MDX" : 35
+  "Docs-site quality preview" : 30
+  "AI-safe component protocol" : 25
+  "Cross-platform desktop" : 10
+```
+
 <ImageZoom src="https://placehold.co/1280x720/111827/ffffff/png?text=MDXForge+MDX+Workspace" alt="MDXForge MDX workspace preview" width={1280} height={720} />
 
 <Heading as="h2" id="launch-positioning">

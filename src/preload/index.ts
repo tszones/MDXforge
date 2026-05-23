@@ -29,10 +29,20 @@ const api = {
     ipcRenderer.on('mdx:file-opened', listener)
     return () => ipcRenderer.removeListener('mdx:file-opened', listener)
   },
+  onMdxFileChanged: (callback: (file: unknown) => void) => {
+    const listener = (_: Electron.IpcRendererEvent, file: unknown): void => callback(file)
+    ipcRenderer.on('mdx:file-changed', listener)
+    return () => ipcRenderer.removeListener('mdx:file-changed', listener)
+  },
   onMdxFileOpenError: (callback: (message: string) => void) => {
     const listener = (_: Electron.IpcRendererEvent, message: string): void => callback(message)
     ipcRenderer.on('mdx:file-open-error', listener)
     return () => ipcRenderer.removeListener('mdx:file-open-error', listener)
+  },
+  onMdxFileChangeError: (callback: (message: string) => void) => {
+    const listener = (_: Electron.IpcRendererEvent, message: string): void => callback(message)
+    ipcRenderer.on('mdx:file-change-error', listener)
+    return () => ipcRenderer.removeListener('mdx:file-change-error', listener)
   }
 }
 

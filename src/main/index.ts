@@ -1,5 +1,6 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { app, BrowserWindow, ipcMain, shell } from 'electron'
+import { watch, type FSWatcher } from 'fs'
 import { join, resolve } from 'path'
 
 if (process.platform === 'win32') {
@@ -27,6 +28,11 @@ import {
 import { checkForUpdatesOnStartup, registerUpdaterIpc } from './updater'
 
 let mainWindow: BrowserWindow | null = null
+let mdxWatcher: FSWatcher | null = null
+let mdxWatchTimer: NodeJS.Timeout | null = null
+let watchedMdxPath: string | null = null
+let watchedWorkspaceRoot: string | undefined
+let watchedOpenedPath: string | null = null
 
 registerLocalImageScheme()
 
@@ -45,10 +51,59 @@ async function openMdxPath(filePath: string): Promise<void> {
   try {
     const workspace = await readMdxWorkspace(filePath)
     setLastOpenPath(workspace.file.path)
+    watchMdxWorkspace(filePath, workspace.folder?.rootPath)
     mainWindow.webContents.send('mdx:file-opened', workspace)
   } catch (cause) {
     mainWindow.webContents.send(
       'mdx:file-open-error',
+      cause instanceof Error ? cause.message : String(cause)
+    )
+  }
+}
+
+function watchMdxWorkspace(openedPath: string, workspaceRoot?: string): void {
+  const watchPath = workspaceRoot ?? openedPath
+  if (watchedMdxPath === watchPath) {
+    watchedOpenedPath = openedPath
+    watchedWorkspaceRoot = workspaceRoot
+    return
+  }
+
+  mdxWatcher?.close()
+  mdxWatcher = null
+  watchedMdxPath = watchPath
+  watchedOpenedPath = openedPath
+  watchedWorkspaceRoot = workspaceRoot
+
+  try {
+    mdxWatcher = watch(watchPath, { recursive: true }, () => scheduleMdxReload())
+  } catch {
+    try {
+      mdxWatcher = watch(watchPath, () => scheduleMdxReload())
+    } catch {
+      watchedMdxPath = null
+      watchedOpenedPath = null
+      watchedWorkspaceRoot = undefined
+    }
+  }
+}
+
+function scheduleMdxReload(): void {
+  if (mdxWatchTimer) clearTimeout(mdxWatchTimer)
+  mdxWatchTimer = setTimeout(() => {
+    void reloadWatchedMdxWorkspace()
+  }, 250)
+}
+
+async function reloadWatchedMdxWorkspace(): Promise<void> {
+  if (!mainWindow || !watchedOpenedPath) return
+
+  try {
+    const workspace = await readMdxWorkspace(watchedOpenedPath, watchedWorkspaceRoot)
+    mainWindow.webContents.send('mdx:file-changed', workspace)
+  } catch (cause) {
+    mainWindow.webContents.send(
+      'mdx:file-change-error',
       cause instanceof Error ? cause.message : String(cause)
     )
   }
@@ -126,11 +181,25 @@ app.whenReady().then(() => {
   })
   ipcMain.handle('window:close', () => mainWindow?.close())
   ipcMain.handle('window:is-maximized', () => mainWindow?.isMaximized() ?? false)
-  ipcMain.handle('mdx:open-file', () => openMdxFile())
-  ipcMain.handle('mdx:open-folder', () => openMdxFolder())
-  ipcMain.handle('mdx:open-path', (_, filePath: string, workspaceRoot?: string) =>
-    readMdxWorkspace(filePath, workspaceRoot)
-  )
+  ipcMain.handle('mdx:open-file', async () => {
+    const workspace = await openMdxFile()
+    if (workspace) watchMdxWorkspace(workspace.file.path, workspace.folder?.rootPath)
+    return workspace
+  })
+  ipcMain.handle('mdx:open-folder', async () => {
+    const workspace = await openMdxFolder()
+    if (workspace)
+      watchMdxWorkspace(
+        workspace.folder?.rootPath ?? workspace.file.path,
+        workspace.folder?.rootPath
+      )
+    return workspace
+  })
+  ipcMain.handle('mdx:open-path', async (_, filePath: string, workspaceRoot?: string) => {
+    const workspace = await readMdxWorkspace(filePath, workspaceRoot)
+    watchMdxWorkspace(filePath, workspace.folder?.rootPath)
+    return workspace
+  })
   ipcMain.handle('mdx:register-default-app', () => app.setAsDefaultProtocolClient('mdx'))
   ipcMain.handle('mdx:is-default-app', () => app.isDefaultProtocolClient('mdx'))
   ipcMain.handle('settings:get', () => getAppSettings())

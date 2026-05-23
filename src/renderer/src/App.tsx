@@ -101,13 +101,23 @@ function AppContent({
       setError(null)
       setViewMode('preview')
     })
+    const removeChangedListener = window.api.onMdxFileChanged((changedWorkspace) => {
+      setWorkspace(changedWorkspace)
+      setError(null)
+      setViewMode('preview')
+    })
     const removeErrorListener = window.api.onMdxFileOpenError((message) => {
+      setError(message)
+    })
+    const removeChangeErrorListener = window.api.onMdxFileChangeError((message) => {
       setError(message)
     })
 
     return () => {
       removeOpenedListener()
+      removeChangedListener()
       removeErrorListener()
+      removeChangeErrorListener()
     }
   }, [])
 
