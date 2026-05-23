@@ -124,7 +124,9 @@ app.whenReady().then(() => {
   ipcMain.handle('window:is-maximized', () => mainWindow?.isMaximized() ?? false)
   ipcMain.handle('mdx:open-file', () => openMdxFile())
   ipcMain.handle('mdx:open-folder', () => openMdxFolder())
-  ipcMain.handle('mdx:open-path', (_, filePath: string) => readMdxWorkspace(filePath))
+  ipcMain.handle('mdx:open-path', (_, filePath: string, workspaceRoot?: string) =>
+    readMdxWorkspace(filePath, workspaceRoot)
+  )
   ipcMain.handle('mdx:register-default-app', () => app.setAsDefaultProtocolClient('mdx'))
   ipcMain.handle('mdx:is-default-app', () => app.isDefaultProtocolClient('mdx'))
   ipcMain.handle('settings:get', () => getAppSettings())

@@ -9,7 +9,8 @@ const api = {
   getVersions: () => process.versions,
   openMdxFile: () => ipcRenderer.invoke('mdx:open-file'),
   openMdxFolder: () => ipcRenderer.invoke('mdx:open-folder'),
-  openMdxPath: (filePath: string) => ipcRenderer.invoke('mdx:open-path', filePath),
+  openMdxPath: (filePath: string, workspaceRoot?: string) =>
+    ipcRenderer.invoke('mdx:open-path', filePath, workspaceRoot),
   registerDefaultMdxApp: () => ipcRenderer.invoke('mdx:register-default-app'),
   isDefaultMdxApp: () => ipcRenderer.invoke('mdx:is-default-app'),
   getSettings: () => ipcRenderer.invoke('settings:get'),

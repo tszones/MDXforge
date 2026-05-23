@@ -100,7 +100,7 @@ export interface AppAPI {
   getVersions: () => AppVersions
   openMdxFile: () => Promise<MdxWorkspace | null>
   openMdxFolder: () => Promise<MdxWorkspace | null>
-  openMdxPath: (filePath: string) => Promise<MdxWorkspace>
+  openMdxPath: (filePath: string, workspaceRoot?: string) => Promise<MdxWorkspace>
   registerDefaultMdxApp: () => Promise<boolean>
   isDefaultMdxApp: () => Promise<boolean>
   getSettings: () => Promise<AppSettings>

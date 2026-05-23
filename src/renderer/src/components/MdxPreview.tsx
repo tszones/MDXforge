@@ -27,7 +27,7 @@ interface MdxPreviewProps {
   workspace: MdxWorkspace
   onOpenFile: () => void
   onOpenFolder: () => void
-  onOpenPath: (filePath: string) => void
+  onOpenPath: (filePath: string, workspaceRoot?: string) => void
   opening: boolean
 }
 
@@ -140,7 +140,7 @@ function PreviewSidebar({
   workspace: MdxWorkspace
   onOpenFile: () => void
   onOpenFolder: () => void
-  onOpenPath: (filePath: string) => void
+  onOpenPath: (filePath: string, workspaceRoot?: string) => void
   opening: boolean
   onCollapseSidebar?: () => void
 }): React.JSX.Element {
@@ -224,7 +224,7 @@ function PreviewSidebar({
                   key={entry.path}
                   entry={entry}
                   active={entry.path === file.path}
-                  onOpenPath={onOpenPath}
+                  onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
                 />
               ))}
             </div>
@@ -235,7 +235,7 @@ function PreviewSidebar({
                   key={getTreeNodeKey(node, index)}
                   node={node}
                   activePath={file.path}
-                  onOpenPath={onOpenPath}
+                  onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
                 />
               ))}
             </div>

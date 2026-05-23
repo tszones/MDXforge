@@ -145,12 +145,12 @@ function AppContent({
     }
   }
 
-  async function openPath(filePath: string): Promise<void> {
+  async function openPath(filePath: string, workspaceRoot?: string): Promise<void> {
     setLoading(true)
     setError(null)
 
     try {
-      setWorkspace(await window.api.openMdxPath(filePath))
+      setWorkspace(await window.api.openMdxPath(filePath, workspaceRoot))
       setViewMode('preview')
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))

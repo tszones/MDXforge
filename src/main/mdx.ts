@@ -98,10 +98,13 @@ export async function openMdxFolder(): Promise<MdxWorkspace | null> {
   return readMdxWorkspace(folderPath)
 }
 
-export async function readMdxWorkspace(inputPath: string): Promise<MdxWorkspace> {
+export async function readMdxWorkspace(
+  inputPath: string,
+  workspaceRoot?: string
+): Promise<MdxWorkspace> {
   const resolvedPath = resolve(inputPath)
   const file = await readMdxFile(resolvedPath)
-  const folderRoot = getWorkspaceRoot(resolvedPath, file.path)
+  const folderRoot = getWorkspaceRoot(resolvedPath, file.path, workspaceRoot)
 
   return {
     file,
@@ -151,7 +154,16 @@ async function compileMdxSource(source: string): Promise<string> {
   )
 }
 
-function getWorkspaceRoot(inputPath: string, filePath: string): string | null {
+function getWorkspaceRoot(
+  inputPath: string,
+  filePath: string,
+  workspaceRoot?: string
+): string | null {
+  if (workspaceRoot) {
+    const resolvedRoot = resolve(workspaceRoot)
+    if (existsSync(resolvedRoot) && statSync(resolvedRoot).isDirectory()) return resolvedRoot
+  }
+
   if (!existsSync(inputPath)) return null
   const stat = statSync(inputPath)
   if (stat.isDirectory()) return inputPath
