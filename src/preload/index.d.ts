@@ -54,6 +54,7 @@ export interface AppSettings {
   theme: AppThemeName
   colorMode: AppColorMode
   language: AppLanguage
+  font: AppFontName
 }
 
 export type AppThemeName =
@@ -71,6 +72,7 @@ export type AppThemeName =
 
 export type AppColorMode = 'light' | 'dark'
 export type AppLanguage = 'system' | 'zh-CN' | 'en-US'
+export type AppFontName = 'system' | 'bricolage' | 'serif' | 'mono'
 
 export interface UpdateState {
   status:

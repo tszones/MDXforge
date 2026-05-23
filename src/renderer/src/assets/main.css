@@ -54,7 +54,8 @@
 
 :root {
   --radius: 0.625rem;
-  --font-custom: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-custom: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
 }
 
 .dark {

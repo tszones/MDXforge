@@ -88,5 +88,20 @@
   "theme_ruby_label": "Ruby",
   "theme_ruby_description": "A ruby-red accent that stands out without feeling harsh.",
   "theme_aspen_label": "Aspen",
-  "theme_aspen_description": "A natural yellow-green palette that stays soft and readable."
+  "theme_aspen_description": "A natural yellow-green palette that stays soft and readable.",
+  "settings_title": "Settings",
+  "settings_description": "Tune language, theme, fonts, and local update preferences.",
+  "settings_language_tab": "Language",
+  "settings_appearance_tab": "Theme & fonts",
+  "settings_font": "Font",
+  "settings_font_description": "Choose the reading and interface font. Bricolage matches the reference site; System keeps the platform default.",
+  "settings_font_preview": "MDXForge 文档预览 123 ABC",
+  "font_system_label": "System default",
+  "font_system_description": "Clean platform-native font stack. Best for Chinese/English fallback.",
+  "font_bricolage_label": "Bricolage Grotesque",
+  "font_bricolage_description": "The reference site font: rounded, lively, good for UI and numbers.",
+  "font_serif_label": "Serif reading",
+  "font_serif_description": "More book-like, better for long-form document reading.",
+  "font_mono_label": "Mono technical",
+  "font_mono_description": "Fixed-width style for specs, code-heavy docs, and technical notes."
 }

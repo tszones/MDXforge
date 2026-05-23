@@ -88,5 +88,20 @@
   "theme_ruby_label": "Ruby / 宝石红",
   "theme_ruby_description": "红宝石主色，醒目但不刺眼。",
   "theme_aspen_label": "Aspen / 山林绿",
-  "theme_aspen_description": "偏自然的黄绿色，柔和耐看。"
+  "theme_aspen_description": "偏自然的黄绿色，柔和耐看。",
+  "settings_title": "设置",
+  "settings_description": "调整语言、主题、字体和本地更新偏好。",
+  "settings_language_tab": "语言",
+  "settings_appearance_tab": "主题与字体",
+  "settings_font": "字体",
+  "settings_font_description": "选择阅读和界面字体。Bricolage 对齐参考站；系统默认保留平台原生观感。",
+  "settings_font_preview": "MDXForge 文档预览 123 ABC",
+  "font_system_label": "系统默认",
+  "font_system_description": "干净的系统字体栈，中英文 fallback 最稳。",
+  "font_bricolage_label": "Bricolage Grotesque",
+  "font_bricolage_description": "参考站同款字体，圆润、有活力，适合 UI 和数字。",
+  "font_serif_label": "衬线阅读",
+  "font_serif_description": "更像书籍排版，适合长文档阅读。",
+  "font_mono_label": "等宽技术",
+  "font_mono_description": "等宽风格，适合规范、代码密集文档和技术笔记。"
 }

@@ -15,11 +15,13 @@ export type AppThemeName =
 
 export type AppColorMode = 'light' | 'dark'
 export type AppLanguage = 'system' | 'zh-CN' | 'en-US'
+export type AppFontName = 'system' | 'bricolage' | 'serif' | 'mono'
 
 export interface AppSettings {
   theme: AppThemeName
   colorMode: AppColorMode
   language: AppLanguage
+  font: AppFontName
 }
 
 type StoreConstructor = new <T extends object>(options: {
@@ -37,7 +39,8 @@ const store = new ElectronStore<AppSettings>({
   defaults: {
     theme: 'purple',
     colorMode: 'dark',
-    language: 'en-US'
+    language: 'en-US',
+    font: 'system'
   }
 })
 
@@ -45,7 +48,8 @@ export function getAppSettings(): AppSettings {
   return {
     theme: store.get('theme'),
     colorMode: store.get('colorMode'),
-    language: store.get('language')
+    language: store.get('language'),
+    font: store.get('font')
   }
 }
 
@@ -53,5 +57,6 @@ export function setAppSettings(settings: Partial<AppSettings>): AppSettings {
   if (settings.theme) store.set('theme', settings.theme)
   if (settings.colorMode) store.set('colorMode', settings.colorMode)
   if (settings.language) store.set('language', settings.language)
+  if (settings.font) store.set('font', settings.font)
   return getAppSettings()
 }

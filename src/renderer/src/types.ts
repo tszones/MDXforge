@@ -1,6 +1,8 @@
 export const APP_LANGUAGE_OPTIONS = ['system', 'zh-CN', 'en-US'] as const
+export const APP_FONT_OPTIONS = ['system', 'bricolage', 'serif', 'mono'] as const
 
 export type AppLanguage = (typeof APP_LANGUAGE_OPTIONS)[number]
+export type AppFontName = (typeof APP_FONT_OPTIONS)[number]
 
 export interface MdxFile {
   path: string

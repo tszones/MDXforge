@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { MdxPreview } from './components/MdxPreview'
 import { SettingsPage } from './components/SettingsPage'
 import { WindowTitleBar } from './components/WindowTitleBar'
+import { applyAppFont, normalizeStoredFont } from './lib/font'
 import { applyLanguage, normalizeStoredLanguage } from './lib/language'
 import {
   applyFumadocsTheme,
@@ -10,7 +11,7 @@ import {
   isFumadocsThemeName
 } from './lib/theme'
 import { m } from './paraglide/messages'
-import type { AppLanguage, MdxWorkspace } from './types'
+import type { AppFontName, AppLanguage, MdxWorkspace } from './types'
 
 type ViewMode = 'preview' | 'settings'
 
@@ -18,6 +19,7 @@ function App(): React.JSX.Element {
   const [theme, setThemeState] = useState<FumadocsThemeName>('purple')
   const [colorMode, setColorModeState] = useState<ColorMode>('dark')
   const [language, setLanguageState] = useState<AppLanguage>('en-US')
+  const [font, setFontState] = useState<AppFontName>('system')
   const [, rerenderForLocaleChange] = useState(0)
 
   useEffect(() => {
@@ -25,11 +27,14 @@ function App(): React.JSX.Element {
       const nextTheme = isFumadocsThemeName(settings.theme) ? settings.theme : 'purple'
       const nextColorMode = settings.colorMode === 'light' ? 'light' : 'dark'
       const nextLanguage = normalizeStoredLanguage(settings.language)
+      const nextFont = normalizeStoredFont(settings.font)
       setThemeState(nextTheme)
       setColorModeState(nextColorMode)
       setLanguageState(nextLanguage)
+      setFontState(nextFont)
       applyFumadocsTheme(nextTheme, nextColorMode)
       applyLanguage(nextLanguage)
+      applyAppFont(nextFont)
       rerenderForLocaleChange((version) => version + 1)
     })
   }, [])
@@ -61,14 +66,25 @@ function App(): React.JSX.Element {
     rerenderForLocaleChange((version) => version + 1)
   }
 
+  async function setFont(fontName: AppFontName): Promise<void> {
+    setFontState(fontName)
+    applyAppFont(fontName)
+    const settings = await window.api.setSettings({ font: fontName })
+    const storedFont = normalizeStoredFont(settings.font)
+    setFontState(storedFont)
+    applyAppFont(storedFont)
+  }
+
   return (
     <AppContent
       theme={theme}
       colorMode={colorMode}
       language={language}
+      font={font}
       onThemeChange={(nextTheme) => void setTheme(nextTheme)}
       onColorModeChange={(nextMode) => void setColorMode(nextMode)}
       onLanguageChange={(nextLanguage) => void setLanguage(nextLanguage)}
+      onFontChange={(nextFont) => void setFont(nextFont)}
     />
   )
 }
@@ -77,16 +93,20 @@ function AppContent({
   theme,
   colorMode,
   language,
+  font,
   onThemeChange,
   onColorModeChange,
-  onLanguageChange
+  onLanguageChange,
+  onFontChange
 }: {
   theme: FumadocsThemeName
   colorMode: ColorMode
   language: AppLanguage
+  font: AppFontName
   onThemeChange: (theme: FumadocsThemeName) => void
   onColorModeChange: (mode: ColorMode) => void
   onLanguageChange: (language: AppLanguage) => void
+  onFontChange: (font: AppFontName) => void
 }): React.JSX.Element {
   const [workspace, setWorkspace] = useState<MdxWorkspace | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -177,9 +197,11 @@ function AppContent({
           theme={theme}
           mode={colorMode}
           language={language}
+          font={font}
           onThemeChange={onThemeChange}
           onModeChange={onColorModeChange}
           onLanguageChange={onLanguageChange}
+          onFontChange={onFontChange}
           onBack={() => setViewMode('preview')}
         />
       ) : (
