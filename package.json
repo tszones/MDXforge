@@ -4,6 +4,7 @@
   "description": "AI-native MDX docs workspace",
   "main": "./out/main/index.js",
   "author": "MDXForge",
+  "license": "MIT",
   "homepage": "https://github.com/tszones/MDXforge",
   "bin": {
     "mdxforge": "bin/mdxforge.cjs",
