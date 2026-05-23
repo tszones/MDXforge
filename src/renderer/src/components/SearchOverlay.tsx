@@ -1,10 +1,10 @@
 import { useHotkeys } from '@tanstack/react-hotkeys'
-import { FileSearch, FileText, Search } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { FileText, Search } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import { appHotkeys } from '../lib/hotkeys'
 import { filterFileEntries, getTextMatches } from '../lib/search-model'
 import { m } from '../paraglide/messages'
-import type { MdxFolderEntry, MdxWorkspace, MdxWorkspaceSearchResult } from '../types'
+import type { MdxFolderEntry, MdxWorkspace } from '../types'
 import {
   Command,
   CommandDialog,
@@ -14,7 +14,7 @@ import {
   CommandList
 } from './ui/command'
 
-type SearchMode = 'file' | 'workspace' | 'quickOpen'
+type SearchMode = 'file' | 'quickOpen'
 
 interface SearchOverlayProps {
   workspace: MdxWorkspace | null
@@ -46,17 +46,6 @@ export function SearchOverlay({ workspace, onOpenPath }: SearchOverlayProps): Re
         }
       },
       {
-        hotkey: appHotkeys.searchWorkspace,
-        callback: () => openMode('workspace'),
-        options: {
-          enabled: Boolean(workspace?.folder),
-          meta: {
-            name: 'Search workspace',
-            description: 'Search across all documents in the current workspace.'
-          }
-        }
-      },
-      {
         hotkey: appHotkeys.quickOpenFile,
         callback: () => openMode('quickOpen'),
         options: {
@@ -83,13 +72,6 @@ export function SearchOverlay({ workspace, onOpenPath }: SearchOverlayProps): Re
         <div className="flex items-center gap-1 border-b p-1">
           <ModeButton active={mode === 'file'} onClick={() => openMode('file')}>
             {m.search_mode_file()}
-          </ModeButton>
-          <ModeButton
-            active={mode === 'workspace'}
-            disabled={!workspace?.folder}
-            onClick={() => openMode('workspace')}
-          >
-            {m.search_mode_workspace()}
           </ModeButton>
           <ModeButton
             active={mode === 'quickOpen'}
@@ -145,10 +127,6 @@ function SearchResults({
     )
   }
 
-  if (mode === 'workspace') {
-    return <WorkspaceSearchResults query={query} workspace={workspace} onOpenPath={onOpenPath} />
-  }
-
   return <FileSearchResults query={query} workspace={workspace} />
 }
 
@@ -201,78 +179,6 @@ function findRenderedText(query: string): void {
   ).find
 
   find?.(query, false, false, true)
-}
-
-function WorkspaceSearchResults({
-  query,
-  workspace,
-  onOpenPath
-}: {
-  query: string
-  workspace: MdxWorkspace
-  onOpenPath: (filePath: string, workspaceRoot?: string) => void
-}): React.JSX.Element {
-  const [results, setResults] = useState<MdxWorkspaceSearchResult[]>([])
-  const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    let canceled = false
-    const workspaceRoot = workspace.folder?.rootPath
-    const trimmedQuery = query.trim()
-
-    if (!workspaceRoot || !trimmedQuery) {
-      setResults([])
-      setLoading(false)
-      return
-    }
-
-    setLoading(true)
-    const timer = window.setTimeout(() => {
-      void window.api.searchMdxWorkspace(workspaceRoot, trimmedQuery).then((nextResults) => {
-        if (canceled) return
-        setResults(nextResults)
-        setLoading(false)
-      })
-    }, 150)
-
-    return () => {
-      canceled = true
-      window.clearTimeout(timer)
-    }
-  }, [workspace.folder?.rootPath, query])
-
-  if (!workspace.folder) return <EmptyState>{m.search_empty_no_workspace()}</EmptyState>
-  if (!query.trim()) return <EmptyState>{m.search_empty_type_query()}</EmptyState>
-  if (loading) return <EmptyState>{m.search_loading()}</EmptyState>
-  if (results.length === 0) return <EmptyState>{m.search_empty_no_results()}</EmptyState>
-
-  return (
-    <CommandList className="max-h-[min(60vh,520px)]">
-      {results.flatMap((result) =>
-        result.matches.map((match) => (
-          <CommandItem
-            key={`${result.path}:${match.line}:${match.column}:${match.preview}`}
-            value={`${result.relativePath}:${match.line}:${match.column}:${match.preview}`}
-            onSelect={() => onOpenPath(result.path, workspace.folder?.rootPath)}
-          >
-            <FileSearch className="size-4 text-fd-muted-foreground" />
-            <div className="min-w-0 flex-1">
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="truncate text-sm font-medium">
-                  {result.title ?? result.displayPath ?? result.name}
-                </span>
-                <span className="shrink-0 text-xs text-fd-muted-foreground">
-                  {m.search_line_column({ line: match.line, column: match.column })}
-                </span>
-              </div>
-              <div className="truncate text-xs text-fd-muted-foreground">{result.relativePath}</div>
-              <div className="truncate text-sm">{match.preview}</div>
-            </div>
-          </CommandItem>
-        ))
-      )}
-    </CommandList>
-  )
 }
 
 function QuickOpenResults({
@@ -349,19 +255,16 @@ function EmptyState({ children }: { children: React.ReactNode }): React.JSX.Elem
 }
 
 function getModeTitle(mode: SearchMode): string {
-  if (mode === 'workspace') return m.search_mode_workspace()
   if (mode === 'quickOpen') return m.search_mode_quick_open()
   return m.search_mode_file()
 }
 
 function getModeDescription(mode: SearchMode): string {
-  if (mode === 'workspace') return m.search_workspace_description()
   if (mode === 'quickOpen') return m.search_quick_open_description()
   return m.search_file_description()
 }
 
 function getModePlaceholder(mode: SearchMode): string {
-  if (mode === 'workspace') return m.search_workspace_placeholder()
   if (mode === 'quickOpen') return m.search_quick_open_placeholder()
   return m.search_file_placeholder()
 }

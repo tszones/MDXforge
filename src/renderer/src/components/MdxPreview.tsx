@@ -1,3 +1,4 @@
+import { useHotkeys } from '@tanstack/react-hotkeys'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import {
   SidebarFolder,
@@ -6,6 +7,7 @@ import {
   SidebarItem,
   useFolderDepth
 } from 'fumadocs-ui/components/sidebar/base'
+import { buttonVariants } from 'fumadocs-ui/components/ui/button'
 import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page'
 import {
   BookOpen,
@@ -22,9 +24,15 @@ import {
 } from 'lucide-react'
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
-import { filterFileEntries } from '../lib/search-model'
+import { appHotkeys } from '../lib/hotkeys'
 import { m } from '../paraglide/messages'
-import type { MdxDocumentBacklink, MdxFolderEntry, MdxFolderTreeNode, MdxWorkspace } from '../types'
+import type {
+  MdxDocumentBacklink,
+  MdxFolderEntry,
+  MdxFolderTreeNode,
+  MdxWorkspace,
+  MdxWorkspaceSearchResult
+} from '../types'
 import { MdxDocsLayout, MdxPageContainer } from './MdxDocsLayout'
 import { getMDXComponents } from './mdx'
 
@@ -109,6 +117,8 @@ export function MdxPreview({
   const file = workspace.file
   const [module, setModule] = useState<MdxModule | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const [copiedFilePath, setCopiedFilePath] = useState(file.path)
   const title = typeof file.frontmatter.title === 'string' ? file.frontmatter.title : file.name
   const description =
     typeof file.frontmatter.description === 'string' ? file.frontmatter.description : file.path
@@ -158,6 +168,30 @@ export function MdxPreview({
     }
   }, [file.compiledSource, file.compileError])
 
+  if (copiedFilePath !== file.path) {
+    setCopiedFilePath(file.path)
+    setCopyState('idle')
+  }
+
+  useEffect(() => {
+    if (copyState === 'idle') return
+
+    const timer = window.setTimeout(() => {
+      setCopyState('idle')
+    }, 1800)
+
+    return () => window.clearTimeout(timer)
+  }, [copyState])
+
+  async function copyRawSource(): Promise<void> {
+    try {
+      await window.api.copyMdxRawSource(file.path)
+      setCopyState('copied')
+    } catch {
+      setCopyState('error')
+    }
+  }
+
   const Mdx = module?.default
   const toc = module?.toc?.filter((item) => item.depth > 1) ?? []
 
@@ -181,6 +215,7 @@ export function MdxPreview({
       <MdxPageContainer>
         <DocsTitle>{title}</DocsTitle>
         <DocsDescription>{description}</DocsDescription>
+        <PageActions copyState={copyState} onCopyRawSource={() => void copyRawSource()} />
 
         {error ? (
           <pre className="overflow-auto rounded-md border bg-fd-error/10 p-4 text-sm text-fd-error">
@@ -282,6 +317,38 @@ function Backlinks({
   )
 }
 
+function PageActions({
+  copyState,
+  onCopyRawSource
+}: {
+  copyState: 'idle' | 'copied' | 'error'
+  onCopyRawSource: () => void
+}): React.JSX.Element {
+  return (
+    <div className="flex flex-row items-center gap-2 border-b pb-6 pt-2">
+      <button
+        type="button"
+        onClick={onCopyRawSource}
+        aria-label={m.actions_copy_raw_source()}
+        className={buttonVariants({
+          color: 'secondary',
+          size: 'sm',
+          className:
+            'gap-2 data-[state=copied]:border-fd-primary/40 data-[state=copied]:bg-fd-primary/10 data-[state=copied]:text-fd-primary data-[state=error]:border-fd-error/40 data-[state=error]:bg-fd-error/10 data-[state=error]:text-fd-error [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground'
+        })}
+        data-state={copyState}
+      >
+        {copyState === 'copied' ? <Check /> : <Copy />}
+        {copyState === 'copied'
+          ? m.actions_copied_raw_source()
+          : copyState === 'error'
+            ? m.actions_copy_raw_source_failed()
+            : m.actions_copy_raw_source()}
+      </button>
+    </div>
+  )
+}
+
 function PreviewSidebar({
   workspace,
   onOpenFile,
@@ -305,40 +372,73 @@ function PreviewSidebar({
 }): React.JSX.Element {
   const file = workspace.file
   const [query, setQuery] = useState('')
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
   const [renamingPath, setRenamingPath] = useState<string | null>(null)
+  const [workspaceSearchResults, setWorkspaceSearchResults] = useState<MdxWorkspaceSearchResult[]>(
+    []
+  )
+  const [workspaceSearchLoading, setWorkspaceSearchLoading] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const tree = useMemo(
     () => buildFileTree(workspace.folder?.files ?? [], workspace.folder?.tree),
     [workspace.folder]
   )
-  const searchResults = useMemo(
-    () => filterFileEntries(workspace.folder?.files ?? [], query),
-    [workspace.folder?.files, query]
-  )
   const searching = query.trim().length > 0
 
-  useEffect(() => {
-    if (workspace.file.path) setCopyState('idle')
-  }, [workspace.file.path])
+  useHotkeys(
+    [
+      {
+        hotkey: appHotkeys.searchWorkspace,
+        callback: () => {
+          onExpandSidebar?.()
+          window.setTimeout(() => {
+            searchInputRef.current?.focus()
+            searchInputRef.current?.select()
+          }, 0)
+        },
+        options: {
+          enabled: Boolean(workspace.folder),
+          meta: {
+            name: 'Search workspace',
+            description: 'Focus the workspace search field in the sidebar.'
+          }
+        }
+      }
+    ],
+    { ignoreInputs: true }
+  )
 
   useEffect(() => {
-    if (copyState === 'idle') return
+    let canceled = false
+    const workspaceRoot = workspace.folder?.rootPath
+    const trimmedQuery = query.trim()
 
-    const timer = window.setTimeout(() => {
-      setCopyState('idle')
-    }, 1800)
-
-    return () => window.clearTimeout(timer)
-  }, [copyState])
-
-  async function copyRawSource(): Promise<void> {
-    try {
-      await window.api.copyMdxRawSource(file.path)
-      setCopyState('copied')
-    } catch {
-      setCopyState('error')
+    if (!workspaceRoot || !trimmedQuery) {
+      setWorkspaceSearchResults([])
+      setWorkspaceSearchLoading(false)
+      return
     }
-  }
+
+    setWorkspaceSearchLoading(true)
+    const timer = window.setTimeout(() => {
+      void window.api
+        .searchMdxWorkspace(workspaceRoot, trimmedQuery)
+        .then((results) => {
+          if (canceled) return
+          setWorkspaceSearchResults(results)
+          setWorkspaceSearchLoading(false)
+        })
+        .catch(() => {
+          if (canceled) return
+          setWorkspaceSearchResults([])
+          setWorkspaceSearchLoading(false)
+        })
+    }, 150)
+
+    return () => {
+      canceled = true
+      window.clearTimeout(timer)
+    }
+  }, [workspace.folder?.rootPath, query])
 
   return (
     <div className="h-full min-h-0 bg-fd-card text-sm">
@@ -373,9 +473,10 @@ function PreviewSidebar({
             <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground focus-within:border-fd-primary/50 focus-within:text-fd-foreground">
               <Search className="size-4 shrink-0" />
               <input
+                ref={searchInputRef}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder={m.preview_search_placeholder()}
+                placeholder={m.search_workspace_placeholder()}
                 className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-fd-muted-foreground"
               />
               {query ? (
@@ -400,22 +501,38 @@ function PreviewSidebar({
         <div className="fd-scroll-container min-h-0 flex-1 overflow-auto px-3 py-2 [mask:linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]">
           <p className="mb-1 px-2 text-xs font-medium text-fd-muted-foreground">
             {searching
-              ? m.preview_search_results({ count: searchResults.length })
+              ? workspaceSearchLoading
+                ? m.search_loading()
+                : m.preview_search_results({
+                    count: workspaceSearchResults.reduce(
+                      (count, result) => count + result.matches.length,
+                      0
+                    )
+                  })
               : workspace.folder
                 ? m.preview_files_nav()
                 : m.preview_current_file()}
           </p>
           {searching ? (
-            <div className="flex flex-col gap-0.5">
-              {searchResults.map((entry) => (
-                <SearchResultItem
-                  key={entry.path}
-                  entry={entry}
-                  active={entry.path === file.path}
-                  onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
-                />
-              ))}
-            </div>
+            workspaceSearchLoading ? (
+              <SidebarEmptyState>{m.search_loading()}</SidebarEmptyState>
+            ) : workspaceSearchResults.length > 0 ? (
+              <div className="flex flex-col gap-0.5">
+                {workspaceSearchResults.flatMap((result) =>
+                  result.matches.map((match) => (
+                    <WorkspaceSearchResultItem
+                      key={`${result.path}:${match.line}:${match.column}:${match.preview}`}
+                      result={result}
+                      match={match}
+                      active={result.path === file.path}
+                      onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
+                    />
+                  ))
+                )}
+              </div>
+            ) : (
+              <SidebarEmptyState>{m.search_empty_no_results()}</SidebarEmptyState>
+            )
           ) : tree.length > 0 ? (
             <div className="flex flex-col gap-0.5">
               {tree.map((node, index) => (
@@ -445,27 +562,6 @@ function PreviewSidebar({
           <p className="mb-2 line-clamp-2 px-1 text-xs leading-5 text-fd-muted-foreground wrap-anywhere">
             {file.path}
           </p>
-          <button
-            type="button"
-            onClick={() => void copyRawSource()}
-            title={m.actions_copy_raw_source()}
-            aria-label={m.actions_copy_raw_source()}
-            className="mb-2 inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg border bg-fd-secondary/50 px-2 text-xs text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-[state=copied]:border-fd-primary/40 data-[state=copied]:bg-fd-primary/10 data-[state=copied]:text-fd-primary data-[state=error]:border-fd-error/40 data-[state=error]:bg-fd-error/10 data-[state=error]:text-fd-error"
-            data-state={copyState}
-          >
-            {copyState === 'copied' ? (
-              <Check className="size-3.5 shrink-0" />
-            ) : (
-              <Copy className="size-3.5 shrink-0 text-fd-muted-foreground" />
-            )}
-            <span className="truncate">
-              {copyState === 'copied'
-                ? m.actions_copied_raw_source()
-                : copyState === 'error'
-                  ? m.actions_copy_raw_source_failed()
-                  : m.actions_copy_raw_source()}
-            </span>
-          </button>
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
@@ -805,29 +901,41 @@ function buildFileTreeFromPageTree(
     .filter((node): node is FileTreeNode => node !== null)
 }
 
-function SearchResultItem({
-  entry,
+function WorkspaceSearchResultItem({
+  result,
+  match,
   active,
   onOpenPath
 }: {
-  entry: MdxFolderEntry
+  result: MdxWorkspaceSearchResult
+  match: MdxWorkspaceSearchResult['matches'][number]
   active: boolean
   onOpenPath: (filePath: string) => void
 }): React.JSX.Element {
   return (
     <button
       type="button"
-      title={entry.relativePath}
-      onClick={() => onOpenPath(entry.path)}
+      title={`${result.relativePath}:${match.line}:${match.column}`}
+      onClick={() => onOpenPath(result.path)}
       className="relative flex w-full flex-col rounded-lg p-2 text-start text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary"
       data-active={active}
     >
-      <span className="truncate text-sm font-medium">{entry.title ?? getDisplayName(entry)}</span>
-      <span className="mt-0.5 truncate text-xs opacity-70">
-        {entry.displayPath || entry.relativePath}
+      <span className="truncate text-sm font-medium">
+        {result.title ?? result.displayPath ?? result.name}
+      </span>
+      <span className="mt-0.5 truncate text-xs opacity-70">{result.relativePath}</span>
+      <span className="mt-1 truncate text-xs opacity-80">
+        {m.search_line_column({ line: match.line, column: match.column })}
+      </span>
+      <span className="mt-0.5 line-clamp-2 text-xs leading-5 text-fd-foreground/80">
+        {match.preview}
       </span>
     </button>
   )
+}
+
+function SidebarEmptyState({ children }: { children: React.ReactNode }): React.JSX.Element {
+  return <div className="rounded-lg px-2 py-4 text-xs text-fd-muted-foreground">{children}</div>
 }
 
 function buildDocumentLinkMap(
