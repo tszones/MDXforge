@@ -106,7 +106,7 @@ export function MdxPreview({
         <DocsDescription>{description}</DocsDescription>
 
         {error ? (
-          <pre className="overflow-auto rounded-md border bg-destructive/10 p-4 text-sm text-destructive">
+          <pre className="overflow-auto rounded-md border bg-fd-error/10 p-4 text-sm text-fd-error">
             {error}
           </pre>
         ) : null}

@@ -80,7 +80,7 @@ export function SettingsPage({
           </p>
         </header>
 
-        <section className="grid gap-3 rounded-xl border bg-fd-card p-4 shadow-sm">
+        <section className="grid gap-3 rounded-lg border bg-fd-card p-4">
           <div className="flex items-center gap-2 font-medium">
             <Sun className="size-4" />
             {m.settings_color_mode()}
@@ -97,7 +97,7 @@ export function SettingsPage({
           </div>
         </section>
 
-        <section className="grid gap-3 rounded-xl border bg-fd-card p-4 shadow-sm">
+        <section className="grid gap-3 rounded-lg border bg-fd-card p-4">
           <div>
             <div className="flex items-center gap-2 font-medium">
               <Languages className="size-4" />
@@ -193,54 +193,45 @@ function ThemeCard({
       type="button"
       onClick={onClick}
       data-active={active}
-      className="group overflow-hidden rounded-xl border bg-fd-card text-start shadow-sm transition hover:-translate-y-0.5 hover:border-fd-primary/50 hover:shadow-md data-[active=true]:border-fd-primary data-[active=true]:ring-2 data-[active=true]:ring-fd-primary/20"
+      className="group rounded-lg border bg-fd-card p-4 text-start transition-colors hover:border-fd-primary/40 hover:bg-fd-accent/30 data-[active=true]:border-fd-primary data-[active=true]:bg-fd-primary/5"
     >
-      <div
-        className="h-20 border-b"
-        style={{
-          background: `linear-gradient(135deg, ${meta.colors[0]} 0 45%, ${meta.colors[2]} 45% 70%, ${meta.colors[3]} 70% 100%)`
-        }}
-      >
-        <div className="flex h-full items-end justify-end gap-1.5 p-3">
-          {meta.colors.map((color) => (
-            <span
-              key={color}
-              className="size-6 rounded-full border border-black/10 shadow-sm"
-              style={{ background: color }}
-              title={color}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <span className="font-medium">{themeLabel(name)}</span>
+          <code className="mt-1 block text-xs text-fd-muted-foreground">{name}</code>
+        </div>
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-md border bg-fd-background px-2 py-0.5 text-xs text-fd-muted-foreground">
+          {active ? <Check className="size-3" /> : null}
+          {active ? m.settings_current() : m.settings_select()}
+        </span>
+      </div>
+      <div className="mt-3 flex overflow-hidden rounded-md border">
+        {swatchLabels.map((label, index) => (
+          <span
+            key={label}
+            className="h-6 flex-1"
+            style={{ background: meta.colors[index] }}
+            title={label}
+          />
+        ))}
+      </div>
+      <p className="mt-3 text-sm text-fd-muted-foreground">{themeDescription(name)}</p>
+      <div className="mt-4 grid grid-cols-4 gap-1.5 text-[10px] text-fd-muted-foreground">
+        {swatchLabels.map((label, index) => (
+          <div key={label} className="min-w-0">
+            <div
+              className="mb-1 h-5 rounded-sm border"
+              style={{ background: meta.colors[index] }}
             />
-          ))}
-        </div>
-      </div>
-      <div className="p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <span className="font-medium">{themeLabel(name)}</span>
-            <code className="mt-1 block text-xs text-fd-muted-foreground">{name}</code>
+            <span className="truncate">{label}</span>
           </div>
-          <span className="inline-flex items-center gap-1 rounded-full bg-fd-muted px-2 py-0.5 text-xs text-fd-muted-foreground">
-            {active ? <Check className="size-3" /> : null}
-            {active ? m.settings_current() : m.settings_select()}
-          </span>
-        </div>
-        <p className="mt-3 text-sm text-fd-muted-foreground">{themeDescription(name)}</p>
-        <div className="mt-4 grid grid-cols-4 gap-1.5 text-[10px] text-fd-muted-foreground">
-          {swatchLabels.map((label, index) => (
-            <div key={label} className="min-w-0">
-              <div
-                className="mb-1 h-6 rounded-md border"
-                style={{ background: meta.colors[index] }}
-              />
-              <span className="truncate">{label}</span>
-            </div>
-          ))}
-        </div>
-        <p className="mt-3 text-xs text-fd-muted-foreground">
-          {m.settings_preview_mode({
-            mode: mode === 'dark' ? m.settings_dark() : m.settings_light()
-          })}
-        </p>
+        ))}
       </div>
+      <p className="mt-3 text-xs text-fd-muted-foreground">
+        {m.settings_preview_mode({
+          mode: mode === 'dark' ? m.settings_dark() : m.settings_light()
+        })}
+      </p>
     </button>
   )
 }

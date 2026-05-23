@@ -209,11 +209,6 @@
   --color-fd-muted: hsl(223, 16%, 83%);
 }
 
-:root[data-fd-theme="catppuccin"] #nd-sidebar {
-  --color-fd-secondary: hsl(237, 16%, 23%);
-  --color-fd-muted: hsl(237, 16%, 23%);
-}
-
 :root.dark[data-fd-theme="catppuccin"] #nd-sidebar {
   --color-fd-secondary: hsl(237, 16%, 23%);
   --color-fd-muted: hsl(237, 16%, 23%);
