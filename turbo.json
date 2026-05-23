@@ -1,0 +1,87 @@
+{
+  "$schema": "https://turborepo.dev/schema.v2.json",
+  "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true
+    },
+    "format": {
+      "cache": false
+    },
+    "lint": {
+      "outputs": []
+    },
+    "lint:fix": {
+      "cache": false
+    },
+    "paraglide:compile": {
+      "outputs": ["src/renderer/src/paraglide/**"]
+    },
+    "typecheck:node": {
+      "outputs": []
+    },
+    "typecheck:web": {
+      "outputs": ["src/renderer/src/paraglide/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"],
+      "outputs": ["src/renderer/src/paraglide/**"]
+    },
+    "test:main-bundle-boundary": {
+      "dependsOn": ["build"],
+      "outputs": []
+    },
+    "test:renderer-boundary": {
+      "outputs": []
+    },
+    "test:local-images": {
+      "outputs": []
+    },
+    "test:page-tree": {
+      "outputs": []
+    },
+    "test:mdx-raw-source": {
+      "outputs": []
+    },
+    "test:search": {
+      "outputs": []
+    },
+    "test:extensions": {
+      "outputs": []
+    },
+    "test:fixtures": {
+      "outputs": []
+    },
+    "build:icons": {
+      "outputs": ["build/icons/**"]
+    },
+    "build": {
+      "dependsOn": ["^build", "typecheck"],
+      "outputs": ["out/**"]
+    },
+    "build:unpack": {
+      "dependsOn": ["build"],
+      "outputs": ["dist/**"]
+    },
+    "build:win": {
+      "dependsOn": ["build"],
+      "outputs": ["dist/**"]
+    },
+    "build:mac": {
+      "dependsOn": ["build"],
+      "outputs": ["dist/**"]
+    },
+    "build:linux": {
+      "dependsOn": ["build", "build:icons"],
+      "outputs": ["dist/**", "build/icons/**"]
+    },
+    "test": {
+      "outputs": []
+    }
+  }
+}

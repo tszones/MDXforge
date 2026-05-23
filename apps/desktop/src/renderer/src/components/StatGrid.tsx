@@ -23,8 +23,8 @@ const columnClassNames: Record<NonNullable<StatGridProps['columns']>, string> = 
 export function StatGrid({ items, columns = 3 }: StatGridProps) {
   return (
     <div className={cn('not-prose grid gap-4', columnClassNames[columns])}>
-      {items.map((item, index) => (
-        <MetricCard key={`${item.label}-${index}`} {...item} />
+      {items.map((item) => (
+        <MetricCard key={item.label} {...item} />
       ))}
     </div>
   )

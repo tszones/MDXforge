@@ -41,22 +41,22 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Build renderer/main
-        run: pnpm build
+        run: pnpm run build:desktop
 
       - name: Build Windows artifacts
         if: runner.os == 'Windows'
-        run: pnpm exec electron-builder --win --publish always
+        run: pnpm --filter @mdxforge/desktop exec electron-builder --win --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build macOS artifacts
         if: runner.os == 'macOS'
-        run: pnpm exec electron-builder --mac --publish always
+        run: pnpm --filter @mdxforge/desktop exec electron-builder --mac --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Linux artifacts
         if: runner.os == 'Linux'
-        run: pnpm run build:icons && pnpm exec electron-builder --linux --publish always
+        run: pnpm run build:icons && pnpm --filter @mdxforge/desktop exec electron-builder --linux --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

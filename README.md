@@ -77,14 +77,25 @@ MDXForge 是一个 Electron + React 桌面应用。
 
 ## 开发
 
+仓库现在是 pnpm workspace / Turborepo monorepo：
+
+```txt
+apps/
+  desktop/   # Electron + React 桌面应用
+packages/    # 后续放共享包
+```
+
 ```bash
 pnpm install
 pnpm dev
 ```
 
+`pnpm dev` 默认启动 `apps/desktop`。后续官网可以自然加入 `apps/web`。
+
 ## 构建
 
 ```bash
+pnpm build
 pnpm build:win
 pnpm build:mac
 pnpm build:linux
@@ -95,7 +106,9 @@ pnpm build:linux
 Releases are published to GitHub Releases. Create a version tag:
 
 ```bash
+cd apps/desktop
 pnpm version patch
+cd ../..
 git push origin main --follow-tags
 ```
 

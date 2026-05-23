@@ -23,7 +23,7 @@ win:
       description: Markdown document
       role: Editor
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
+  artifactName: mdxforge-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
@@ -54,7 +54,7 @@ mac:
     NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
 dmg:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: mdxforge-${version}.${ext}
 linux:
   target:
     - AppImage
@@ -64,7 +64,7 @@ linux:
   icon: build/icons
   category: Utility
 appImage:
-  artifactName: ${name}-${version}.${ext}
+  artifactName: mdxforge-${version}.${ext}
 npmRebuild: false
 publish:
   provider: github
