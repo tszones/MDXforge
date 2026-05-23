@@ -1,8 +1,10 @@
+import { useHotkeys } from '@tanstack/react-hotkeys'
 import { useEffect, useState } from 'react'
 import { MdxPreview } from './components/MdxPreview'
 import { SettingsPage } from './components/SettingsPage'
 import { WindowTitleBar } from './components/WindowTitleBar'
 import { applyAppFont, normalizeStoredFont } from './lib/font'
+import { appHotkeys } from './lib/hotkeys'
 import { applyLanguage, normalizeStoredLanguage } from './lib/language'
 import {
   applyFumadocsTheme,
@@ -121,23 +123,13 @@ function AppContent({
       setError(null)
       setViewMode('preview')
     })
-    const removeChangedListener = window.api.onMdxFileChanged((changedWorkspace) => {
-      setWorkspace(changedWorkspace)
-      setError(null)
-      setViewMode('preview')
-    })
     const removeErrorListener = window.api.onMdxFileOpenError((message) => {
-      setError(message)
-    })
-    const removeChangeErrorListener = window.api.onMdxFileChangeError((message) => {
       setError(message)
     })
 
     return () => {
       removeOpenedListener()
-      removeChangedListener()
       removeErrorListener()
-      removeChangeErrorListener()
     }
   }, [])
 
@@ -188,6 +180,55 @@ function AppContent({
       setLoading(false)
     }
   }
+
+  useHotkeys(
+    [
+      {
+        hotkey: appHotkeys.openFile,
+        callback: () => void openFile(),
+        options: {
+          enabled: !loading,
+          meta: {
+            name: 'Open MDX file',
+            description: 'Open a local MDX or Markdown file.'
+          }
+        }
+      },
+      {
+        hotkey: appHotkeys.openFolder,
+        callback: () => void openFolder(),
+        options: {
+          enabled: !loading,
+          meta: {
+            name: 'Open folder',
+            description: 'Open a folder workspace.'
+          }
+        }
+      },
+      {
+        hotkey: appHotkeys.openSettings,
+        callback: () => setViewMode((mode) => (mode === 'settings' ? 'preview' : 'settings')),
+        options: {
+          meta: {
+            name: 'Toggle settings',
+            description: 'Open or close the settings view.'
+          }
+        }
+      },
+      {
+        hotkey: appHotkeys.closeSettings,
+        callback: () => setViewMode('preview'),
+        options: {
+          enabled: viewMode === 'settings',
+          meta: {
+            name: 'Back to preview',
+            description: 'Close settings and return to the preview.'
+          }
+        }
+      }
+    ],
+    { ignoreInputs: true }
+  )
 
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-fd-background pt-10 text-fd-foreground">

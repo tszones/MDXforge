@@ -38,7 +38,24 @@ try {
     })
   )
   write('index.mdx', '---\ntitle: Home\ndescription: Welcome\nicon: Home\n---\n\n# Home\n')
-  write('guide.mdx', '---\ntitle: Guide\n---\n\n# Guide\n')
+  write(
+    'guide.mdx',
+    [
+      '---',
+      'title: Guide',
+      '---',
+      '',
+      '# Guide',
+      '',
+      'Continue with [Setup](./advanced/setup.mdx).',
+      '',
+      'Jump to [[api/reference|Reference API]].',
+      '',
+      'External links stay external: [Example](https://example.com).',
+      '',
+      'Images are not document links: ![Diagram](./assets/diagram.png).'
+    ].join('\n')
+  )
   write('draft.mdx', '---\ntitle: Draft\n---\n\n# Draft\n')
   write('localized.cn.mdx', '---\ntitle: Localized\n---\n\n# Localized\n')
   write('(essentials)/intro.mdx', '---\ntitle: Intro\n---\n\n# Intro\n')
@@ -64,7 +81,7 @@ try {
     })
   )
   write('api/index.mdx', '---\ntitle: API Home\n---\n\n# API\n')
-  write('api/reference.mdx', '---\ntitle: Reference\n---\n\n# Reference\n')
+  write('api/reference.mdx', '---\ntitle: Reference\n---\n\n# Reference\n\nBack to [[guide|Guide]].\n')
   write('api/hidden.mdx', '---\ntitle: Hidden\n---\n\n# Hidden\n')
 
   const folder = readMdxFolder(root)
@@ -101,6 +118,61 @@ try {
   )
   assert.equal(folder.files[0].description, 'Welcome')
   assert.equal(folder.files[0].icon, 'Home')
+
+  const guide = folder.files.find((file) => file.relativePath === 'guide.mdx')
+  assert.ok(guide)
+  assert.deepEqual(
+    guide.links.map((link) => ({
+      href: link.href,
+      label: link.label,
+      targetRelativePath: link.targetRelativePath
+    })),
+    [
+      {
+        href: './advanced/setup.mdx',
+        label: 'Setup',
+        targetRelativePath: 'advanced/setup.mdx'
+      },
+      {
+        href: 'api/reference',
+        label: 'Reference API',
+        targetRelativePath: 'api/reference.mdx'
+      }
+    ]
+  )
+
+  const reference = folder.files.find((file) => file.relativePath === 'api/reference.mdx')
+  assert.ok(reference)
+  assert.deepEqual(reference.backlinks, [
+    {
+      sourcePath: path.join(root, 'guide.mdx'),
+      sourceRelativePath: 'guide.mdx',
+      sourceDisplayPath: 'guide',
+      sourceTitle: 'Guide',
+      label: 'Reference API',
+      href: 'api/reference'
+    }
+  ])
+
+  const setup = folder.files.find((file) => file.relativePath === 'advanced/setup.mdx')
+  assert.ok(setup)
+  assert.deepEqual(
+    setup.backlinks.map((backlink) => ({
+      sourceRelativePath: backlink.sourceRelativePath,
+      label: backlink.label,
+      href: backlink.href
+    })),
+    [{ sourceRelativePath: 'guide.mdx', label: 'Setup', href: './advanced/setup.mdx' }]
+  )
+
+  assert.deepEqual(
+    guide.backlinks.map((backlink) => ({
+      sourceRelativePath: backlink.sourceRelativePath,
+      label: backlink.label,
+      href: backlink.href
+    })),
+    [{ sourceRelativePath: 'api/reference.mdx', label: 'Guide', href: 'guide' }]
+  )
   assert.equal(
     folder.files.find((file) => file.relativePath === 'draft.mdx'),
     undefined

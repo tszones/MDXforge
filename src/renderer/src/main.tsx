@@ -4,6 +4,7 @@ import '@fontsource/bricolage-grotesque/latin-600.css'
 import '@fontsource/bricolage-grotesque/latin-700.css'
 import './assets/main.css'
 
+import { HotkeysProvider } from '@tanstack/react-hotkeys'
 import { RootProvider } from 'fumadocs-ui/provider/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -13,9 +14,21 @@ import App from './App'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <HashRouter>
-      <RootProvider search={{ enabled: false }}>
-        <App />
-      </RootProvider>
+      <HotkeysProvider
+        defaultOptions={{
+          hotkey: {
+            conflictBehavior: 'warn',
+            eventType: 'keydown',
+            preventDefault: true,
+            requireReset: true,
+            stopPropagation: true
+          }
+        }}
+      >
+        <RootProvider search={{ enabled: false }}>
+          <App />
+        </RootProvider>
+      </HotkeysProvider>
     </HashRouter>
   </StrictMode>
 )

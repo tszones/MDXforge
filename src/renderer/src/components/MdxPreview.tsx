@@ -1,3 +1,4 @@
+import { useHotkey } from '@tanstack/react-hotkeys'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import {
   SidebarFolder,
@@ -17,8 +18,9 @@ import {
   Search,
   X
 } from 'lucide-react'
-import { Component, useEffect, useMemo, useState } from 'react'
+import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
+import { appHotkeys } from '../lib/hotkeys'
 import { m } from '../paraglide/messages'
 import type { MdxFolderEntry, MdxFolderTreeNode, MdxWorkspace } from '../types'
 import { MdxDocsLayout, MdxPageContainer } from './MdxDocsLayout'
@@ -196,6 +198,7 @@ function PreviewSidebar({
 }): React.JSX.Element {
   const file = workspace.file
   const [query, setQuery] = useState('')
+  const searchInputRef = useRef<HTMLInputElement>(null)
   const tree = useMemo(
     () => buildFileTree(workspace.folder?.files ?? [], workspace.folder?.tree),
     [workspace.folder]
@@ -205,6 +208,23 @@ function PreviewSidebar({
     [workspace.folder?.files, query]
   )
   const searching = query.trim().length > 0
+
+  useHotkey(
+    appHotkeys.focusWorkspaceSearch,
+    () => {
+      onExpandSidebar?.()
+      searchInputRef.current?.focus()
+      searchInputRef.current?.select()
+    },
+    {
+      enabled: Boolean(workspace.folder),
+      ignoreInputs: true,
+      meta: {
+        name: 'Search workspace',
+        description: 'Focus the folder workspace search input.'
+      }
+    }
+  )
 
   return (
     <div className="h-full min-h-0 bg-fd-card text-sm">
@@ -239,6 +259,7 @@ function PreviewSidebar({
             <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground focus-within:border-fd-primary/50 focus-within:text-fd-foreground">
               <Search className="size-4 shrink-0" />
               <input
+                ref={searchInputRef}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={m.preview_search_placeholder()}

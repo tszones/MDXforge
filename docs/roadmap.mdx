@@ -2,6 +2,18 @@
 
 MDXForge is an AI-native MDX docs workspace. The long-term goal is not just previewing MDX, but creating a controlled document protocol that AI can write safely and users can extend.
 
+## Product Boundary
+
+MDXForge is focused on one vertical: AI documentation workflows.
+
+The core path is:
+
+```txt
+AI generates structured MDX / Markdown -> MDXForge previews it locally -> humans read, review, and share it
+```
+
+This project should not expand into a general Markdown editor, note-taking app, cloud collaboration suite, or full documentation framework. Feature decisions should serve the AI-generated local document workflow first.
+
 ## Current Focus
 
 ### Phase 1: Local MDX Preview
@@ -19,6 +31,69 @@ MDXForge is an AI-native MDX docs workspace. The long-term goal is not just prev
 - Switch between files.
 - Preserve current selected file.
 - Resolve relative assets from the opened folder.
+
+## Near-term Feature Backlog
+
+These features should be evaluated after the basic local file and folder preview flows are stable. The priority order favors improvements that make MDXForge a better documentation workspace without turning it into a general-purpose editor.
+
+### P0: Workspace Search
+
+Search should come first because it directly improves the folder workspace reading flow and does not require mutating local files.
+
+Scope:
+
+- Search documents by file name and relative path.
+- Search frontmatter `title`.
+- Optionally search frontmatter `description`.
+- Keep full-text search as a later step after title/path search feels reliable.
+
+Acceptance direction:
+
+- The sidebar exposes a compact search input when a folder workspace is open.
+- Matching results keep enough tree context for users to understand where a document lives.
+- Keyboard navigation should allow users to move through results and open the selected document.
+
+### P1: Inline File Rename
+
+Renaming files is useful once users treat MDXForge as a workspace instead of a pure viewer. It should come after search because it changes the local filesystem and needs stronger edge-case handling.
+
+Scope:
+
+- Double-click a document item in the sidebar to enter rename mode.
+- Rename `.mdx` and `.md` files in the current workspace.
+- Refresh the page tree after rename.
+- Preserve the current document selection when the renamed file is the active file.
+
+Safety requirements:
+
+- Prevent empty names, path traversal, and unsupported extensions.
+- Confirm or block overwriting an existing file.
+- Show a clear error when the rename fails due to permissions or filesystem conflicts.
+- Use Node `path` APIs and Electron IPC so behavior stays cross-platform.
+
+### P2: Built-in Terminal for AI-assisted Writing
+
+The built-in terminal is powerful but should be treated as a later feature because it expands the product from reading and navigation into local command execution.
+
+Goal:
+
+- Let users open an integrated terminal inside the current workspace.
+- Provide keyboard shortcuts to toggle and focus the terminal.
+- Support CLI-based writing tools such as Codex, Claude Code, Cloud Code, or other local assistants installed by the user.
+
+Constraints:
+
+- The terminal should start in the opened folder workspace, not an arbitrary system path.
+- MDXForge should not bundle cloud credentials or vendor-specific AI services by default.
+- Commands run locally under the user's environment.
+- The UI should make the active working directory visible.
+- Terminal state should not block the core document preview flow.
+
+Open questions:
+
+- Whether the terminal should be hidden behind an experimental setting for the first version.
+- Whether single-file mode should offer a terminal rooted at the file's parent folder.
+- Which shortcuts should be reserved across Windows, macOS, and Linux.
 
 ## Long-term Plan: Plugin System
 

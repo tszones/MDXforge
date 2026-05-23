@@ -113,9 +113,7 @@ export interface AppAPI {
   quitAndInstallUpdate: () => Promise<void>
   onUpdateState: (callback: (state: UpdateState) => void) => () => void
   onMdxFileOpened: (callback: (workspace: MdxWorkspace) => void) => () => void
-  onMdxFileChanged: (callback: (workspace: MdxWorkspace) => void) => () => void
   onMdxFileOpenError: (callback: (message: string) => void) => () => void
-  onMdxFileChangeError: (callback: (message: string) => void) => () => void
 }
 
 declare global {
