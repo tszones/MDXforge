@@ -54,6 +54,10 @@
     "remark-math": "^6.0.0",
     "tailwindcss": "^4.3.0",
     "twoslash": "^0.3.8",
+    "@typescript/vfs": "^1.6.4",
+    "debug": "^4.4.3",
+    "ms": "^2.1.3",
+    "twoslash-protocol": "0.3.8",
     "typescript": "^5.9.3"
   },
   "devDependencies": {
