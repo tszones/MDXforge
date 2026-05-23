@@ -4,11 +4,13 @@ import appIcon from '../../../../resources/icon.png'
 import { m } from '../paraglide/messages'
 
 export function WindowTitleBar({
-  viewMode,
-  onViewModeChange
+  inSettings,
+  onBackToPreview,
+  onOpenSettings
 }: {
-  viewMode: 'preview' | 'settings'
-  onViewModeChange: (viewMode: 'preview' | 'settings') => void
+  inSettings: boolean
+  onBackToPreview: () => void
+  onOpenSettings: () => void
 }): React.JSX.Element {
   const [maximized, setMaximized] = useState(false)
 
@@ -28,14 +30,10 @@ export function WindowTitleBar({
       </div>
       <div className="flex h-full [-webkit-app-region:no-drag]">
         <TitleBarButton
-          label={viewMode === 'settings' ? m.title_bar_back_to_preview() : m.title_bar_settings()}
-          onClick={() => onViewModeChange(viewMode === 'settings' ? 'preview' : 'settings')}
+          label={inSettings ? m.title_bar_back_to_preview() : m.title_bar_settings()}
+          onClick={inSettings ? onBackToPreview : onOpenSettings}
         >
-          {viewMode === 'settings' ? (
-            <ArrowLeft className="size-4" />
-          ) : (
-            <Settings className="size-4" />
-          )}
+          {inSettings ? <ArrowLeft className="size-4" /> : <Settings className="size-4" />}
         </TitleBarButton>
         <TitleBarButton
           label={m.title_bar_minimize()}

@@ -1,7 +1,8 @@
 import { useHotkeys } from '@tanstack/react-hotkeys'
 import { useEffect, useState } from 'react'
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { MdxPreview } from './components/MdxPreview'
-import { SettingsPage } from './components/SettingsPage'
+import { SettingsPage, type SettingsRoute } from './components/SettingsPage'
 import { WindowTitleBar } from './components/WindowTitleBar'
 import { applyAppFont, normalizeStoredFont } from './lib/font'
 import { appHotkeys } from './lib/hotkeys'
@@ -14,8 +15,6 @@ import {
 } from './lib/theme'
 import { m } from './paraglide/messages'
 import type { AppFontName, AppLanguage, MdxWorkspace } from './types'
-
-type ViewMode = 'preview' | 'settings'
 
 function App(): React.JSX.Element {
   const [theme, setThemeState] = useState<FumadocsThemeName>('purple')
@@ -110,10 +109,13 @@ function AppContent({
   onLanguageChange: (language: AppLanguage) => void
   onFontChange: (font: AppFontName) => void
 }): React.JSX.Element {
+  const location = useLocation()
+  const navigate = useNavigate()
   const [workspace, setWorkspace] = useState<MdxWorkspace | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
-  const [viewMode, setViewMode] = useState<ViewMode>('preview')
+  const inSettingsRoute =
+    location.pathname === '/settings' || location.pathname.startsWith('/settings/')
 
   useEffect(() => {
     void window.api.registerDefaultMdxApp()
@@ -121,7 +123,7 @@ function AppContent({
     const removeOpenedListener = window.api.onMdxFileOpened((openedWorkspace) => {
       setWorkspace(openedWorkspace)
       setError(null)
-      setViewMode('preview')
+      navigate('/', { replace: true })
     })
     const removeErrorListener = window.api.onMdxFileOpenError((message) => {
       setError(message)
@@ -131,7 +133,7 @@ function AppContent({
       removeOpenedListener()
       removeErrorListener()
     }
-  }, [])
+  }, [navigate])
 
   async function openFile(): Promise<void> {
     setLoading(true)
@@ -141,7 +143,7 @@ function AppContent({
       const result = await window.api.openMdxFile()
       if (result) {
         setWorkspace(result)
-        setViewMode('preview')
+        navigate('/')
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
@@ -158,7 +160,7 @@ function AppContent({
       const result = await window.api.openMdxFolder()
       if (result) {
         setWorkspace(result)
-        setViewMode('preview')
+        navigate('/')
       }
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
@@ -173,7 +175,7 @@ function AppContent({
 
     try {
       setWorkspace(await window.api.openMdxPath(filePath, workspaceRoot))
-      setViewMode('preview')
+      navigate('/')
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
     } finally {
@@ -207,7 +209,7 @@ function AppContent({
       },
       {
         hotkey: appHotkeys.openSettings,
-        callback: () => setViewMode((mode) => (mode === 'settings' ? 'preview' : 'settings')),
+        callback: () => navigate(inSettingsRoute ? '/' : '/settings/language'),
         options: {
           meta: {
             name: 'Toggle settings',
@@ -217,9 +219,9 @@ function AppContent({
       },
       {
         hotkey: appHotkeys.closeSettings,
-        callback: () => setViewMode('preview'),
+        callback: () => navigate('/'),
         options: {
-          enabled: viewMode === 'settings',
+          enabled: inSettingsRoute,
           meta: {
             name: 'Back to preview',
             description: 'Close settings and return to the preview.'
@@ -230,86 +232,104 @@ function AppContent({
     { ignoreInputs: true }
   )
 
-  return (
-    <main className="flex h-screen flex-col overflow-hidden bg-fd-background pt-10 text-fd-foreground">
-      <WindowTitleBar viewMode={viewMode} onViewModeChange={setViewMode} />
-      {viewMode === 'settings' ? (
-        <SettingsPage
-          theme={theme}
-          mode={colorMode}
-          language={language}
-          font={font}
-          onThemeChange={onThemeChange}
-          onModeChange={onColorModeChange}
-          onLanguageChange={onLanguageChange}
-          onFontChange={onFontChange}
-          onBack={() => setViewMode('preview')}
+  function renderSettingsRoute(route: SettingsRoute): React.JSX.Element {
+    return (
+      <SettingsPage
+        page={route}
+        theme={theme}
+        mode={colorMode}
+        language={language}
+        font={font}
+        onThemeChange={onThemeChange}
+        onModeChange={onColorModeChange}
+        onLanguageChange={onLanguageChange}
+        onFontChange={onFontChange}
+        onBack={() => navigate('/')}
+      />
+    )
+  }
+
+  const previewRoute = (
+    <>
+      {workspace ? null : (
+        <header className="flex shrink-0 items-center gap-3 border-b bg-fd-background/95 px-4 py-3 backdrop-blur">
+          <button
+            type="button"
+            onClick={openFile}
+            disabled={loading}
+            className="rounded-md bg-fd-primary px-3 py-2 text-sm font-medium text-fd-primary-foreground disabled:opacity-60"
+          >
+            {loading ? m.actions_opening() : m.actions_open_mdx_file()}
+          </button>
+          <button
+            type="button"
+            onClick={openFolder}
+            disabled={loading}
+            className="rounded-md border px-3 py-2 text-sm font-medium disabled:opacity-60"
+          >
+            {m.actions_open_folder()}
+          </button>
+        </header>
+      )}
+
+      {error ? (
+        <pre className="m-4 shrink-0 overflow-auto rounded-md border bg-fd-error/10 p-4 text-sm text-fd-error">
+          {error}
+        </pre>
+      ) : null}
+
+      {workspace ? (
+        <MdxPreview
+          workspace={workspace}
+          onOpenFile={openFile}
+          onOpenFolder={openFolder}
+          onOpenPath={openPath}
+          opening={loading}
         />
       ) : (
-        <>
-          {workspace ? null : (
-            <header className="flex shrink-0 items-center gap-3 border-b bg-fd-background/95 px-4 py-3 backdrop-blur">
+        <section className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-8 text-center">
+          <div>
+            <h1 className="mb-2 text-3xl font-semibold">MDXForge</h1>
+            <p className="mb-6 text-fd-muted-foreground">{m.home_description()}</p>
+            <div className="flex justify-center gap-3">
               <button
                 type="button"
                 onClick={openFile}
                 disabled={loading}
-                className="rounded-md bg-fd-primary px-3 py-2 text-sm font-medium text-fd-primary-foreground disabled:opacity-60"
+                className="rounded-md bg-fd-primary px-4 py-2 font-medium text-fd-primary-foreground disabled:opacity-60"
               >
-                {loading ? m.actions_opening() : m.actions_open_mdx_file()}
+                {m.actions_select_file()}
               </button>
               <button
                 type="button"
                 onClick={openFolder}
                 disabled={loading}
-                className="rounded-md border px-3 py-2 text-sm font-medium disabled:opacity-60"
+                className="rounded-md border px-4 py-2 font-medium disabled:opacity-60"
               >
-                {m.actions_open_folder()}
+                {m.actions_select_folder()}
               </button>
-            </header>
-          )}
-
-          {error ? (
-            <pre className="m-4 shrink-0 overflow-auto rounded-md border bg-fd-error/10 p-4 text-sm text-fd-error">
-              {error}
-            </pre>
-          ) : null}
-
-          {workspace ? (
-            <MdxPreview
-              workspace={workspace}
-              onOpenFile={openFile}
-              onOpenFolder={openFolder}
-              onOpenPath={openPath}
-              opening={loading}
-            />
-          ) : (
-            <section className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-8 text-center">
-              <div>
-                <h1 className="mb-2 text-3xl font-semibold">MDXForge</h1>
-                <p className="mb-6 text-fd-muted-foreground">{m.home_description()}</p>
-                <div className="flex justify-center gap-3">
-                  <button
-                    type="button"
-                    onClick={openFile}
-                    disabled={loading}
-                    className="rounded-md bg-fd-primary px-4 py-2 font-medium text-fd-primary-foreground disabled:opacity-60"
-                  >
-                    {m.actions_select_file()}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={openFolder}
-                    disabled={loading}
-                    className="rounded-md border px-4 py-2 font-medium disabled:opacity-60"
-                  >
-                    {m.actions_select_folder()}
-                  </button>
-                </div>
-              </div>
-            </section>
-          )}
-        </>
+            </div>
+          </div>
+        </section>
       )}
+    </>
+  )
+
+  return (
+    <main className="flex h-screen flex-col overflow-hidden bg-fd-background pt-10 text-fd-foreground">
+      <WindowTitleBar
+        inSettings={inSettingsRoute}
+        onBackToPreview={() => navigate('/')}
+        onOpenSettings={() => navigate('/settings/language')}
+      />
+      <Routes>
+        <Route path="/settings" element={<Navigate to="/settings/language" replace />} />
+        <Route path="/settings/language" element={renderSettingsRoute('language')} />
+        <Route path="/settings/appearance" element={renderSettingsRoute('appearance')} />
+        <Route path="/settings/updates" element={renderSettingsRoute('updates')} />
+        <Route path="/settings/*" element={<Navigate to="/settings/language" replace />} />
+        <Route path="*" element={previewRoute} />
+      </Routes>
     </main>
   )
 }

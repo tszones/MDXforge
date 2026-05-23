@@ -1,4 +1,5 @@
 import { ArrowLeft, Check, Languages, Moon, Palette, Settings, Sun, Type } from 'lucide-react'
+import { NavLink } from 'react-router'
 import { APP_FONT_OPTIONS, type AppFontName } from '../lib/font'
 import { type ColorMode, FUMADOCS_THEMES, type FumadocsThemeName } from '../lib/theme'
 import { m } from '../paraglide/messages'
@@ -34,6 +35,7 @@ const THEME_META: Record<FumadocsThemeName, { colors: [string, string, string, s
 }
 
 interface SettingsPageProps {
+  page: SettingsRoute
   theme: FumadocsThemeName
   mode: ColorMode
   language: AppLanguage
@@ -45,7 +47,10 @@ interface SettingsPageProps {
   onBack: () => void
 }
 
+export type SettingsRoute = 'language' | 'appearance' | 'updates'
+
 export function SettingsPage({
+  page,
   theme,
   mode,
   language,
@@ -56,6 +61,9 @@ export function SettingsPage({
   onFontChange,
   onBack
 }: SettingsPageProps): React.JSX.Element {
+  const pageTitle = settingsPageTitle(page)
+  const pageDescription = settingsPageDescription(page)
+
   return (
     <section className="flex min-h-0 flex-1 overflow-auto bg-fd-background p-6 text-fd-foreground">
       <div className="mx-auto grid w-full max-w-6xl gap-6 lg:grid-cols-[220px_1fr]">
@@ -69,129 +77,184 @@ export function SettingsPage({
             {m.settings_back_home()}
           </button>
           <nav className="grid gap-1 rounded-xl border bg-fd-card p-2 text-sm">
-            <a
-              href="#language"
-              className="rounded-lg px-3 py-2 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground"
-            >
-              {m.settings_language_tab()}
-            </a>
-            <a
-              href="#appearance"
-              className="rounded-lg px-3 py-2 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground"
-            >
+            <SettingsNavLink to="/settings/language">{m.settings_language_tab()}</SettingsNavLink>
+            <SettingsNavLink to="/settings/appearance">
               {m.settings_appearance_tab()}
-            </a>
-            <a
-              href="#updates"
-              className="rounded-lg px-3 py-2 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground"
-            >
-              {m.settings_updates_title()}
-            </a>
+            </SettingsNavLink>
+            <SettingsNavLink to="/settings/updates">{m.settings_updates_title()}</SettingsNavLink>
           </nav>
         </aside>
 
-        <div className="flex min-w-0 flex-col gap-8">
+        <div className="flex min-w-0 flex-col gap-6">
           <header className="border-b pb-6">
             <div className="inline-flex items-center gap-2 text-sm font-medium text-fd-muted-foreground">
               <Settings className="size-4" />
               {m.settings_label()}
             </div>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight">{m.settings_title()}</h1>
-            <p className="mt-2 max-w-2xl text-fd-muted-foreground">{m.settings_description()}</p>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight">{pageTitle}</h1>
+            <p className="mt-2 max-w-2xl text-fd-muted-foreground">{pageDescription}</p>
           </header>
 
-          <section
-            id="language"
-            className="grid scroll-mt-6 gap-3 rounded-xl border bg-fd-card p-4"
-          >
-            <div>
-              <div className="flex items-center gap-2 font-medium">
-                <Languages className="size-4" />
-                {m.settings_language()}
-              </div>
-              <p className="mt-1 text-sm text-fd-muted-foreground">
-                {m.settings_language_description()}
-              </p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {APP_LANGUAGE_OPTIONS.map((item) => (
-                <OptionButton
-                  key={item}
-                  active={language === item}
-                  onClick={() => onLanguageChange(item)}
-                >
-                  {languageLabel(item)}
-                </OptionButton>
-              ))}
-            </div>
-          </section>
-
-          <section id="appearance" className="grid scroll-mt-6 gap-6">
-            <div className="grid gap-3 rounded-xl border bg-fd-card p-4">
-              <div className="flex items-center gap-2 font-medium">
-                <Sun className="size-4" />
-                {m.settings_color_mode()}
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <OptionButton active={mode === 'light'} onClick={() => onModeChange('light')}>
-                  <Sun className="size-4" />
-                  {m.settings_light()}
-                </OptionButton>
-                <OptionButton active={mode === 'dark'} onClick={() => onModeChange('dark')}>
-                  <Moon className="size-4" />
-                  {m.settings_dark()}
-                </OptionButton>
-              </div>
-            </div>
-
-            <section className="grid gap-4 rounded-xl border bg-fd-card p-4">
-              <div>
-                <div className="flex items-center gap-2 font-medium">
-                  <Type className="size-4" />
-                  {m.settings_font()}
-                </div>
-                <p className="mt-1 text-sm text-fd-muted-foreground">
-                  {m.settings_font_description()}
-                </p>
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2">
-                {APP_FONT_OPTIONS.map((item) => (
-                  <FontCard
-                    key={item}
-                    name={item}
-                    active={font === item}
-                    onClick={() => onFontChange(item)}
-                  />
-                ))}
-              </div>
-            </section>
-
-            <section className="grid gap-4">
-              <div className="flex items-center gap-2 font-medium">
-                <Palette className="size-4" />
-                {m.settings_fumadocs_theme()}
-              </div>
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                {FUMADOCS_THEMES.map((item) => (
-                  <ThemeCard
-                    key={item}
-                    name={item}
-                    active={item === theme}
-                    mode={mode}
-                    onClick={() => onThemeChange(item)}
-                  />
-                ))}
-              </div>
-            </section>
-          </section>
-
-          <section id="updates" className="scroll-mt-6">
-            <UpdateSettingsCard />
-          </section>
+          {page === 'language' ? (
+            <LanguageSettingsPage language={language} onLanguageChange={onLanguageChange} />
+          ) : null}
+          {page === 'appearance' ? (
+            <AppearanceSettingsPage
+              theme={theme}
+              mode={mode}
+              font={font}
+              onThemeChange={onThemeChange}
+              onModeChange={onModeChange}
+              onFontChange={onFontChange}
+            />
+          ) : null}
+          {page === 'updates' ? <UpdateSettingsCard /> : null}
         </div>
       </div>
     </section>
   )
+}
+
+function SettingsNavLink({
+  to,
+  children
+}: {
+  to: string
+  children: React.ReactNode
+}): React.JSX.Element {
+  return (
+    <NavLink
+      to={to}
+      className={({ isActive }) =>
+        [
+          'rounded-lg px-3 py-2 transition-colors',
+          isActive
+            ? 'bg-fd-primary/10 text-fd-primary'
+            : 'text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground'
+        ].join(' ')
+      }
+    >
+      {children}
+    </NavLink>
+  )
+}
+
+function LanguageSettingsPage({
+  language,
+  onLanguageChange
+}: {
+  language: AppLanguage
+  onLanguageChange: (language: AppLanguage) => void
+}): React.JSX.Element {
+  return (
+    <section className="grid gap-3 rounded-xl border bg-fd-card p-4">
+      <div>
+        <div className="flex items-center gap-2 font-medium">
+          <Languages className="size-4" />
+          {m.settings_language()}
+        </div>
+        <p className="mt-1 text-sm text-fd-muted-foreground">{m.settings_language_description()}</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {APP_LANGUAGE_OPTIONS.map((item) => (
+          <OptionButton
+            key={item}
+            active={language === item}
+            onClick={() => onLanguageChange(item)}
+          >
+            {languageLabel(item)}
+          </OptionButton>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+function AppearanceSettingsPage({
+  theme,
+  mode,
+  font,
+  onThemeChange,
+  onModeChange,
+  onFontChange
+}: {
+  theme: FumadocsThemeName
+  mode: ColorMode
+  font: AppFontName
+  onThemeChange: (theme: FumadocsThemeName) => void
+  onModeChange: (mode: ColorMode) => void
+  onFontChange: (font: AppFontName) => void
+}): React.JSX.Element {
+  return (
+    <section className="grid gap-6">
+      <div className="grid gap-3 rounded-xl border bg-fd-card p-4">
+        <div className="flex items-center gap-2 font-medium">
+          <Sun className="size-4" />
+          {m.settings_color_mode()}
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <OptionButton active={mode === 'light'} onClick={() => onModeChange('light')}>
+            <Sun className="size-4" />
+            {m.settings_light()}
+          </OptionButton>
+          <OptionButton active={mode === 'dark'} onClick={() => onModeChange('dark')}>
+            <Moon className="size-4" />
+            {m.settings_dark()}
+          </OptionButton>
+        </div>
+      </div>
+
+      <section className="grid gap-4 rounded-xl border bg-fd-card p-4">
+        <div>
+          <div className="flex items-center gap-2 font-medium">
+            <Type className="size-4" />
+            {m.settings_font()}
+          </div>
+          <p className="mt-1 text-sm text-fd-muted-foreground">{m.settings_font_description()}</p>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {APP_FONT_OPTIONS.map((item) => (
+            <FontCard
+              key={item}
+              name={item}
+              active={font === item}
+              onClick={() => onFontChange(item)}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section className="grid gap-4">
+        <div className="flex items-center gap-2 font-medium">
+          <Palette className="size-4" />
+          {m.settings_fumadocs_theme()}
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {FUMADOCS_THEMES.map((item) => (
+            <ThemeCard
+              key={item}
+              name={item}
+              active={item === theme}
+              mode={mode}
+              onClick={() => onThemeChange(item)}
+            />
+          ))}
+        </div>
+      </section>
+    </section>
+  )
+}
+
+function settingsPageTitle(page: SettingsRoute): string {
+  if (page === 'language') return m.settings_language_tab()
+  if (page === 'appearance') return m.settings_appearance_title()
+  return m.settings_updates_title()
+}
+
+function settingsPageDescription(page: SettingsRoute): string {
+  if (page === 'language') return m.settings_language_description()
+  if (page === 'appearance') return m.settings_appearance_description()
+  return m.settings_updates_description()
 }
 
 function OptionButton({
