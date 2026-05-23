@@ -4,6 +4,10 @@ const matter = require('gray-matter')
 const React = require('react')
 const { renderToStaticMarkup } = require('react-dom/server')
 const runtime = require('react/jsx-runtime')
+const { createJiti } = require('jiti')
+
+const jiti = createJiti(__filename)
+const { LOCAL_IMAGE_SCHEME, remarkLocalImages } = jiti('../src/main/local-images.ts')
 
 async function main() {
   const { compile } = await import('@mdx-js/mdx')
@@ -164,7 +168,18 @@ async function main() {
         await compile(parsed.content, {
           outputFormat: 'function-body',
           development: false,
-          remarkPlugins: [remarkMdxMermaid, remarkGfm, remarkMath],
+          remarkPlugins: [
+            [
+              remarkLocalImages,
+              {
+                documentPath: fullPath,
+                workspaceRoot: dir
+              }
+            ],
+            remarkMdxMermaid,
+            remarkGfm,
+            remarkMath
+          ],
           rehypePlugins: [
             rehypeKatex,
             [
@@ -187,7 +202,10 @@ async function main() {
       if (expectError) {
         console.error(`FAIL ${file}: expected error but rendered ${html.length} chars`)
         failed++
-      } else if (mustContain && !html.includes(mustContain)) {
+      } else if (
+        mustContain &&
+        !html.includes(mustContain.replace('{LOCAL_IMAGE_SCHEME}', LOCAL_IMAGE_SCHEME))
+      ) {
         console.error(`FAIL ${file}: rendered output does not contain ${mustContain}`)
         failed++
       } else {

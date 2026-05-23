@@ -4,6 +4,7 @@ import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from '
 import matter from 'gray-matter'
 import { dirname, extname, join, resolve } from 'path'
 import { mainMessage } from './i18n'
+import { remarkLocalImages } from './local-images'
 import { getMDXForgeRehypePlugins, getMDXForgeRemarkPlugins } from './mdx-options'
 import {
   type MdxFolder,
@@ -105,8 +106,11 @@ export async function readMdxWorkspace(
   workspaceRoot?: string
 ): Promise<MdxWorkspace> {
   const resolvedPath = resolve(inputPath)
-  const file = await readMdxFile(resolvedPath)
-  const folderRoot = getWorkspaceRoot(resolvedPath, file.path, workspaceRoot)
+  const filePath = resolveMdxTarget(resolvedPath)
+  if (!filePath) throw new Error(mainMessage('error_no_mdx_found', { filePath: inputPath }))
+
+  const folderRoot = getWorkspaceRoot(resolvedPath, filePath, workspaceRoot)
+  const file = await readMdxFile(filePath, folderRoot ?? undefined)
 
   return {
     file,
@@ -127,7 +131,7 @@ function setLastOpenFolder(folderPath: string): void {
   }
 }
 
-export async function readMdxFile(filePath: string): Promise<MdxFile> {
+export async function readMdxFile(filePath: string, workspaceRoot?: string): Promise<MdxFile> {
   const resolvedPath = resolveMdxTarget(filePath)
   if (!resolvedPath) throw new Error(mainMessage('error_no_mdx_found', { filePath }))
 
@@ -154,7 +158,10 @@ export async function readMdxFile(filePath: string): Promise<MdxFile> {
       name: resolvedPath.split(/[\\/]/).pop() ?? resolvedPath,
       frontmatter: parsed.data,
       content: parsed.content,
-      compiledSource: await compileMdxSource(parsed.content),
+      compiledSource: await compileMdxSource(parsed.content, {
+        documentPath: resolvedPath,
+        workspaceRoot
+      }),
       raw
     }
   } catch (cause) {
@@ -175,12 +182,15 @@ function formatMdxError(cause: unknown): string {
   return mainMessage('error_mdx_compile', { message })
 }
 
-async function compileMdxSource(source: string): Promise<string> {
+async function compileMdxSource(
+  source: string,
+  localImageContext: { documentPath: string; workspaceRoot?: string }
+): Promise<string> {
   return String(
     await compile(source, {
       outputFormat: 'function-body',
       development: false,
-      remarkPlugins: getMDXForgeRemarkPlugins(),
+      remarkPlugins: [[remarkLocalImages, localImageContext], ...getMDXForgeRemarkPlugins()],
       rehypePlugins: getMDXForgeRehypePlugins()
     })
   )

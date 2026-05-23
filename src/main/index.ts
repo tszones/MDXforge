@@ -7,6 +7,7 @@ if (process.platform === 'win32') {
 }
 
 import icon from '../../resources/icon.png?asset'
+import { registerLocalImageProtocol, registerLocalImageScheme } from './local-image-protocol'
 import {
   getLastOpenFile,
   openMdxFile,
@@ -26,6 +27,8 @@ import {
 import { checkForUpdatesOnStartup, registerUpdaterIpc } from './updater'
 
 let mainWindow: BrowserWindow | null = null
+
+registerLocalImageScheme()
 
 function getMdxPathFromArgv(argv: string[]): string | null {
   return (
@@ -110,6 +113,7 @@ app.whenReady().then(() => {
   })
 
   registerUpdaterIpc(() => mainWindow)
+  registerLocalImageProtocol()
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
