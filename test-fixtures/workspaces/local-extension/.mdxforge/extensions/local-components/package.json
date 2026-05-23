@@ -1,0 +1,12 @@
+{
+  "name": "local-components",
+  "version": "0.0.0",
+  "private": true,
+  "mdxforge": {
+    "schema": 1,
+    "type": "component",
+    "entry": "./bundle/extension.js",
+    "styles": ["./bundle/style.css"],
+    "rules": ["./rules.mdx"]
+  }
+}

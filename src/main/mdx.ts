@@ -3,6 +3,7 @@ import { app, dialog } from 'electron'
 import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'fs'
 import matter from 'gray-matter'
 import { dirname, extname, isAbsolute, join, relative, resolve } from 'path'
+import { readWorkspaceExtensionManifest, type WorkspaceExtensionManifest } from './extensions'
 import { mainMessage } from './i18n'
 import { remarkLocalImages } from './local-images'
 import { getMDXForgeRehypePlugins, getMDXForgeRemarkPlugins } from './mdx-options'
@@ -67,6 +68,7 @@ export type { MdxFolder, MdxFolderEntry, MdxFolderTreeNode }
 export interface MdxWorkspace {
   file: MdxFile
   folder?: MdxFolder
+  extensions?: WorkspaceExtensionManifest
 }
 
 export async function openMdxFile(): Promise<MdxWorkspace | null> {
@@ -116,7 +118,8 @@ export async function readMdxWorkspace(
 
   return {
     file,
-    folder: folderRoot ? readMdxFolder(folderRoot) : undefined
+    folder: folderRoot ? readMdxFolder(folderRoot) : undefined,
+    extensions: folderRoot ? readWorkspaceExtensionManifest(folderRoot) : undefined
   }
 }
 
