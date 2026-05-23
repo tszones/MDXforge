@@ -20,7 +20,7 @@
   "settings_light": "Light",
   "settings_dark": "Dark",
   "settings_language": "Interface language",
-  "settings_language_description": "Switch the Docuforge application language. MDX document content is not translated.",
+  "settings_language_description": "Switch the MDXForge application language. MDX document content is not translated.",
   "settings_language_system": "System",
   "settings_language_chinese": "Simplified Chinese",
   "settings_language_english": "English",

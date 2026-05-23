@@ -1,23 +1,23 @@
 ---
-title: Docuforge MDX Skill
-description: Official AI writing skill for Docuforge-compatible MDX documents.
+title: MDXForge MDX Skill
+description: Official AI writing skill for MDXForge-compatible MDX documents.
 ---
 
-# Docuforge MDX Skill
+# MDXForge MDX Skill
 
-Use this skill when writing documentation for Docuforge.
+Use this skill when writing documentation for MDXForge.
 
-Docuforge documents should be written in MDX by default. MDX is preferred because it is easier to read than HTML, more expressive than plain Markdown, and constrained by a predictable component whitelist.
+MDXForge documents should be written in MDX by default. MDX is preferred because it is easier to read than HTML, more expressive than plain Markdown, and constrained by a predictable component whitelist.
 
 ## Output Contract
 
-When asked to write Docuforge documentation, output complete `.mdx` content.
+When asked to write MDXForge documentation, output complete `.mdx` content.
 
 Requirements:
 
 1. Include frontmatter.
 2. Use normal Markdown for most content.
-3. Use only supported Docuforge components.
+3. Use only supported MDXForge components.
 4. Do not use `import` or `export`.
 5. Do not define custom React components.
 6. Do not use arbitrary JavaScript expressions.
@@ -87,7 +87,7 @@ Rules:
 
 ## Official Supported Components
 
-These components are supported by Docuforge today.
+These components are supported by MDXForge today.
 
 ### Callout
 
@@ -168,7 +168,7 @@ Rules:
 
 ## Supported Base Elements
 
-Docuforge also supports customized rendering for normal Markdown elements:
+MDXForge also supports customized rendering for normal Markdown elements:
 
 - `a`
 - `img`

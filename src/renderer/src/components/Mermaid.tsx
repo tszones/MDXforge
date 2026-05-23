@@ -61,7 +61,7 @@ export function Mermaid({ chart }: { chart: string }): React.JSX.Element {
 
   if (state.status === 'error') {
     return (
-      <div data-docuforge-mermaid="">
+      <div data-mdxforge-mermaid="">
         <CodeBlock title="Mermaid">
           <Pre>{chart}</Pre>
         </CodeBlock>
@@ -71,13 +71,13 @@ export function Mermaid({ chart }: { chart: string }): React.JSX.Element {
   }
 
   if (state.status === 'loading') {
-    return <div data-docuforge-mermaid="" className="docuforge-mermaid" aria-busy="true" />
+    return <div data-mdxforge-mermaid="" className="mdxforge-mermaid" aria-busy="true" />
   }
 
   return (
     <div
-      data-docuforge-mermaid=""
-      className="docuforge-mermaid"
+      data-mdxforge-mermaid=""
+      className="mdxforge-mermaid"
       ref={(container) => {
         if (container) state.bindFunctions?.(container)
       }}
@@ -101,5 +101,5 @@ function createMermaidId(): string {
       ? crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(36).slice(2)}`
 
-  return `docuforge-mermaid-${randomValue}`
+  return `mdxforge-mermaid-${randomValue}`
 }

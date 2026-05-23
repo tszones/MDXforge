@@ -7,7 +7,7 @@ const { createJiti } = require('jiti')
 const jiti = createJiti(__filename)
 const { readMdxFolder } = jiti('../src/main/page-tree.ts')
 
-const root = fs.mkdtempSync(path.join(os.tmpdir(), 'docuforge-page-tree-'))
+const root = fs.mkdtempSync(path.join(os.tmpdir(), 'mdxforge-page-tree-'))
 
 function write(relativePath, content) {
   const filePath = path.join(root, relativePath)

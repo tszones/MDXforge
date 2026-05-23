@@ -1,5 +1,5 @@
-appId: com.docuforge.app
-productName: Docuforge
+appId: com.mdxforge.app
+productName: MDXForge
 directories:
   buildResources: build
 files:
@@ -12,7 +12,7 @@ files:
 asarUnpack:
   - resources/**
 win:
-  executableName: docuforge
+  executableName: mdxforge
   fileAssociations:
     - ext: mdx
       name: MDX Document
@@ -42,13 +42,14 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: docuforge
+  maintainer: mdxforge
+  icon: build/icons
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
   provider: generic
-  url: https://example.com/docuforge/auto-updates
+  url: https://example.com/mdxforge/auto-updates
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

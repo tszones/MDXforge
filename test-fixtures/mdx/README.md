@@ -1,6 +1,6 @@
-# Docuforge MDX Test Fixtures
+# MDXForge MDX Test Fixtures
 
-Use these files to manually verify Docuforge rendering behavior.
+Use these files to manually verify MDXForge rendering behavior.
 
 ## Positive Fixtures
 
@@ -18,7 +18,7 @@ Use these files to manually verify Docuforge rendering behavior.
 
 ## Manual Test Flow
 
-1. Run Docuforge.
+1. Run MDXForge.
 2. Open each positive fixture.
 3. Verify no crash.
 4. Verify component styling appears.

@@ -11,7 +11,7 @@ import rehypeKatex from 'rehype-katex'
 import remarkMath from 'remark-math'
 import type { Pluggable } from 'unified'
 
-export function getDocuforgeRehypeCodeOptions(): RehypeCodeOptions {
+export function getMDXForgeRehypeCodeOptions(): RehypeCodeOptions {
   return {
     ...rehypeCodeDefaultOptions,
     transformers: [...(rehypeCodeDefaultOptions.transformers ?? []), transformerTwoslash()],
@@ -19,18 +19,18 @@ export function getDocuforgeRehypeCodeOptions(): RehypeCodeOptions {
   }
 }
 
-export function getDocuforgeRemarkPlugins(): Pluggable[] {
+export function getMDXForgeRemarkPlugins(): Pluggable[] {
   return [remarkMdxMermaid, remarkMath, [remarkHeading, { generateToc: false }]]
 }
 
-export function getDocuforgeRehypePlugins(): Pluggable[] {
-  return [rehypeKatex, [rehypeCode, getDocuforgeRehypeCodeOptions()], rehypeToc]
+export function getMDXForgeRehypePlugins(): Pluggable[] {
+  return [rehypeKatex, [rehypeCode, getMDXForgeRehypeCodeOptions()], rehypeToc]
 }
 
-export function withDocuforgeRemarkPlugins(plugins: Pluggable[]): Pluggable[] {
+export function withMDXForgeRemarkPlugins(plugins: Pluggable[]): Pluggable[] {
   return [remarkMdxMermaid, remarkMath, ...plugins]
 }
 
-export function withDocuforgeRehypePlugins(plugins: Pluggable[]): Pluggable[] {
+export function withMDXForgeRehypePlugins(plugins: Pluggable[]): Pluggable[] {
   return [rehypeKatex, ...plugins]
 }

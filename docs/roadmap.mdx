@@ -1,6 +1,6 @@
-# Docuforge Roadmap
+# MDXForge Roadmap
 
-Docuforge is an AI-native MDX docs workspace. The long-term goal is not just previewing MDX, but creating a controlled document protocol that AI can write safely and users can extend.
+MDXForge is an AI-native MDX docs workspace. The long-term goal is not just previewing MDX, but creating a controlled document protocol that AI can write safely and users can extend.
 
 ## Current Focus
 
@@ -22,11 +22,11 @@ Docuforge is an AI-native MDX docs workspace. The long-term goal is not just pre
 
 ## Long-term Plan: Plugin System
 
-Docuforge should reserve a plugin system for user customization. This is not part of the immediate implementation, but the architecture should avoid blocking it.
+MDXForge should reserve a plugin system for user customization. This is not part of the immediate implementation, but the architecture should avoid blocking it.
 
 ### Why Plugins Matter
 
-AI-generated MDX must be both expressive and controlled. Different teams will need different document components, rules, themes, and transforms. A plugin system lets Docuforge stay small while allowing users to extend it for their own documentation workflows.
+AI-generated MDX must be both expressive and controlled. Different teams will need different document components, rules, themes, and transforms. A plugin system lets MDXForge stay small while allowing users to extend it for their own documentation workflows.
 
 ### Planned Extension Points
 
@@ -128,12 +128,12 @@ Do not write raw `<script>` tags.
 Do not use unknown diagram components.
 ```
 
-Docuforge can merge these rules into the active project authoring guide.
+MDXForge can merge these rules into the active project authoring guide.
 
 ## Possible Plugin Interface
 
 ```ts
-export interface DocuforgePlugin {
+export interface MDXForgePlugin {
   name: string
   components?: Record<string, React.ComponentType<any>>
   rules?: string
@@ -157,7 +157,7 @@ export default {
 }
 ```
 
-Docuforge should initially do only three things:
+MDXForge should initially do only three things:
 
 1. Load plugins.
 2. Merge component maps.
@@ -167,6 +167,6 @@ Docuforge should initially do only three things:
 
 Do not implement the full plugin system now. But current code should avoid hard-coding decisions that would make plugins difficult later.
 
-Docuforge should evolve toward:
+MDXForge should evolve toward:
 
 > AI-first MDX authoring + controlled component protocol + local renderer + extensible plugin system.

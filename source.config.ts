@@ -1,8 +1,8 @@
 import { defineConfig, defineDocs } from 'fumadocs-mdx/config'
 import {
-  getDocuforgeRehypeCodeOptions,
-  withDocuforgeRehypePlugins,
-  withDocuforgeRemarkPlugins
+  getMDXForgeRehypeCodeOptions,
+  withMDXForgeRehypePlugins,
+  withMDXForgeRemarkPlugins
 } from './src/main/mdx-options'
 
 export const docs = defineDocs({
@@ -11,8 +11,8 @@ export const docs = defineDocs({
 
 export default defineConfig({
   mdxOptions: {
-    remarkPlugins: withDocuforgeRemarkPlugins,
-    rehypePlugins: withDocuforgeRehypePlugins,
-    rehypeCodeOptions: getDocuforgeRehypeCodeOptions()
+    remarkPlugins: withMDXForgeRemarkPlugins,
+    rehypePlugins: withMDXForgeRehypePlugins,
+    rehypeCodeOptions: getMDXForgeRehypeCodeOptions()
   }
 })

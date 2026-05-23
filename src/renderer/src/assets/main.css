@@ -48,20 +48,20 @@ body {
   background: transparent;
 }
 
-.docuforge-mermaid {
+.mdxforge-mermaid {
   display: flex;
   min-height: 4rem;
   overflow-x: auto;
   padding-block: 0.75rem;
 }
 
-.docuforge-mermaid:empty {
+.mdxforge-mermaid:empty {
   border: 1px solid var(--color-fd-border);
   border-radius: 0.5rem;
   background: color-mix(in oklab, var(--color-fd-muted) 55%, transparent);
 }
 
-.docuforge-mermaid svg {
+.mdxforge-mermaid svg {
   max-width: 100%;
   height: auto;
   margin-inline: auto;

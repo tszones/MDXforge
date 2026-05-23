@@ -212,7 +212,7 @@ function AppContent({
           ) : (
             <section className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-8 text-center">
               <div>
-                <h1 className="mb-2 text-3xl font-semibold">Docuforge</h1>
+                <h1 className="mb-2 text-3xl font-semibold">MDXForge</h1>
                 <p className="mb-6 text-fd-muted-foreground">{m.home_description()}</p>
                 <div className="flex justify-center gap-3">
                   <button

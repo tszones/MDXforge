@@ -4,18 +4,18 @@ const { dirname, join, resolve } = require('node:path')
 const { spawn } = require('node:child_process')
 
 function getExePath() {
-  if (process.env.DOCUFORGE_APP_PATH) return process.env.DOCUFORGE_APP_PATH
+  if (process.env.MDXFORGE_APP_PATH) return process.env.MDXFORGE_APP_PATH
 
-  const localExe = join(__dirname, '..', 'dist', 'win-unpacked', 'docuforge.exe')
+  const localExe = join(__dirname, '..', 'dist', 'win-unpacked', 'mdxforge.exe')
   if (existsSync(localExe)) return localExe
 
   if (process.platform === 'win32') {
-    return join(process.env.LOCALAPPDATA || '', 'Programs', 'docuforge', 'docuforge.exe')
+    return join(process.env.LOCALAPPDATA || '', 'Programs', 'mdxforge', 'mdxforge.exe')
   }
 
-  if (process.platform === 'darwin') return '/Applications/Docuforge.app/Contents/MacOS/Docuforge'
+  if (process.platform === 'darwin') return '/Applications/MDXForge.app/Contents/MacOS/MDXForge'
 
-  return 'docuforge'
+  return 'mdxforge'
 }
 
 const target = process.argv[2] ? resolve(process.argv[2]) : process.cwd()

@@ -1,20 +1,20 @@
 ---
-name: docuforge-mdx
-summary: Write Docuforge-compatible MDX docs using the official component whitelist.
+name: mdxforge-mdx
+summary: Write MDXForge-compatible MDX docs using the official component whitelist.
 version: 0.1.0
 ---
 
-# Docuforge MDX Skill
+# MDXForge MDX Skill
 
-Use this skill when creating or editing documentation intended for Docuforge.
+Use this skill when creating or editing documentation intended for MDXForge.
 
-Docuforge docs use MDX by default. Output complete `.mdx` files that follow the official component whitelist and avoid arbitrary runtime code.
+MDXForge docs use MDX by default. Output complete `.mdx` files that follow the official component whitelist and avoid arbitrary runtime code.
 
 ## Core Rules
 
 - Include frontmatter with `title` and preferably `description`.
 - Use Markdown for normal prose.
-- Use only supported Docuforge components.
+- Use only supported MDXForge components.
 - Do not write `import` / `export`.
 - Do not define custom React components.
 - Do not use arbitrary JS expressions such as `{fetch(...)}` or `{window...}`.
@@ -95,7 +95,7 @@ npm install
 
 ## Normal Markdown Elements
 
-Docuforge supports enhanced rendering for:
+MDXForge supports enhanced rendering for:
 
 - headings: `#`, `##`, `###`, `####`, `#####`, `######`
 - links

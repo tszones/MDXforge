@@ -3,7 +3,7 @@ import { app, dialog } from 'electron'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs'
 import matter from 'gray-matter'
 import { dirname, extname, join, resolve } from 'path'
-import { getDocuforgeRehypePlugins, getDocuforgeRemarkPlugins } from './mdx-options'
+import { getMDXForgeRehypePlugins, getMDXForgeRemarkPlugins } from './mdx-options'
 import {
   type MdxFolder,
   type MdxFolderEntry,
@@ -145,8 +145,8 @@ async function compileMdxSource(source: string): Promise<string> {
     await compile(source, {
       outputFormat: 'function-body',
       development: false,
-      remarkPlugins: getDocuforgeRemarkPlugins(),
-      rehypePlugins: getDocuforgeRehypePlugins()
+      remarkPlugins: getMDXForgeRemarkPlugins(),
+      rehypePlugins: getMDXForgeRehypePlugins()
     })
   )
 }

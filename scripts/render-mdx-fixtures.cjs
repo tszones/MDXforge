@@ -65,7 +65,7 @@ async function main() {
     TabsTrigger,
     TypeTable,
     Mermaid({ chart }) {
-      return React.createElement('div', { 'data-docuforge-mermaid': '' }, chart)
+      return React.createElement('div', { 'data-mdxforge-mermaid': '' }, chart)
     },
     ...Twoslash,
     wrapper({ children }) {

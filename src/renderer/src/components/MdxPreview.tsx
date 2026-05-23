@@ -112,7 +112,7 @@ export function MdxPreview({
         ) : null}
 
         {Mdx ? (
-          <DocsBody className="docuforge-mdx max-w-none text-fd-foreground/90 dark:prose-invert">
+          <DocsBody className="mdxforge-mdx max-w-none text-fd-foreground/90 dark:prose-invert">
             <Mdx components={mdxComponents} />
           </DocsBody>
         ) : null}
@@ -149,7 +149,7 @@ function PreviewSidebar({
           <div className="flex">
             <div className="me-auto inline-flex items-center gap-2.5 font-medium text-[0.9375rem]">
               <BookOpen className="size-4 text-fd-primary" />
-              <span>Docuforge</span>
+              <span>MDXForge</span>
             </div>
             {onCollapseSidebar ? (
               <button

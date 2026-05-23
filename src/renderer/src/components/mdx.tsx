@@ -1,11 +1,11 @@
 import defaultMdxComponents from 'fumadocs-ui/mdx'
 import type { MDXComponents } from 'mdx/types'
-import { docuforgeMdxComponents } from './mdx-components'
+import { mdxforgeMdxComponents } from './mdx-components'
 
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
-    ...docuforgeMdxComponents,
+    ...mdxforgeMdxComponents,
     ...components
   } satisfies MDXComponents
 }

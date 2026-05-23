@@ -3,7 +3,7 @@ import { app, BrowserWindow, ipcMain, shell } from 'electron'
 import { join, resolve } from 'path'
 
 if (process.platform === 'win32') {
-  app.setPath('userData', join(app.getPath('temp'), 'docuforge-dev'))
+  app.setPath('userData', join(app.getPath('temp'), 'mdxforge-dev'))
 }
 
 import icon from '../../resources/icon.png?asset'
@@ -65,7 +65,7 @@ function createWindow(): void {
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
-    title: 'Docuforge',
+    title: 'MDXForge',
     titleBarStyle: 'hidden',
     frame: false,
     webPreferences: {
@@ -99,7 +99,7 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.docuforge')
+  electronApp.setAppUserModelId('com.mdxforge')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.

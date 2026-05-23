@@ -1,8 +1,8 @@
-# Docuforge
+# MDXForge
 
 AI-native MDX docs workspace.
 
-Docuforge lets AI write structured MDX documentation that is easier to read than plain Markdown, more token-efficient than HTML, and safer to render through a controlled component whitelist.
+MDXForge lets AI write structured MDX documentation that is easier to read than plain Markdown, more token-efficient than HTML, and safer to render through a controlled component whitelist.
 
 ## Features
 

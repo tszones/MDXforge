@@ -12,7 +12,7 @@ import { Tab, Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/compo
 import { TypeTable } from 'fumadocs-ui/components/type-table'
 import { Mermaid } from './Mermaid'
 
-export const docuforgeMdxComponents = {
+export const mdxforgeMdxComponents = {
   Accordion,
   Accordions,
   Banner,

@@ -1,9 +1,9 @@
 ﻿---
-title: Docuforge Launch Demo
+title: MDXForge Launch Demo
 description: A cinematic MDX document that shows why AI-native docs need more than Markdown.
 ---
 
-# Docuforge Launch Demo
+# MDXForge Launch Demo
 
 <Banner variant="normal" changeLayout={false}>
   Open MDX like Markdown. Render it like a production docs site. Keep AI output controlled.
@@ -19,7 +19,7 @@ AI can already write long documents. The bottleneck is no longer generation. The
 
 Plain Markdown is readable, but it flattens product specs, API guides, architecture notes, release plans, and onboarding flows into the same few primitives. HTML is expressive, but too noisy for humans and too expensive for AI context windows.
 
-Docuforge turns MDX into a local document surface: expressive enough for real product knowledge, constrained enough for predictable rendering.
+MDXForge turns MDX into a local document surface: expressive enough for real product knowledge, constrained enough for predictable rendering.
 
 <Cards>
   <Card title="Markdown-simple" description="Files stay editable, portable, and readable in plain text." />
@@ -101,7 +101,7 @@ MDX keeps the authoring surface small while preserving intent.
     **Map provider events** to internal subscription transitions with an explicit state table.
   </Step>
   <Step>
-    **Preview the handoff locally** in Docuforge before opening a pull request.
+    **Preview the handoff locally** in MDXForge before opening a pull request.
   </Step>
 </Steps>
 
@@ -129,7 +129,7 @@ MDX keeps the authoring surface small while preserving intent.
   type={{
     source: {
       type: 'string',
-      description: 'Absolute local file path opened by Docuforge.',
+      description: 'Absolute local file path opened by MDXForge.',
       required: true
     },
     components: {
@@ -172,7 +172,7 @@ npm run dev
 
 ```bash
 df ./docs/billing-webhooks.mdx
-docuforge ./docs
+mdxforge ./docs
 ```
 
   </Tab>
@@ -188,7 +188,7 @@ docuforge ./docs
 
 <Accordions>
   <Accordion title="Why not just use a docs site?">
-    A docs site is great for publishing. Docuforge is for local reading, AI handoff, drafts, design notes, architecture reviews, and documents that should not require a full web app to preview.
+    A docs site is great for publishing. MDXForge is for local reading, AI handoff, drafts, design notes, architecture reviews, and documents that should not require a full web app to preview.
   </Accordion>
   <Accordion title="Why not just use Markdown preview?">
     Markdown preview loses the components that make modern docs useful: tabs, callouts, file trees, API tables, steps, banners, and rich code blocks.
@@ -200,7 +200,7 @@ docuforge ./docs
 
 ## Visual Proof
 
-<ImageZoom src="https://placehold.co/1280x720/111827/ffffff/png?text=Docuforge+MDX+Workspace" alt="Docuforge MDX workspace preview" width={1280} height={720} />
+<ImageZoom src="https://placehold.co/1280x720/111827/ffffff/png?text=MDXForge+MDX+Workspace" alt="MDXForge MDX workspace preview" width={1280} height={720} />
 
 <Heading as="h2" id="launch-positioning">
   Launch Positioning
@@ -220,7 +220,7 @@ docuforge ./docs
 > Open local MDX files without running a docs site. Built for AI-generated documentation with a controlled component set.
 
 ```txt
-AI writes MDX -> Docuforge opens it -> humans read a real docs page -> teams keep the source as plain files
+AI writes MDX -> MDXForge opens it -> humans read a real docs page -> teams keep the source as plain files
 ```
 
 <Callout type="success" title="The pitch">

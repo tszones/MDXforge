@@ -20,7 +20,7 @@
   "settings_light": "浅色",
   "settings_dark": "深色",
   "settings_language": "界面语言",
-  "settings_language_description": "切换 Docuforge 的应用界面语言。MDX 文档内容不会被翻译。",
+  "settings_language_description": "切换 MDXForge 的应用界面语言。MDX 文档内容不会被翻译。",
   "settings_language_system": "跟随系统",
   "settings_language_chinese": "简体中文",
   "settings_language_english": "English",
