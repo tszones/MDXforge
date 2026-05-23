@@ -47,10 +47,14 @@
   --radius-2xl: calc(var(--radius) + 8px);
   --radius-3xl: calc(var(--radius) + 12px);
   --radius-4xl: calc(var(--radius) + 16px);
+  --font-custom: var(--font-custom);
+  --font-sans: var(--font-custom);
+  --font-mono: var(--font-custom);
 }
 
 :root {
   --radius: 0.625rem;
+  --font-custom: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
 }
 
 .dark {
@@ -72,6 +76,11 @@ body,
 
 body {
   margin: 0;
+  font-family: var(--font-custom);
+  font-weight: 500;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 * {
