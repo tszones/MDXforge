@@ -8,6 +8,7 @@ import { remarkHeading } from 'fumadocs-core/mdx-plugins/remark-heading'
 import { remarkMdxMermaid } from 'fumadocs-core/mdx-plugins/remark-mdx-mermaid'
 import { transformerTwoslash } from 'fumadocs-twoslash'
 import rehypeKatex from 'rehype-katex'
+import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import type { Pluggable } from 'unified'
 
@@ -20,7 +21,7 @@ export function getMDXForgeRehypeCodeOptions(): RehypeCodeOptions {
 }
 
 export function getMDXForgeRemarkPlugins(): Pluggable[] {
-  return [remarkMdxMermaid, remarkMath, [remarkHeading, { generateToc: false }]]
+  return [remarkMdxMermaid, remarkGfm, remarkMath, [remarkHeading, { generateToc: false }]]
 }
 
 export function getMDXForgeRehypePlugins(): Pluggable[] {
@@ -28,7 +29,7 @@ export function getMDXForgeRehypePlugins(): Pluggable[] {
 }
 
 export function withMDXForgeRemarkPlugins(plugins: Pluggable[]): Pluggable[] {
-  return [remarkMdxMermaid, remarkMath, ...plugins]
+  return [remarkMdxMermaid, remarkGfm, remarkMath, ...plugins]
 }
 
 export function withMDXForgeRehypePlugins(plugins: Pluggable[]): Pluggable[] {

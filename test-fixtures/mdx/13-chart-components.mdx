@@ -1,0 +1,30 @@
+---
+title: Chart Components
+mustContain: 渠道传播表现
+---
+
+# Chart Components
+
+<SimpleBarChart
+  title="渠道传播表现"
+  description="不同内容渠道的传播指数。"
+  unit="分"
+  data={[
+    { name: "短视频", value: 86 },
+    { name: "图文", value: 64 },
+    { name: "直播", value: 52 }
+  ]}
+/>
+
+<SimpleLineChart
+  title="一周阅读趋势"
+  description="内容发布后一周内的阅读变化。"
+  unit="次"
+  showLabels
+  data={[
+    { name: "周一", value: 120 },
+    { name: "周二", value: 180 },
+    { name: "周三", value: 260 },
+    { name: "周四", value: 310 }
+  ]}
+/>

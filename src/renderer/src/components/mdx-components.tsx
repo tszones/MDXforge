@@ -11,6 +11,20 @@ import { Step, Steps } from 'fumadocs-ui/components/steps'
 import { Tab, Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs'
 import { TypeTable } from 'fumadocs-ui/components/type-table'
 import { Mermaid } from './Mermaid'
+import { MetricCard } from './MetricCard'
+import { SimpleBarChart } from './SimpleBarChart'
+import { SimpleLineChart } from './SimpleLineChart'
+import { StatGrid } from './StatGrid'
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow
+} from './ui/table'
 
 export const mdxforgeMdxComponents = {
   Accordion,
@@ -25,6 +39,10 @@ export const mdxforgeMdxComponents = {
   ImageZoom,
   InlineTOC,
   Mermaid,
+  MetricCard,
+  SimpleBarChart,
+  SimpleLineChart,
+  StatGrid,
   Step,
   Steps,
   Tab,
@@ -32,6 +50,14 @@ export const mdxforgeMdxComponents = {
   TabsContent,
   TabsList,
   TabsTrigger,
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow,
   TypeTable,
   ...Twoslash
 }

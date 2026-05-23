@@ -13,6 +13,7 @@ async function main() {
   )
   const { remarkMdxMermaid } = await import('fumadocs-core/mdx-plugins/remark-mdx-mermaid')
   const { transformerTwoslash } = await import('fumadocs-twoslash')
+  const remarkGfm = (await import('remark-gfm')).default
   const remarkMath = (await import('remark-math')).default
   const Twoslash = await import('fumadocs-twoslash/ui')
   const fumadocsMdxComponents = require('fumadocs-ui/mdx')
@@ -64,6 +65,55 @@ async function main() {
     TabsList,
     TabsTrigger,
     TypeTable,
+    MetricCard({ label, value, description, trend, tone = 'default' }) {
+      return React.createElement(
+        'div',
+        { 'data-mdxforge-metric-card': '', 'data-tone': tone },
+        React.createElement('div', null, label),
+        React.createElement('div', null, value),
+        trend ? React.createElement('div', null, trend) : null,
+        description ? React.createElement('p', null, description) : null
+      )
+    },
+    StatGrid({ items = [], columns = 3 }) {
+      return React.createElement(
+        'div',
+        { 'data-mdxforge-stat-grid': '', 'data-columns': columns },
+        items.map((item, index) =>
+          React.createElement(components.MetricCard, { ...item, key: `${item.label}-${index}` })
+        )
+      )
+    },
+    SimpleBarChart({ data = [], title, description, unit }) {
+      return React.createElement(
+        'figure',
+        { 'data-mdxforge-simple-bar-chart': '', 'data-unit': unit ?? '' },
+        title ? React.createElement('figcaption', null, title) : null,
+        description ? React.createElement('p', null, description) : null,
+        data.map((item, index) =>
+          React.createElement(
+            'div',
+            { key: `${item.name}-${index}` },
+            `${item.name}: ${item.value}`
+          )
+        )
+      )
+    },
+    SimpleLineChart({ data = [], title, description, unit }) {
+      return React.createElement(
+        'figure',
+        { 'data-mdxforge-simple-line-chart': '', 'data-unit': unit ?? '' },
+        title ? React.createElement('figcaption', null, title) : null,
+        description ? React.createElement('p', null, description) : null,
+        data.map((item, index) =>
+          React.createElement(
+            'div',
+            { key: `${item.name}-${index}` },
+            `${item.name}: ${item.value}`
+          )
+        )
+      )
+    },
     Mermaid({ chart }) {
       return React.createElement('div', { 'data-mdxforge-mermaid': '' }, chart)
     },
@@ -92,7 +142,7 @@ async function main() {
         await compile(parsed.content, {
           outputFormat: 'function-body',
           development: false,
-          remarkPlugins: [remarkMdxMermaid, remarkMath],
+          remarkPlugins: [remarkMdxMermaid, remarkGfm, remarkMath],
           rehypePlugins: [
             rehypeKatex,
             [
