@@ -16,7 +16,7 @@ import {
   Search,
   X
 } from 'lucide-react'
-import { useEffect, useMemo, useState } from 'react'
+import { Component, useEffect, useMemo, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
 import { m } from '../paraglide/messages'
 import type { MdxFolderEntry, MdxFolderTreeNode, MdxWorkspace } from '../types'
@@ -51,6 +51,45 @@ type FileTreeNode =
     }
   | { type: 'separator'; label: string; icon?: string }
   | { type: 'link'; label: string; href: string; external?: boolean; icon?: string }
+
+type MdxRenderBoundaryProps = {
+  children: React.ReactNode
+  sourceKey: string
+  onError: (message: string) => void
+}
+
+type MdxRenderBoundaryState = {
+  sourceKey: string
+  error: string | null
+}
+
+class MdxRenderBoundary extends Component<MdxRenderBoundaryProps, MdxRenderBoundaryState> {
+  state: MdxRenderBoundaryState = {
+    sourceKey: this.props.sourceKey,
+    error: null
+  }
+
+  static getDerivedStateFromError(cause: unknown): Partial<MdxRenderBoundaryState> {
+    return { error: cause instanceof Error ? cause.message : String(cause) }
+  }
+
+  static getDerivedStateFromProps(
+    props: MdxRenderBoundaryProps,
+    state: MdxRenderBoundaryState
+  ): Partial<MdxRenderBoundaryState> | null {
+    if (props.sourceKey !== state.sourceKey) return { sourceKey: props.sourceKey, error: null }
+    return null
+  }
+
+  componentDidCatch(cause: unknown): void {
+    this.props.onError(cause instanceof Error ? cause.message : String(cause))
+  }
+
+  render(): React.ReactNode {
+    if (this.state.error) return null
+    return this.props.children
+  }
+}
 
 const mdxComponents = getMDXComponents()
 
@@ -119,10 +158,12 @@ export function MdxPreview({
           </pre>
         ) : null}
 
-        {Mdx ? (
-          <DocsBody className="mdxforge-mdx max-w-none text-fd-foreground/90 dark:prose-invert">
-            <Mdx components={mdxComponents} />
-          </DocsBody>
+        {Mdx && !error ? (
+          <MdxRenderBoundary sourceKey={file.compiledSource} onError={setError}>
+            <DocsBody className="mdxforge-mdx max-w-none text-fd-foreground/90 dark:prose-invert">
+              <Mdx components={mdxComponents} />
+            </DocsBody>
+          </MdxRenderBoundary>
         ) : null}
       </MdxPageContainer>
     </MdxDocsLayout>
