@@ -1,5 +1,6 @@
 import { ArrowLeft, Maximize2, Minus, Settings, Square, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import appIcon from '../../../../resources/icon.png'
 import { m } from '../paraglide/messages'
 
 export function WindowTitleBar({
@@ -22,7 +23,7 @@ export function WindowTitleBar({
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex h-10 select-none items-center border-b bg-fd-background/95 backdrop-blur supports-[backdrop-filter]:bg-fd-background/80 [-webkit-app-region:drag]">
       <div className="flex min-w-0 flex-1 items-center gap-2 px-3 text-sm font-medium text-fd-muted-foreground">
-        <span className="size-2 rounded-full bg-fd-primary" />
+        <img src={appIcon} alt="" className="size-4 shrink-0 rounded-sm" />
         <span className="truncate">MDXForge</span>
       </div>
       <div className="flex h-full [-webkit-app-region:no-drag]">
