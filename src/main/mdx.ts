@@ -1,17 +1,19 @@
 import { compile } from '@mdx-js/mdx'
 import { app, dialog } from 'electron'
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs'
+import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'fs'
 import matter from 'gray-matter'
-import { dirname, extname, join, resolve } from 'path'
+import { dirname, extname, isAbsolute, join, relative, resolve } from 'path'
 import { mainMessage } from './i18n'
 import { remarkLocalImages } from './local-images'
 import { getMDXForgeRehypePlugins, getMDXForgeRemarkPlugins } from './mdx-options'
+import { readMdxRawSource } from './mdx-raw-source'
 import {
   type MdxFolder,
   type MdxFolderEntry,
   type MdxFolderTreeNode,
   readMdxFolder
 } from './page-tree'
+import { remarkWikiLinks } from './wiki-links'
 
 const statePath = () => `${app.getPath('userData')}/state.json`
 
@@ -118,6 +120,38 @@ export async function readMdxWorkspace(
   }
 }
 
+export async function renameMdxPath(
+  targetPath: string,
+  nextName: string,
+  workspaceRoot?: string
+): Promise<MdxWorkspace> {
+  const resolvedTarget = resolve(targetPath)
+  if (!existsSync(resolvedTarget))
+    throw new Error(mainMessage('error_path_not_found', { filePath: targetPath }))
+
+  const trimmedName = nextName.trim()
+  if (!trimmedName || trimmedName.includes('/') || trimmedName.includes('\\')) {
+    throw new Error(mainMessage('error_invalid_file_name', { name: nextName }))
+  }
+
+  const resolvedRoot = workspaceRoot ? resolve(workspaceRoot) : undefined
+  if (resolvedRoot) {
+    const relativeTarget = relative(resolvedRoot, resolvedTarget)
+    if (relativeTarget.startsWith('..') || isAbsolute(relativeTarget)) {
+      throw new Error(mainMessage('error_path_outside_workspace', { filePath: targetPath }))
+    }
+  }
+
+  const nextPath = resolve(dirname(resolvedTarget), trimmedName)
+  if (nextPath !== resolvedTarget && existsSync(nextPath)) {
+    throw new Error(mainMessage('error_path_already_exists', { filePath: nextPath }))
+  }
+
+  renameSync(resolvedTarget, nextPath)
+  const nextRoot = resolvedRoot === resolvedTarget ? nextPath : resolvedRoot
+  return readMdxWorkspace(nextPath, nextRoot)
+}
+
 function setLastOpenFolder(folderPath: string): void {
   const state = readState()
   try {
@@ -135,7 +169,7 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
   const resolvedPath = resolveMdxTarget(filePath)
   if (!resolvedPath) throw new Error(mainMessage('error_no_mdx_found', { filePath }))
 
-  const raw = readFileSync(resolvedPath, 'utf-8')
+  const raw = readMdxRawSource(resolvedPath)
   let parsed: matter.GrayMatterFile<string>
 
   try {
@@ -190,7 +224,11 @@ async function compileMdxSource(
     await compile(source, {
       outputFormat: 'function-body',
       development: false,
-      remarkPlugins: [[remarkLocalImages, localImageContext], ...getMDXForgeRemarkPlugins()],
+      remarkPlugins: [
+        [remarkLocalImages, localImageContext],
+        remarkWikiLinks,
+        ...getMDXForgeRemarkPlugins()
+      ],
       rehypePlugins: getMDXForgeRehypePlugins()
     })
   )

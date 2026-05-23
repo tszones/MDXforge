@@ -5,5 +5,7 @@ export const appHotkeys = {
   openFolder: 'Mod+Shift+O',
   openSettings: 'Mod+,',
   closeSettings: 'Escape',
-  focusWorkspaceSearch: 'Mod+F'
+  findInFile: 'Mod+F',
+  searchWorkspace: 'Mod+Shift+F',
+  quickOpenFile: 'Mod+P'
 } as const satisfies Record<string, RegisterableHotkey>

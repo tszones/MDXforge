@@ -11,6 +11,11 @@ const api = {
   openMdxFolder: () => ipcRenderer.invoke('mdx:open-folder'),
   openMdxPath: (filePath: string, workspaceRoot?: string) =>
     ipcRenderer.invoke('mdx:open-path', filePath, workspaceRoot),
+  renameMdxPath: (targetPath: string, nextName: string, workspaceRoot?: string) =>
+    ipcRenderer.invoke('mdx:rename-path', targetPath, nextName, workspaceRoot),
+  copyMdxRawSource: (filePath: string) => ipcRenderer.invoke('mdx:copy-raw-source', filePath),
+  searchMdxWorkspace: (workspaceRoot: string, query: string) =>
+    ipcRenderer.invoke('mdx:search-workspace', workspaceRoot, query),
   registerDefaultMdxApp: () => ipcRenderer.invoke('mdx:register-default-app'),
   isDefaultMdxApp: () => ipcRenderer.invoke('mdx:is-default-app'),
   getSettings: () => ipcRenderer.invoke('settings:get'),

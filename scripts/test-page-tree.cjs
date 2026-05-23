@@ -81,7 +81,10 @@ try {
     })
   )
   write('api/index.mdx', '---\ntitle: API Home\n---\n\n# API\n')
-  write('api/reference.mdx', '---\ntitle: Reference\n---\n\n# Reference\n\nBack to [[guide|Guide]].\n')
+  write(
+    'api/reference.mdx',
+    '---\ntitle: Reference\n---\n\n# Reference\n\nBack to [[guide|Guide]].\n'
+  )
   write('api/hidden.mdx', '---\ntitle: Hidden\n---\n\n# Hidden\n')
 
   const folder = readMdxFolder(root)
@@ -202,6 +205,7 @@ try {
       type: 'folder',
       name: 'API',
       path: 'api',
+      absolutePath: path.join(root, 'api'),
       description: 'API reference',
       icon: 'Box',
       defaultOpen: true,

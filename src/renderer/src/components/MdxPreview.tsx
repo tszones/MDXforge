@@ -1,4 +1,3 @@
-import { useHotkey } from '@tanstack/react-hotkeys'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import {
   SidebarFolder,
@@ -10,9 +9,12 @@ import {
 import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page'
 import {
   BookOpen,
+  Check,
+  Copy,
   ExternalLink,
   FileText,
   FolderOpen,
+  Link2,
   PanelLeft,
   PanelLeftClose,
   Search,
@@ -20,9 +22,9 @@ import {
 } from 'lucide-react'
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
-import { appHotkeys } from '../lib/hotkeys'
+import { filterFileEntries } from '../lib/search-model'
 import { m } from '../paraglide/messages'
-import type { MdxFolderEntry, MdxFolderTreeNode, MdxWorkspace } from '../types'
+import type { MdxDocumentBacklink, MdxFolderEntry, MdxFolderTreeNode, MdxWorkspace } from '../types'
 import { MdxDocsLayout, MdxPageContainer } from './MdxDocsLayout'
 import { getMDXComponents } from './mdx'
 
@@ -31,6 +33,7 @@ interface MdxPreviewProps {
   onOpenFile: () => void
   onOpenFolder: () => void
   onOpenPath: (filePath: string, workspaceRoot?: string) => void
+  onRenamePath: (targetPath: string, nextName: string, workspaceRoot?: string) => Promise<void>
   opening: boolean
 }
 
@@ -45,6 +48,7 @@ type FileTreeNode =
       type: 'folder'
       name: string
       path: string
+      absolutePath: string
       description?: string
       icon?: string
       root?: boolean
@@ -94,13 +98,12 @@ class MdxRenderBoundary extends Component<MdxRenderBoundaryProps, MdxRenderBound
   }
 }
 
-const mdxComponents = getMDXComponents()
-
 export function MdxPreview({
   workspace,
   onOpenFile,
   onOpenFolder,
   onOpenPath,
+  onRenamePath,
   opening
 }: MdxPreviewProps): React.JSX.Element {
   const file = workspace.file
@@ -109,6 +112,25 @@ export function MdxPreview({
   const title = typeof file.frontmatter.title === 'string' ? file.frontmatter.title : file.name
   const description =
     typeof file.frontmatter.description === 'string' ? file.frontmatter.description : file.path
+  const currentEntry = useMemo(
+    () => workspace.folder?.files.find((entry) => entry.path === file.path),
+    [file.path, workspace.folder]
+  )
+  const documentLinksByHref = useMemo(() => buildDocumentLinkMap(currentEntry), [currentEntry])
+  const mdxComponents = useMemo(
+    () =>
+      getMDXComponents({
+        a: (props) => (
+          <DocumentLink
+            {...props}
+            linksByHref={documentLinksByHref}
+            workspaceRoot={workspace.folder?.rootPath}
+            onOpenPath={onOpenPath}
+          />
+        )
+      }),
+    [documentLinksByHref, onOpenPath, workspace.folder?.rootPath]
+  )
 
   useEffect(() => {
     let canceled = false
@@ -148,6 +170,7 @@ export function MdxPreview({
           onOpenFile={onOpenFile}
           onOpenFolder={onOpenFolder}
           onOpenPath={onOpenPath}
+          onRenamePath={onRenamePath}
           opening={opening}
           collapsed={collapsed}
           onCollapseSidebar={collapseSidebar}
@@ -172,8 +195,90 @@ export function MdxPreview({
             </DocsBody>
           </MdxRenderBoundary>
         ) : null}
+
+        {currentEntry && currentEntry.backlinks.length > 0 ? (
+          <Backlinks
+            backlinks={currentEntry.backlinks}
+            onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
+          />
+        ) : null}
       </MdxPageContainer>
     </MdxDocsLayout>
+  )
+}
+
+function DocumentLink({
+  href,
+  children,
+  linksByHref,
+  workspaceRoot,
+  onOpenPath,
+  ...props
+}: React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+  linksByHref: Map<string, MdxFolderEntry['links'][number]>
+  workspaceRoot?: string
+  onOpenPath: (filePath: string, workspaceRoot?: string) => void
+}): React.JSX.Element {
+  const target = typeof href === 'string' ? linksByHref.get(normalizeDocumentHref(href)) : undefined
+
+  if (!target) {
+    return (
+      <a href={href} {...props}>
+        {children}
+      </a>
+    )
+  }
+
+  return (
+    <a
+      href={href}
+      {...props}
+      data-mdxforge-document-link
+      title={target.targetRelativePath}
+      onClick={(event) => {
+        props.onClick?.(event)
+        if (event.defaultPrevented || shouldUseNativeLinkClick(event)) return
+
+        event.preventDefault()
+        onOpenPath(target.targetPath, workspaceRoot)
+      }}
+    >
+      {children}
+    </a>
+  )
+}
+
+function Backlinks({
+  backlinks,
+  onOpenPath
+}: {
+  backlinks: MdxDocumentBacklink[]
+  onOpenPath: (filePath: string) => void
+}): React.JSX.Element {
+  return (
+    <section className="mt-6 border-t pt-5">
+      <h2 className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-fd-muted-foreground">
+        <Link2 className="size-4" />
+        {m.preview_backlinks_title({ count: backlinks.length })}
+      </h2>
+      <div className="grid gap-2">
+        {backlinks.map((backlink) => (
+          <button
+            key={`${backlink.sourcePath}:${backlink.href}:${backlink.label}`}
+            type="button"
+            onClick={() => onOpenPath(backlink.sourcePath)}
+            className="rounded-lg border bg-fd-card px-3 py-2 text-start transition-colors hover:bg-fd-accent/50"
+          >
+            <span className="block truncate text-sm font-medium">
+              {backlink.sourceTitle ?? backlink.sourceDisplayPath}
+            </span>
+            <span className="mt-0.5 block truncate text-xs text-fd-muted-foreground">
+              {m.preview_backlink_context({ label: backlink.label })}
+            </span>
+          </button>
+        ))}
+      </div>
+    </section>
   )
 }
 
@@ -182,6 +287,7 @@ function PreviewSidebar({
   onOpenFile,
   onOpenFolder,
   onOpenPath,
+  onRenamePath,
   opening,
   collapsed,
   onCollapseSidebar,
@@ -191,6 +297,7 @@ function PreviewSidebar({
   onOpenFile: () => void
   onOpenFolder: () => void
   onOpenPath: (filePath: string, workspaceRoot?: string) => void
+  onRenamePath: (targetPath: string, nextName: string, workspaceRoot?: string) => Promise<void>
   opening: boolean
   collapsed?: boolean
   onCollapseSidebar?: () => void
@@ -198,33 +305,40 @@ function PreviewSidebar({
 }): React.JSX.Element {
   const file = workspace.file
   const [query, setQuery] = useState('')
-  const searchInputRef = useRef<HTMLInputElement>(null)
+  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const [renamingPath, setRenamingPath] = useState<string | null>(null)
   const tree = useMemo(
     () => buildFileTree(workspace.folder?.files ?? [], workspace.folder?.tree),
     [workspace.folder]
   )
   const searchResults = useMemo(
-    () => filterEntries(workspace.folder?.files ?? [], query),
+    () => filterFileEntries(workspace.folder?.files ?? [], query),
     [workspace.folder?.files, query]
   )
   const searching = query.trim().length > 0
 
-  useHotkey(
-    appHotkeys.focusWorkspaceSearch,
-    () => {
-      onExpandSidebar?.()
-      searchInputRef.current?.focus()
-      searchInputRef.current?.select()
-    },
-    {
-      enabled: Boolean(workspace.folder),
-      ignoreInputs: true,
-      meta: {
-        name: 'Search workspace',
-        description: 'Focus the folder workspace search input.'
-      }
+  useEffect(() => {
+    if (workspace.file.path) setCopyState('idle')
+  }, [workspace.file.path])
+
+  useEffect(() => {
+    if (copyState === 'idle') return
+
+    const timer = window.setTimeout(() => {
+      setCopyState('idle')
+    }, 1800)
+
+    return () => window.clearTimeout(timer)
+  }, [copyState])
+
+  async function copyRawSource(): Promise<void> {
+    try {
+      await window.api.copyMdxRawSource(file.path)
+      setCopyState('copied')
+    } catch {
+      setCopyState('error')
     }
-  )
+  }
 
   return (
     <div className="h-full min-h-0 bg-fd-card text-sm">
@@ -259,7 +373,6 @@ function PreviewSidebar({
             <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground focus-within:border-fd-primary/50 focus-within:text-fd-foreground">
               <Search className="size-4 shrink-0" />
               <input
-                ref={searchInputRef}
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={m.preview_search_placeholder()}
@@ -311,6 +424,12 @@ function PreviewSidebar({
                   node={node}
                   activePath={file.path}
                   onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
+                  onRenamePath={(targetPath, nextName) =>
+                    onRenamePath(targetPath, nextName, workspace.folder?.rootPath)
+                  }
+                  renamingPath={renamingPath}
+                  onStartRename={setRenamingPath}
+                  onStopRename={() => setRenamingPath(null)}
                 />
               ))}
             </div>
@@ -326,6 +445,27 @@ function PreviewSidebar({
           <p className="mb-2 line-clamp-2 px-1 text-xs leading-5 text-fd-muted-foreground wrap-anywhere">
             {file.path}
           </p>
+          <button
+            type="button"
+            onClick={() => void copyRawSource()}
+            title={m.actions_copy_raw_source()}
+            aria-label={m.actions_copy_raw_source()}
+            className="mb-2 inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg border bg-fd-secondary/50 px-2 text-xs text-fd-secondary-foreground transition-colors hover:bg-fd-accent data-[state=copied]:border-fd-primary/40 data-[state=copied]:bg-fd-primary/10 data-[state=copied]:text-fd-primary data-[state=error]:border-fd-error/40 data-[state=error]:bg-fd-error/10 data-[state=error]:text-fd-error"
+            data-state={copyState}
+          >
+            {copyState === 'copied' ? (
+              <Check className="size-3.5 shrink-0" />
+            ) : (
+              <Copy className="size-3.5 shrink-0 text-fd-muted-foreground" />
+            )}
+            <span className="truncate">
+              {copyState === 'copied'
+                ? m.actions_copied_raw_source()
+                : copyState === 'error'
+                  ? m.actions_copy_raw_source_failed()
+                  : m.actions_copy_raw_source()}
+            </span>
+          </button>
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
@@ -355,11 +495,19 @@ function PreviewSidebar({
 function FileTreeNodeView({
   node,
   activePath,
-  onOpenPath
+  onOpenPath,
+  onRenamePath,
+  renamingPath,
+  onStartRename,
+  onStopRename
 }: {
   node: FileTreeNode
   activePath: string
   onOpenPath: (filePath: string) => void
+  onRenamePath: (targetPath: string, nextName: string) => Promise<void>
+  renamingPath: string | null
+  onStartRename: (path: string) => void
+  onStopRename: () => void
 }): React.JSX.Element {
   if (node.type === 'separator') {
     return (
@@ -389,21 +537,43 @@ function FileTreeNodeView({
         entry={node.entry}
         active={node.entry.path === activePath}
         onOpenPath={onOpenPath}
+        onRenamePath={onRenamePath}
+        renamingPath={renamingPath}
+        onStartRename={onStartRename}
+        onStopRename={onStopRename}
       />
     )
   }
 
-  return <FileTreeFolder node={node} activePath={activePath} onOpenPath={onOpenPath} />
+  return (
+    <FileTreeFolder
+      node={node}
+      activePath={activePath}
+      onOpenPath={onOpenPath}
+      onRenamePath={onRenamePath}
+      renamingPath={renamingPath}
+      onStartRename={onStartRename}
+      onStopRename={onStopRename}
+    />
+  )
 }
 
 function FileTreeFolder({
   node,
   activePath,
-  onOpenPath
+  onOpenPath,
+  onRenamePath,
+  renamingPath,
+  onStartRename,
+  onStopRename
 }: {
   node: Extract<FileTreeNode, { type: 'folder' }>
   activePath: string
   onOpenPath: (filePath: string) => void
+  onRenamePath: (targetPath: string, nextName: string) => Promise<void>
+  renamingPath: string | null
+  onStartRename: (path: string) => void
+  onStopRename: () => void
 }): React.JSX.Element {
   const active = nodeContainsPath(node, activePath)
   const depth = useFolderDepth()
@@ -418,10 +588,29 @@ function FileTreeFolder({
         className="relative flex w-full flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors wrap-anywhere hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:text-fd-foreground [&_svg]:size-4 [&_svg]:shrink-0"
         data-active={active}
         title={node.description ?? node.path}
+        onDoubleClick={(event) => {
+          event.preventDefault()
+          event.stopPropagation()
+          onStartRename(node.absolutePath)
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== 'F2') return
+          event.preventDefault()
+          event.stopPropagation()
+          onStartRename(node.absolutePath)
+        }}
         style={{ paddingInlineStart: getItemOffset(depth) }}
       >
         <FolderOpen className="size-4 shrink-0" />
-        <span className="truncate">{node.name}</span>
+        {renamingPath === node.absolutePath ? (
+          <RenameInput
+            value={node.name}
+            onRename={(nextName) => onRenamePath(node.absolutePath, nextName)}
+            onCancel={onStopRename}
+          />
+        ) : (
+          <span className="truncate">{node.name}</span>
+        )}
       </SidebarFolderTrigger>
       <SidebarFolderContent className="relative flex flex-col gap-0.5 pt-0.5 before:absolute before:inset-y-1 before:inset-s-2.5 before:w-px before:bg-fd-border before:content-['']">
         {node.children.map((child, index) => (
@@ -430,6 +619,10 @@ function FileTreeFolder({
             node={child}
             activePath={activePath}
             onOpenPath={onOpenPath}
+            onRenamePath={onRenamePath}
+            renamingPath={renamingPath}
+            onStartRename={onStartRename}
+            onStopRename={onStopRename}
           />
         ))}
       </SidebarFolderContent>
@@ -440,11 +633,19 @@ function FileTreeFolder({
 function FileTreeItem({
   entry,
   active,
-  onOpenPath
+  onOpenPath,
+  onRenamePath,
+  renamingPath,
+  onStartRename,
+  onStopRename
 }: {
   entry: MdxFolderEntry
   active: boolean
   onOpenPath: (filePath: string) => void
+  onRenamePath: (targetPath: string, nextName: string) => Promise<void>
+  renamingPath: string | null
+  onStartRename: (path: string) => void
+  onStopRename: () => void
 }): React.JSX.Element {
   const depth = useFolderDepth()
 
@@ -456,13 +657,83 @@ function FileTreeItem({
       title={entry.relativePath}
       onClick={(event) => {
         event.preventDefault()
+        if (renamingPath === entry.path) return
         onOpenPath(entry.path)
+      }}
+      onDoubleClick={(event) => {
+        event.preventDefault()
+        event.stopPropagation()
+        onStartRename(entry.path)
+      }}
+      onKeyDown={(event) => {
+        if (event.key !== 'F2') return
+        event.preventDefault()
+        event.stopPropagation()
+        onStartRename(entry.path)
       }}
       className="relative flex w-full flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors wrap-anywhere hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors data-[active=true]:before:absolute data-[active=true]:before:inset-y-2.5 data-[active=true]:before:inset-s-2.5 data-[active=true]:before:w-px data-[active=true]:before:bg-fd-primary data-[active=true]:before:content-[''] [&_svg]:size-4 [&_svg]:shrink-0"
       style={{ paddingInlineStart: getItemOffset(depth) }}
     >
-      <span className="truncate">{entry.title ?? getDisplayName(entry)}</span>
+      {renamingPath === entry.path ? (
+        <RenameInput
+          value={entry.name}
+          onRename={(nextName) => onRenamePath(entry.path, nextName)}
+          onCancel={onStopRename}
+        />
+      ) : (
+        <span className="truncate">{entry.title ?? getDisplayName(entry)}</span>
+      )}
     </SidebarItem>
+  )
+}
+
+function RenameInput({
+  value,
+  onRename,
+  onCancel
+}: {
+  value: string
+  onRename: (nextName: string) => Promise<void>
+  onCancel: () => void
+}): React.JSX.Element {
+  const [nextName, setNextName] = useState(value)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => setNextName(value), [value])
+
+  useEffect(() => {
+    inputRef.current?.focus()
+    inputRef.current?.select()
+  }, [])
+
+  async function submit(): Promise<void> {
+    const trimmed = nextName.trim()
+    if (!trimmed || trimmed === value) {
+      onCancel()
+      return
+    }
+
+    await onRename(trimmed)
+    onCancel()
+  }
+
+  return (
+    <input
+      ref={inputRef}
+      value={nextName}
+      aria-label={m.preview_rename_item()}
+      placeholder={m.preview_rename_placeholder()}
+      onClick={(event) => event.stopPropagation()}
+      onDoubleClick={(event) => event.stopPropagation()}
+      onChange={(event) => setNextName(event.target.value)}
+      onBlur={() => void submit()}
+      onKeyDown={(event) => {
+        event.stopPropagation()
+        if (event.key === 'Enter') void submit()
+        if (event.key === 'Escape') onCancel()
+      }}
+      className="min-w-0 flex-1 rounded border bg-fd-background px-1.5 py-0.5 text-sm text-fd-foreground outline-none ring-fd-primary focus:ring-1"
+    />
   )
 }
 
@@ -491,7 +762,7 @@ function buildFileTree(entries: MdxFolderEntry[], pageTree?: MdxFolderTreeNode[]
       )
 
       if (!folder) {
-        folder = { type: 'folder', name: part, path: currentPath, children: [] }
+        folder = { type: 'folder', name: part, path: currentPath, absolutePath: '', children: [] }
         current.push(folder)
       }
 
@@ -522,6 +793,7 @@ function buildFileTreeFromPageTree(
         type: 'folder',
         name: node.name,
         path: node.path,
+        absolutePath: node.absolutePath,
         description: node.description,
         icon: node.icon,
         root: node.root,
@@ -558,23 +830,34 @@ function SearchResultItem({
   )
 }
 
-function filterEntries(entries: MdxFolderEntry[], query: string): MdxFolderEntry[] {
-  const normalizedQuery = normalizeSearchText(query)
-  if (!normalizedQuery) return []
+function buildDocumentLinkMap(
+  entry: MdxFolderEntry | undefined
+): Map<string, MdxFolderEntry['links'][number]> {
+  const links = new Map<string, MdxFolderEntry['links'][number]>()
 
-  return entries
-    .filter((entry) =>
-      normalizeSearchText(
-        [entry.title, entry.description, entry.displayPath, entry.relativePath, entry.name]
-          .filter(Boolean)
-          .join(' ')
-      ).includes(normalizedQuery)
-    )
-    .slice(0, 50)
+  for (const link of entry?.links ?? []) {
+    links.set(normalizeDocumentHref(link.href), link)
+  }
+
+  return links
 }
 
-function normalizeSearchText(value: string): string {
-  return value.trim().toLowerCase()
+function normalizeDocumentHref(href: string): string {
+  const trimmed = href.trim()
+  const hashIndex = trimmed.indexOf('#')
+  const beforeHash = hashIndex === -1 ? trimmed : trimmed.slice(0, hashIndex)
+  const queryIndex = beforeHash.indexOf('?')
+  const withoutSuffix = queryIndex === -1 ? beforeHash : beforeHash.slice(0, queryIndex)
+
+  try {
+    return decodeURIComponent(withoutSuffix)
+  } catch {
+    return withoutSuffix
+  }
+}
+
+function shouldUseNativeLinkClick(event: React.MouseEvent<HTMLAnchorElement>): boolean {
+  return event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey
 }
 
 function sortTree(nodes: FileTreeNode[]): FileTreeNode[] {

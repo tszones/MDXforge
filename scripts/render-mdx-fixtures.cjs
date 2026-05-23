@@ -8,6 +8,7 @@ const { createJiti } = require('jiti')
 
 const jiti = createJiti(__filename)
 const { LOCAL_IMAGE_SCHEME, remarkLocalImages } = jiti('../src/main/local-images.ts')
+const { remarkWikiLinks } = jiti('../src/main/wiki-links.ts')
 
 async function main() {
   const { compile } = await import('@mdx-js/mdx')
@@ -176,6 +177,7 @@ async function main() {
                 workspaceRoot: dir
               }
             ],
+            remarkWikiLinks,
             remarkMdxMermaid,
             remarkGfm,
             remarkMath

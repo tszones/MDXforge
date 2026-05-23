@@ -23,6 +23,42 @@ export interface MdxFolderEntry {
   title?: string
   description?: string
   icon?: string
+  links: MdxDocumentLink[]
+  backlinks: MdxDocumentBacklink[]
+}
+
+export interface MdxDocumentLink {
+  href: string
+  label: string
+  targetPath: string
+  targetRelativePath: string
+  targetDisplayPath: string
+  targetTitle?: string
+}
+
+export interface MdxDocumentBacklink {
+  sourcePath: string
+  sourceRelativePath: string
+  sourceDisplayPath: string
+  sourceTitle?: string
+  label: string
+  href: string
+}
+
+export interface TextSearchMatch {
+  line: number
+  column: number
+  preview: string
+}
+
+export interface MdxWorkspaceSearchResult {
+  path: string
+  name: string
+  relativePath: string
+  displayPath: string
+  title?: string
+  description?: string
+  matches: TextSearchMatch[]
 }
 
 export type MdxFolderTreeNode =
@@ -31,6 +67,7 @@ export type MdxFolderTreeNode =
       type: 'folder'
       name: string
       path: string
+      absolutePath: string
       description?: string
       icon?: string
       root?: boolean

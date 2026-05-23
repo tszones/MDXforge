@@ -2,6 +2,7 @@ import { useHotkeys } from '@tanstack/react-hotkeys'
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { MdxPreview } from './components/MdxPreview'
+import { SearchOverlay } from './components/SearchOverlay'
 import { SettingsPage, type SettingsRoute } from './components/SettingsPage'
 import { WindowTitleBar } from './components/WindowTitleBar'
 import { applyAppFont, normalizeStoredFont } from './lib/font'
@@ -183,6 +184,24 @@ function AppContent({
     }
   }
 
+  async function renamePath(
+    targetPath: string,
+    nextName: string,
+    workspaceRoot?: string
+  ): Promise<void> {
+    setLoading(true)
+    setError(null)
+
+    try {
+      setWorkspace(await window.api.renameMdxPath(targetPath, nextName, workspaceRoot))
+      navigate('/')
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useHotkeys(
     [
       {
@@ -284,6 +303,7 @@ function AppContent({
           onOpenFile={openFile}
           onOpenFolder={openFolder}
           onOpenPath={openPath}
+          onRenamePath={renamePath}
           opening={loading}
         />
       ) : (
@@ -322,6 +342,7 @@ function AppContent({
         onBackToPreview={() => navigate('/')}
         onOpenSettings={() => navigate('/settings/language')}
       />
+      <SearchOverlay workspace={workspace} onOpenPath={openPath} />
       <Routes>
         <Route path="/settings" element={<Navigate to="/settings/language" replace />} />
         <Route path="/settings/language" element={renderSettingsRoute('language')} />

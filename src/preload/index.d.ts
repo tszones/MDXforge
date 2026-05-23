@@ -17,6 +17,42 @@ export interface MdxFolderEntry {
   title?: string
   description?: string
   icon?: string
+  links: MdxDocumentLink[]
+  backlinks: MdxDocumentBacklink[]
+}
+
+export interface TextSearchMatch {
+  line: number
+  column: number
+  preview: string
+}
+
+export interface MdxWorkspaceSearchResult {
+  path: string
+  name: string
+  relativePath: string
+  displayPath: string
+  title?: string
+  description?: string
+  matches: TextSearchMatch[]
+}
+
+export interface MdxDocumentLink {
+  href: string
+  label: string
+  targetPath: string
+  targetRelativePath: string
+  targetDisplayPath: string
+  targetTitle?: string
+}
+
+export interface MdxDocumentBacklink {
+  sourcePath: string
+  sourceRelativePath: string
+  sourceDisplayPath: string
+  sourceTitle?: string
+  label: string
+  href: string
 }
 
 export type MdxFolderTreeNode =
@@ -25,6 +61,7 @@ export type MdxFolderTreeNode =
       type: 'folder'
       name: string
       path: string
+      absolutePath: string
       description?: string
       icon?: string
       root?: boolean
@@ -104,6 +141,13 @@ export interface AppAPI {
   openMdxFile: () => Promise<MdxWorkspace | null>
   openMdxFolder: () => Promise<MdxWorkspace | null>
   openMdxPath: (filePath: string, workspaceRoot?: string) => Promise<MdxWorkspace>
+  renameMdxPath: (
+    targetPath: string,
+    nextName: string,
+    workspaceRoot?: string
+  ) => Promise<MdxWorkspace>
+  copyMdxRawSource: (filePath: string) => Promise<void>
+  searchMdxWorkspace: (workspaceRoot: string, query: string) => Promise<MdxWorkspaceSearchResult[]>
   registerDefaultMdxApp: () => Promise<boolean>
   isDefaultMdxApp: () => Promise<boolean>
   getSettings: () => Promise<AppSettings>

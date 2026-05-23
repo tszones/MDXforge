@@ -150,3 +150,8 @@ body {
   height: auto;
   margin-inline: auto;
 }
+
+.mdxforge-mdx a[data-mdxforge-document-link] {
+  text-decoration-style: solid;
+  text-underline-offset: 0.18em;
+}

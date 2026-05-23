@@ -1,6 +1,6 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { app, BrowserWindow, ipcMain, shell } from 'electron'
-import { watch, type FSWatcher } from 'fs'
+import { app, BrowserWindow, clipboard, ipcMain, shell } from 'electron'
+import { type FSWatcher, watch } from 'fs'
 import { join, resolve } from 'path'
 
 if (process.platform === 'win32') {
@@ -14,9 +14,12 @@ import {
   openMdxFile,
   openMdxFolder,
   readMdxWorkspace,
+  renameMdxPath,
   resolveMdxTarget,
   setLastOpenPath
 } from './mdx'
+import { readMdxRawSource } from './mdx-raw-source'
+import { readMdxFolder } from './page-tree'
 
 import {
   type AppColorMode,
@@ -26,6 +29,7 @@ import {
   setAppSettings
 } from './settings'
 import { checkForUpdatesOnStartup, registerUpdaterIpc } from './updater'
+import { searchMdxWorkspaceFiles } from './workspace-search'
 
 let mainWindow: BrowserWindow | null = null
 let mdxWatcher: FSWatcher | null = null
@@ -199,6 +203,21 @@ app.whenReady().then(() => {
     const workspace = await readMdxWorkspace(filePath, workspaceRoot)
     watchMdxWorkspace(filePath, workspace.folder?.rootPath)
     return workspace
+  })
+  ipcMain.handle(
+    'mdx:rename-path',
+    async (_, targetPath: string, nextName: string, workspaceRoot?: string) => {
+      const workspace = await renameMdxPath(targetPath, nextName, workspaceRoot)
+      watchMdxWorkspace(workspace.file.path, workspace.folder?.rootPath)
+      return workspace
+    }
+  )
+  ipcMain.handle('mdx:copy-raw-source', (_, filePath: string) => {
+    clipboard.writeText(readMdxRawSource(filePath))
+  })
+  ipcMain.handle('mdx:search-workspace', async (_, workspaceRoot: string, query: string) => {
+    const folder = readMdxFolder(workspaceRoot)
+    return searchMdxWorkspaceFiles(folder.files, query)
   })
   ipcMain.handle('mdx:register-default-app', () => app.setAsDefaultProtocolClient('mdx'))
   ipcMain.handle('mdx:is-default-app', () => app.isDefaultProtocolClient('mdx'))
