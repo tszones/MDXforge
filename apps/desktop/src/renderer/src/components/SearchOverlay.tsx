@@ -1,10 +1,3 @@
-import { useHotkeys } from '@tanstack/react-hotkeys'
-import { FileText, Search } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { appHotkeys } from '../lib/hotkeys'
-import { filterFileEntries, getTextMatches } from '../lib/search-model'
-import { m } from '../paraglide/messages'
-import type { MdxFolderEntry, MdxWorkspace } from '../types'
 import {
   Command,
   CommandDialog,
@@ -12,7 +5,14 @@ import {
   CommandInput,
   CommandItem,
   CommandList
-} from './ui/command'
+} from '@mdxforge/ui/components/command'
+import { useHotkeys } from '@tanstack/react-hotkeys'
+import { FileText, Search } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { appHotkeys } from '../lib/hotkeys'
+import { filterFileEntries, getTextMatches } from '../lib/search-model'
+import { m } from '../paraglide/messages'
+import type { MdxFolderEntry, MdxWorkspace } from '../types'
 
 type SearchMode = 'file' | 'quickOpen'
 

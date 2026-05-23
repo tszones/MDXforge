@@ -1,6 +1,6 @@
+import { cn } from '@mdxforge/ui/lib/utils'
 import { IconAlertTriangle, IconCircle, IconCircleCheck, IconClock } from '@tabler/icons-react'
 import type { ReactNode } from 'react'
-import { cn } from '@/lib/utils'
 import { m } from '../paraglide/messages'
 
 type TodoStatus = 'todo' | 'active' | 'done' | 'blocked'

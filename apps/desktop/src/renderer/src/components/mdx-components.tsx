@@ -1,3 +1,13 @@
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableFooter,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@mdxforge/ui/components/table'
 import * as Twoslash from 'fumadocs-twoslash/ui'
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion'
 import { Banner } from 'fumadocs-ui/components/banner'
@@ -16,16 +26,6 @@ import { SimpleBarChart } from './SimpleBarChart'
 import { SimpleLineChart } from './SimpleLineChart'
 import { StatGrid } from './StatGrid'
 import { Todo, TodoList } from './Todo'
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow
-} from './ui/table'
 
 export const mdxforgeMdxComponents = {
   Accordion,

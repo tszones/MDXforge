@@ -11,6 +11,17 @@
       "apps/desktop/scripts/**",
       "apps/desktop/content/**",
       "apps/desktop/messages/**",
+      "packages/ui/src/**",
+      "packages/ui/*.ts",
+      "packages/ui/*.js",
+      "packages/ui/*.cjs",
+      "packages/ui/*.mjs",
+      "packages/ui/*.json",
+      "packages/ui/*.jsonc",
+      "packages/ui/*.md",
+      "packages/ui/*.mdx",
+      "packages/ui/*.yaml",
+      "packages/ui/*.yml",
       "apps/desktop/*.ts",
       "apps/desktop/*.js",
       "apps/desktop/*.cjs",
@@ -44,7 +55,8 @@
       "!apps/desktop/src/renderer/src/components/ui",
       "!apps/desktop/src/renderer/src/assets",
       "!apps/desktop/test-fixtures",
-      "!apps/desktop/project.inlang"
+      "!apps/desktop/project.inlang",
+      "!packages/ui/src/components"
     ],
     "ignoreUnknown": true
   },

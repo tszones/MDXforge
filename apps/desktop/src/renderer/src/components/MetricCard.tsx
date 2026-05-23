@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn } from '@mdxforge/ui/lib/utils'
 
 type MetricCardProps = {
   label: string

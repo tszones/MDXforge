@@ -82,7 +82,8 @@ MDXForge 是一个 Electron + React 桌面应用。
 ```txt
 apps/
   desktop/   # Electron + React 桌面应用
-packages/    # 后续放共享包
+packages/
+  ui/        # 共享 React UI primitives
 ```
 
 ```bash

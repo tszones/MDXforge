@@ -1,6 +1,11 @@
+import {
+  type ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent
+} from '@mdxforge/ui/components/chart'
+import { cn } from '@mdxforge/ui/lib/utils'
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from 'recharts'
-import { cn } from '@/lib/utils'
-import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from './ui/chart'
 
 type ChartPoint = {
   name: string

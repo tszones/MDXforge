@@ -1,7 +1,10 @@
 const fs = require('node:fs')
 const path = require('node:path')
 
-const rendererRoot = path.resolve(__dirname, '..', 'src', 'renderer', 'src')
+const rendererRoots = [
+  path.resolve(__dirname, '..', 'src', 'renderer', 'src'),
+  path.resolve(__dirname, '..', '..', '..', 'packages', 'ui', 'src')
+]
 
 const forbiddenImports = [
   {
@@ -36,12 +39,16 @@ function listSourceFiles(dir) {
 
 const failures = []
 
-for (const filePath of listSourceFiles(rendererRoot)) {
-  const source = fs.readFileSync(filePath, 'utf8')
+for (const rendererRoot of rendererRoots) {
+  if (!fs.existsSync(rendererRoot)) continue
 
-  for (const forbidden of forbiddenImports) {
-    if (forbidden.pattern.test(source)) {
-      failures.push(`${path.relative(process.cwd(), filePath)}: ${forbidden.reason}`)
+  for (const filePath of listSourceFiles(rendererRoot)) {
+    const source = fs.readFileSync(filePath, 'utf8')
+
+    for (const forbidden of forbiddenImports) {
+      if (forbidden.pattern.test(source)) {
+        failures.push(`${path.relative(process.cwd(), filePath)}: ${forbidden.reason}`)
+      }
     }
   }
 }

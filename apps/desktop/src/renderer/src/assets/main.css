@@ -6,6 +6,8 @@
 @import "katex/dist/katex.css";
 @import "./fumadocs-themes.css";
 
+@source "../../../../../../packages/ui/src";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

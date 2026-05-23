@@ -30,7 +30,7 @@
     },
     "typecheck": {
       "dependsOn": ["^typecheck"],
-      "outputs": ["src/renderer/src/paraglide/**"]
+      "outputs": []
     },
     "test:main-bundle-boundary": {
       "dependsOn": ["build"],

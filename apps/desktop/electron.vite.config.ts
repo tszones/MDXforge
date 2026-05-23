@@ -25,6 +25,7 @@ export default defineConfig({
   preload: {},
   renderer: {
     resolve: {
+      dedupe: ['react', 'react-dom'],
       alias: {
         path: pathShim,
         'node:path': pathShim,
