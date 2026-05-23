@@ -1,0 +1,318 @@
+---
+title: MDXForge 第一版发布清单
+description: 面向 MDXForge v1 的本地 MDX 预览能力、体验补齐与发布前检查。
+---
+
+# MDXForge 第一版发布清单
+
+MDXForge 第一版的目标不是做完整文档平台，而是把「打开本地 MDX / Markdown → 安全、好看、稳定地预览」这条主路径做到可信。
+
+<Callout title="第一版原则">
+先让用户愿意每天打开它，再考虑插件、团队协作、云同步等长期能力。
+</Callout>
+
+## 发布目标
+
+第一版应满足四个标准：
+
+- 用户能打开单个 `.mdx` / `.md` 文件并看到正确渲染。
+- 用户能打开一个文档文件夹，通过侧边栏切换文档。
+- AI 能按明确规范生成可渲染的 MDXForge 文档。
+- 应用在 Windows、macOS、Linux 上具备基本可安装、可启动、可更新能力。
+
+## P0：必须完成
+
+### 1. 相对资源解析
+
+本地文档最常见的写法是引用同目录图片：
+
+```mdx
+![架构图](./assets/architecture.png)
+```
+
+当前第一版应至少支持：
+
+- 相对图片路径。
+- 文件夹 workspace 内的图片引用。
+- 错误路径的清晰提示。
+- 安全的本地资源访问协议，避免任意文件读取。
+
+<Callout title="建议">
+优先实现图片。PDF、视频、附件下载可以放到后续版本。
+</Callout>
+
+### 2. 错误体验
+
+MDX 编译失败时，不应只显示原始异常。需要给用户可理解的错误页：
+
+- 当前文件路径。
+- 错误消息。
+- 可能原因。
+- 复制错误按钮。
+- 返回打开其他文件的入口。
+
+常见原因包括：
+
+- 使用了未知组件。
+- MDX 语法不合法。
+- 代码块围栏没有闭合。
+- JSX 属性写法错误。
+- 引用了不存在的本地资源。
+
+### 3. 侧边栏搜索
+
+文件夹 workspace 至少需要标题/路径搜索。
+
+<Steps>
+  <Step>
+    用户打开一个包含多个文档的文件夹。
+  </Step>
+  <Step>
+    在侧边栏输入关键词。
+  </Step>
+  <Step>
+    文件树只显示匹配文档。
+  </Step>
+  <Step>
+    用户点击结果切换当前文档。
+  </Step>
+</Steps>
+
+MVP 搜索范围：
+
+| 范围 | 第一版是否需要 |
+| --- | --- |
+| 文件名 | 是 |
+| frontmatter title | 是 |
+| frontmatter description | 可选 |
+| 全文内容 | 可选 |
+
+### 4. 最近打开
+
+首页应展示最近打开的文件与文件夹，让用户能直接回到上次工作区。
+
+```json
+{
+  "recent": [
+    {
+      "type": "folder",
+      "path": "/Users/me/docs"
+    },
+    {
+      "type": "file",
+      "path": "/Users/me/docs/intro.mdx"
+    }
+  ]
+}
+```
+
+规则：
+
+- 最近打开列表去重。
+- 不存在的路径应自动失效或显示不可用。
+- 点击后复用现有打开路径逻辑。
+
+### 5. 品牌命名统一
+
+发布前统一所有地方的名称：
+
+<Files>
+  <File name="package.json" />
+  <File name="electron-builder.yml" />
+  <File name="README.md" />
+  <File name="src/main/index.ts" />
+  <File name="src/renderer/src/App.tsx" />
+  <File name="dist/*" />
+</Files>
+
+统一标准：
+
+- 产品名：`MDXForge`
+- npm/package name：`mdxforge`
+- 命令名：`mdxforge`
+- 短命令：`df`
+- 文件关联：`.mdx`、`.md`
+
+## P1：强烈建议
+
+### 6. AI 写作入口
+
+MDXForge 的差异点是 AI-native。首页可以提供三个入口：
+
+<Cards>
+  <Card title="复制 AI 写作规则">
+    把 MDXForge 组件规范复制给 AI，让 AI 生成可直接预览的文档。
+  </Card>
+  <Card title="打开示例文档">
+    加载内置 demo，展示 Callout、Cards、Tabs、Mermaid 等能力。
+  </Card>
+  <Card title="查看 MDX 规范">
+    打开项目内置的 MDX authoring rules。
+  </Card>
+</Cards>
+
+### 7. meta.json 示例文档
+
+文件夹 workspace 已支持 `meta.json` 时，应在 README 和示例目录中给出最小例子：
+
+```json
+{
+  "title": "Guide",
+  "pages": ["index", "quick-start", "---API", "api-reference"]
+}
+```
+
+需要解释：
+
+- 如何排序。
+- 如何分组。
+- 如何隐藏或重命名页面。
+- 如何配置外链。
+
+### 8. CLI 打开路径
+
+命令行是 AI 用户和开发者的高频入口。
+
+```bash
+mdxforge ./docs/demo.mdx
+mdxforge ./docs
+```
+
+验收标准：
+
+- 传入文件 → 直接打开文件预览。
+- 传入文件夹 → 打开 folder workspace。
+- 路径不存在 → 显示清晰错误。
+- 无参数 → 正常启动首页。
+
+### 9. 自动更新收口
+
+如果第一版展示自动更新设置，就必须完成完整链路：
+
+- 检查更新。
+- 下载更新。
+- 安装重启。
+- 错误提示。
+- 用户可关闭自动检查。
+
+<Callout title="发布建议">
+如果自动更新没有完整验证，第一版可以先隐藏入口，避免给用户半成品体验。
+</Callout>
+
+## P2：发布质量
+
+### 10. CI 检查
+
+发布前至少跑这些命令：
+
+```bash
+pnpm run typecheck
+pnpm run lint
+pnpm run test:page-tree
+pnpm run test:fixtures
+```
+
+建议 GitHub Actions 拆成两个 workflow：
+
+- PR 检查：类型、lint、fixture。
+- Release 构建：Windows、macOS、Linux 安装包。
+
+### 11. Fixture 覆盖
+
+第一版 fixture 应覆盖：
+
+- frontmatter。
+- Markdown 表格。
+- Callout。
+- Cards。
+- Tabs。
+- Mermaid。
+- KaTeX。
+- 代码块。
+- 错误 MDX。
+- 文件夹 + `meta.json`。
+- 相对图片。
+
+### 12. README 改成用户导向
+
+README 首页应先回答三个问题：
+
+1. MDXForge 是什么？
+2. 我如何打开一个 MDX 文件？
+3. 我如何让 AI 生成兼容文档？
+
+推荐结构：
+
+```mdx
+# MDXForge
+
+## What is MDXForge?
+
+## Quick Start
+
+## Write MDX with AI
+
+## Supported Components
+
+## Folder Workspace
+
+## Development
+
+## Release
+```
+
+## 第一版不建议做
+
+这些能力值得做，但不该阻塞第一版：
+
+- 完整插件系统。
+- 云同步。
+- 多人协作。
+- 在线评论。
+- 内置编辑器。
+- 自定义任意 React 组件。
+- 复杂权限系统。
+
+## 最小发布路线
+
+<Steps>
+  <Step>
+    完成相对图片解析。
+  </Step>
+  <Step>
+    接上侧边栏搜索。
+  </Step>
+  <Step>
+    补最近打开列表。
+  </Step>
+  <Step>
+    打磨错误页。
+  </Step>
+  <Step>
+    统一品牌命名与 README。
+  </Step>
+  <Step>
+    跑类型、lint、fixture、三端构建。
+  </Step>
+</Steps>
+
+## 验收清单
+
+| 项目 | 状态 |
+| --- | --- |
+| 打开单个 `.mdx` 文件 | 必须通过 |
+| 打开单个 `.md` 文件 | 必须通过 |
+| 打开文件夹 | 必须通过 |
+| 侧边栏切换文档 | 必须通过 |
+| 相对图片渲染 | 必须通过 |
+| 编译错误可读 | 必须通过 |
+| 最近打开可用 | 建议通过 |
+| CLI 打开路径 | 建议通过 |
+| README 可指导用户 | 必须通过 |
+| Windows 构建 | 必须通过 |
+| macOS 构建 | 必须通过 |
+| Linux 构建 | 必须通过 |
+
+## 结论
+
+第一版最值得投入的是「本地文档真实可用」：资源、搜索、错误、最近打开、文档说明。只要这条链路顺，MDXForge 就已经不是 demo，而是一个能被 AI 和开发者持续使用的本地 MDX 阅读器。
