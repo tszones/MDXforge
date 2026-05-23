@@ -73,6 +73,21 @@ export type AppThemeName =
 export type AppColorMode = 'light' | 'dark'
 export type AppLanguage = 'system' | 'zh-CN' | 'en-US'
 
+export interface UpdateState {
+  status:
+    | 'idle'
+    | 'checking'
+    | 'available'
+    | 'not-available'
+    | 'downloading'
+    | 'downloaded'
+    | 'error'
+  version: string
+  availableVersion?: string
+  percent?: number
+  message?: string
+}
+
 export interface AppAPI {
   minimizeWindow: () => Promise<void>
   maximizeWindow: () => Promise<boolean>
@@ -85,6 +100,10 @@ export interface AppAPI {
   isDefaultMdxApp: () => Promise<boolean>
   getSettings: () => Promise<AppSettings>
   setSettings: (settings: Partial<AppSettings>) => Promise<AppSettings>
+  getUpdateState: () => Promise<UpdateState>
+  checkForUpdates: () => Promise<UpdateState>
+  quitAndInstallUpdate: () => Promise<void>
+  onUpdateState: (callback: (state: UpdateState) => void) => () => void
   onMdxFileOpened: (callback: (workspace: MdxWorkspace) => void) => () => void
   onMdxFileOpenError: (callback: (message: string) => void) => () => void
 }

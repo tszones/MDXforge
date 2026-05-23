@@ -4,7 +4,7 @@
   "description": "AI-native MDX docs workspace",
   "main": "./out/main/index.js",
   "author": "MDXForge",
-  "homepage": "https://github.com/mdxforge/mdxforge",
+  "homepage": "https://github.com/tszones/MDXforge",
   "bin": {
     "mdxforge": "bin/mdxforge.cjs",
     "df": "bin/mdxforge.cjs"

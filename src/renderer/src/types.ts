@@ -52,3 +52,18 @@ export interface MdxWorkspace {
   file: MdxFile
   folder?: MdxFolder
 }
+
+export interface UpdateState {
+  status:
+    | 'idle'
+    | 'checking'
+    | 'available'
+    | 'not-available'
+    | 'downloading'
+    | 'downloaded'
+    | 'error'
+  version: string
+  availableVersion?: string
+  percent?: number
+  message?: string
+}

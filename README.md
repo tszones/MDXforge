@@ -26,6 +26,17 @@ pnpm build:mac
 pnpm build:linux
 ```
 
+## Release
+
+Releases are published to GitHub Releases. Create a version tag:
+
+```bash
+pnpm version patch
+git push origin main --follow-tags
+```
+
+The release workflow builds Windows, macOS, and Linux artifacts. Auto updates use the same GitHub Release assets.
+
 ## MDX Rules
 
 See `docs/mdx-authoring-rules.mdx`.

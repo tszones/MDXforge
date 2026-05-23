@@ -23,6 +23,7 @@ import {
   getAppSettings,
   setAppSettings
 } from './settings'
+import { checkForUpdatesOnStartup, registerUpdaterIpc } from './updater'
 
 let mainWindow: BrowserWindow | null = null
 
@@ -70,7 +71,7 @@ function createWindow(): void {
     frame: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: true
     }
   })
 
@@ -99,7 +100,7 @@ function createWindow(): void {
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.mdxforge')
+  electronApp.setAppUserModelId('com.tszones.mdxforge')
 
   // Default open or close DevTools by F12 in development
   // and ignore CommandOrControl + R in production.
@@ -107,6 +108,8 @@ app.whenReady().then(() => {
   app.on('browser-window-created', (_, window) => {
     optimizer.watchWindowShortcuts(window)
   })
+
+  registerUpdaterIpc(() => mainWindow)
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
@@ -145,6 +148,7 @@ app.whenReady().then(() => {
   })
 
   createWindow()
+  checkForUpdatesOnStartup(() => mainWindow)
 
   app.on('activate', () => {
     // On macOS it's common to re-create a window in the app when the

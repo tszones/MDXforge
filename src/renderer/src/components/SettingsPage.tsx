@@ -2,6 +2,7 @@ import { ArrowLeft, Check, Languages, Moon, Palette, Settings, Sun } from 'lucid
 import { type ColorMode, FUMADOCS_THEMES, type FumadocsThemeName } from '../lib/theme'
 import { m } from '../paraglide/messages'
 import { APP_LANGUAGE_OPTIONS, type AppLanguage } from '../types'
+import { UpdateSettingsCard } from './UpdateSettingsCard'
 
 const THEME_META: Record<FumadocsThemeName, { colors: [string, string, string, string] }> = {
   neutral: {
@@ -119,6 +120,8 @@ export function SettingsPage({
             ))}
           </div>
         </section>
+
+        <UpdateSettingsCard />
 
         <section className="grid gap-4">
           <div className="flex items-center gap-2 font-medium">

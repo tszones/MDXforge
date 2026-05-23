@@ -1,4 +1,4 @@
-appId: com.mdxforge.app
+appId: com.tszones.mdxforge
 productName: MDXForge
 directories:
   buildResources: build
@@ -29,12 +29,30 @@ nsis:
   createDesktopShortcut: always
 mac:
   entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
+  extendInfo:
+    CFBundleDocumentTypes:
+      - CFBundleTypeName: MDX Document
+        CFBundleTypeRole: Editor
+        LSHandlerRank: Owner
+        LSItemContentTypes:
+          - com.mdxforge.mdx
+      - CFBundleTypeName: Markdown Document
+        CFBundleTypeRole: Editor
+        LSHandlerRank: Alternate
+        LSItemContentTypes:
+          - net.daringfireball.markdown
+    UTExportedTypeDeclarations:
+      - UTTypeIdentifier: com.mdxforge.mdx
+        UTTypeDescription: MDX Document
+        UTTypeConformsTo:
+          - public.text
+        UTTypeTagSpecification:
+          public.filename-extension:
+            - mdx
+          public.mime-type: text/mdx
+    NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
 dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
@@ -49,7 +67,8 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/mdxforge/auto-updates
+  provider: github
+  owner: tszones
+  repo: MDXforge
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/

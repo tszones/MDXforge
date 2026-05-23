@@ -1,3 +1,4 @@
-provider: generic
-url: https://example.com/mdxforge/auto-updates
+provider: github
+owner: tszones
+repo: MDXforge
 updaterCacheDirName: mdxforge-updater

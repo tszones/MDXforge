@@ -14,6 +14,14 @@ const api = {
   isDefaultMdxApp: () => ipcRenderer.invoke('mdx:is-default-app'),
   getSettings: () => ipcRenderer.invoke('settings:get'),
   setSettings: (settings) => ipcRenderer.invoke('settings:set', settings),
+  getUpdateState: () => ipcRenderer.invoke('update:get-state'),
+  checkForUpdates: () => ipcRenderer.invoke('update:check'),
+  quitAndInstallUpdate: () => ipcRenderer.invoke('update:quit-and-install'),
+  onUpdateState: (callback) => {
+    const listener = (_, updateState) => callback(updateState)
+    ipcRenderer.on('update:state', listener)
+    return () => ipcRenderer.removeListener('update:state', listener)
+  },
   onMdxFileOpened: (callback) => {
     const listener = (_, file) => callback(file)
     ipcRenderer.on('mdx:file-opened', listener)
