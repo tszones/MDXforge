@@ -3,6 +3,7 @@ import { app, dialog } from 'electron'
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs'
 import matter from 'gray-matter'
 import { dirname, extname, join, resolve } from 'path'
+import { mainMessage } from './i18n'
 import { getMDXForgeRehypePlugins, getMDXForgeRemarkPlugins } from './mdx-options'
 import {
   type MdxFolder,
@@ -67,12 +68,12 @@ export interface MdxWorkspace {
 
 export async function openMdxFile(): Promise<MdxWorkspace | null> {
   const result = await dialog.showOpenDialog({
-    title: 'Open MDX file',
+    title: mainMessage('dialog_open_mdx_file'),
     defaultPath: getLastOpenPath(),
     properties: ['openFile'],
     filters: [
-      { name: 'MDX / Markdown', extensions: ['mdx', 'md'] },
-      { name: 'All Files', extensions: ['*'] }
+      { name: mainMessage('dialog_filter_mdx_markdown'), extensions: ['mdx', 'md'] },
+      { name: mainMessage('dialog_filter_all_files'), extensions: ['*'] }
     ]
   })
 
@@ -86,7 +87,7 @@ export async function openMdxFile(): Promise<MdxWorkspace | null> {
 
 export async function openMdxFolder(): Promise<MdxWorkspace | null> {
   const result = await dialog.showOpenDialog({
-    title: 'Open MDX folder',
+    title: mainMessage('dialog_open_mdx_folder'),
     defaultPath: readState().lastOpenFolder ?? getLastOpenPath(),
     properties: ['openDirectory']
   })
@@ -128,7 +129,7 @@ function setLastOpenFolder(folderPath: string): void {
 
 export async function readMdxFile(filePath: string): Promise<MdxFile> {
   const resolvedPath = resolveMdxTarget(filePath)
-  if (!resolvedPath) throw new Error(`No MDX / Markdown file found: ${filePath}`)
+  if (!resolvedPath) throw new Error(mainMessage('error_no_mdx_found', { filePath }))
 
   const raw = readFileSync(resolvedPath, 'utf-8')
   let parsed: matter.GrayMatterFile<string>
@@ -171,7 +172,7 @@ export async function readMdxFile(filePath: string): Promise<MdxFile> {
 
 function formatMdxError(cause: unknown): string {
   const message = cause instanceof Error ? cause.message : String(cause)
-  return `MDX compile error:\n${message}`
+  return mainMessage('error_mdx_compile', { message })
 }
 
 async function compileMdxSource(source: string): Promise<string> {

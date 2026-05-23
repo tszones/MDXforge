@@ -4,6 +4,7 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layo
 import { useMDXComponents } from './components/mdx'
 import { baseOptions } from './lib/layout.shared'
 import { source } from './lib/source'
+import { m } from './paraglide/messages'
 
 const pageTree = source.getPageTree()
 
@@ -13,7 +14,7 @@ function DocsRoute(): React.JSX.Element {
   const page = source.getPage(slugs) ?? source.getPage([])
 
   if (!page) {
-    return <div>Not found</div>
+    return <div>{m.docs_not_found()}</div>
   }
 
   const { pageTree: tree } = useFumadocsLoader({

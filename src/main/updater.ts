@@ -1,5 +1,6 @@
 import { app, type BrowserWindow, ipcMain } from 'electron'
 import { autoUpdater, type UpdateInfo } from 'electron-updater'
+import { mainMessage } from './i18n'
 
 export type UpdateStatus =
   | 'idle'
@@ -106,7 +107,7 @@ export function registerUpdaterIpc(getWindow: () => BrowserWindow | null): void 
       return publish(
         {
           status: 'error',
-          message: 'Auto updates are only available in packaged builds.',
+          message: mainMessage('error_updates_packaged_only'),
           percent: undefined
         },
         getWindow()
