@@ -21,6 +21,10 @@ export function normalizeStoredFont(value: unknown): AppFontName {
 
 export function applyAppFont(font: AppFontName): void {
   const root = document.documentElement
+  const stack = FONT_STACKS[font]
   root.dataset.appFont = font
-  root.style.setProperty('--font-custom', FONT_STACKS[font])
+  root.style.setProperty('--mdxforge-font-family', stack)
+  root.style.setProperty('--font-custom', stack)
+  root.style.setProperty('--font-sans', stack)
+  root.style.setProperty('--font-mono', stack)
 }
