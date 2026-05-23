@@ -1,0 +1,9 @@
+.local-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid color-mix(in oklab, currentColor 25%, transparent);
+  border-radius: 6px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+}

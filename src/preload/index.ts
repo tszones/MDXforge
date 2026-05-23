@@ -16,6 +16,8 @@ const api = {
   copyMdxRawSource: (filePath: string) => ipcRenderer.invoke('mdx:copy-raw-source', filePath),
   searchMdxWorkspace: (workspaceRoot: string, query: string) =>
     ipcRenderer.invoke('mdx:search-workspace', workspaceRoot, query),
+  setWorkspaceExtensionsEnabled: (enabled: boolean, trustKey?: string) =>
+    ipcRenderer.invoke('mdx:set-workspace-extensions-enabled', enabled, trustKey),
   registerDefaultMdxApp: () => ipcRenderer.invoke('mdx:register-default-app'),
   isDefaultMdxApp: () => ipcRenderer.invoke('mdx:is-default-app'),
   getSettings: () => ipcRenderer.invoke('settings:get'),

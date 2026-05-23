@@ -88,9 +88,48 @@ export interface MdxFolder {
   tree: MdxFolderTreeNode[]
 }
 
+export type ExtensionMode = 'safe' | 'trusted'
+export type ExtensionPackageType =
+  | 'component'
+  | 'theme'
+  | 'rules'
+  | 'template'
+  | 'transform'
+  | 'resource'
+
+export interface WorkspaceExtensionAsset {
+  path: string
+  url?: string
+}
+
+export interface WorkspaceExtensionPackage {
+  name: string
+  version: string
+  type: ExtensionPackageType
+  rootPath: string
+  entryPath: string
+  entryUrl: string
+  styles: Array<Required<WorkspaceExtensionAsset>>
+  rules: WorkspaceExtensionAsset[]
+}
+
+export interface WorkspaceExtensionWarning {
+  source: string
+  status: 'blocked' | 'missing' | 'invalid' | 'unsupported'
+  reason: string
+}
+
+export interface WorkspaceExtensionManifest {
+  mode: ExtensionMode
+  workspaceRoot: string
+  packages: WorkspaceExtensionPackage[]
+  warnings: WorkspaceExtensionWarning[]
+}
+
 export interface MdxWorkspace {
   file: MdxFile
   folder?: MdxFolder
+  extensions?: WorkspaceExtensionManifest
 }
 
 export interface UpdateState {

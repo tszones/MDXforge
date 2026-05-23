@@ -20,6 +20,7 @@ import {
   Search,
   X
 } from 'lucide-react'
+import type { MDXComponents } from 'mdx/types'
 import { Component, useEffect, useMemo, useRef, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
 import { filterFileEntries } from '../lib/search-model'
@@ -42,6 +43,19 @@ type MdxModule = {
   toc?: TOCItemType[]
 }
 
+type ExtensionRuntime = typeof runtime
+type ExtensionDefinition = {
+  components?: MDXComponents
+}
+type ExtensionModule = {
+  default?: ExtensionDefinition | ((runtime: ExtensionRuntime) => ExtensionDefinition)
+  components?: MDXComponents
+}
+type ExtensionLoadPackage = {
+  entryUrl: string
+  styles: Array<{ url: string }>
+}
+
 type FileTreeNode =
   | { type: 'file'; entry: MdxFolderEntry }
   | {
@@ -62,7 +76,7 @@ type FileTreeNode =
 type MdxRenderBoundaryProps = {
   children: React.ReactNode
   sourceKey: string
-  onError: (message: string) => void
+  onError: (message: string | null) => void
 }
 
 type MdxRenderBoundaryState = {
@@ -92,6 +106,10 @@ class MdxRenderBoundary extends Component<MdxRenderBoundaryProps, MdxRenderBound
     this.props.onError(cause instanceof Error ? cause.message : String(cause))
   }
 
+  componentDidUpdate(previousProps: MdxRenderBoundaryProps): void {
+    if (previousProps.sourceKey !== this.props.sourceKey) this.props.onError(null)
+  }
+
   render(): React.ReactNode {
     if (this.state.error) return null
     return this.props.children
@@ -107,8 +125,21 @@ export function MdxPreview({
   opening
 }: MdxPreviewProps): React.JSX.Element {
   const file = workspace.file
+  const extensionPackages = workspace.extensions?.packages ?? []
+  const extensionWarnings = workspace.extensions?.warnings ?? []
+  const extensionPackageSnapshot = serializeExtensionLoadPackages(extensionPackages)
+  const extensionWorkspaceKey = workspace.extensions?.workspaceRoot ?? file.path
+  const extensionTrustKey = `${extensionWorkspaceKey}\n${extensionPackageSnapshot}`
+  const [trustedExtensionKey, setTrustedExtensionKey] = useState<string | null>(null)
+  const [extensionComponents, setExtensionComponents] = useState<MDXComponents>({})
+  const [extensionError, setExtensionError] = useState<string | null>(null)
   const [module, setModule] = useState<MdxModule | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const [compileError, setCompileError] = useState<string | null>(null)
+  const [renderError, setRenderError] = useState<string | null>(null)
+  const hasExtensionPackages = extensionPackages.length > 0
+  const extensionsEnabled = hasExtensionPackages && trustedExtensionKey === extensionTrustKey
+  const extensionComponentsKey = Object.keys(extensionComponents).sort().join('|')
+  const renderSourceKey = `${file.compiledSource}\n${extensionsEnabled ? extensionComponentsKey : 'safe'}`
   const title = typeof file.frontmatter.title === 'string' ? file.frontmatter.title : file.name
   const description =
     typeof file.frontmatter.description === 'string' ? file.frontmatter.description : file.path
@@ -120,6 +151,7 @@ export function MdxPreview({
   const mdxComponents = useMemo(
     () =>
       getMDXComponents({
+        ...(extensionsEnabled ? extensionComponents : {}),
         a: (props) => (
           <DocumentLink
             {...props}
@@ -129,15 +161,74 @@ export function MdxPreview({
           />
         )
       }),
-    [documentLinksByHref, onOpenPath, workspace.folder?.rootPath]
+    [
+      documentLinksByHref,
+      extensionsEnabled,
+      extensionComponents,
+      onOpenPath,
+      workspace.folder?.rootPath
+    ]
   )
+
+  useEffect(() => {
+    let canceled = false
+
+    async function loadExtensions(): Promise<void> {
+      setExtensionComponents({})
+      setExtensionError(null)
+      const packages = parseExtensionLoadPackages(extensionPackageSnapshot)
+
+      if (!extensionsEnabled || packages.length === 0) {
+        void window.api.setWorkspaceExtensionsEnabled(false)
+        return
+      }
+
+      try {
+        const enabled = await window.api.setWorkspaceExtensionsEnabled(true, extensionTrustKey)
+        if (!enabled) throw new Error('Workspace extension trust no longer matches.')
+
+        for (const style of packages.flatMap((item) => item.styles)) {
+          loadExtensionStyle(style.url)
+        }
+
+        const loadedComponents: MDXComponents = {}
+        for (const extensionPackage of packages) {
+          const extensionModule = (await import(
+            /* @vite-ignore */ extensionPackage.entryUrl
+          )) as ExtensionModule
+          const extensionDefinition =
+            typeof extensionModule.default === 'function'
+              ? extensionModule.default(runtime)
+              : extensionModule.default
+          Object.assign(
+            loadedComponents,
+            extensionModule.components ?? extensionDefinition?.components ?? {}
+          )
+        }
+
+        if (!canceled) setExtensionComponents(loadedComponents)
+      } catch (cause) {
+        if (!canceled) {
+          setExtensionComponents({})
+          setExtensionError(cause instanceof Error ? cause.message : String(cause))
+        }
+      }
+    }
+
+    void loadExtensions()
+
+    return () => {
+      canceled = true
+    }
+  }, [extensionsEnabled, extensionPackageSnapshot, extensionTrustKey])
 
   useEffect(() => {
     let canceled = false
 
     async function compileMdx(): Promise<void> {
       setModule(null)
-      setError(file.compileError ?? null)
+      setCompileError(file.compileError ?? null)
+      setRenderError(null)
 
       if (file.compileError) return
 
@@ -147,7 +238,7 @@ export function MdxPreview({
 
         if (!canceled) setModule(nextModule)
       } catch (cause) {
-        if (!canceled) setError(cause instanceof Error ? cause.message : String(cause))
+        if (!canceled) setCompileError(cause instanceof Error ? cause.message : String(cause))
       }
     }
 
@@ -182,14 +273,25 @@ export function MdxPreview({
         <DocsTitle>{title}</DocsTitle>
         <DocsDescription>{description}</DocsDescription>
 
-        {error ? (
+        {hasExtensionPackages || extensionWarnings.length > 0 ? (
+          <ExtensionSafetyNotice
+            enabled={extensionsEnabled}
+            packages={extensionPackages}
+            warnings={extensionWarnings}
+            error={extensionError}
+            onEnable={() => setTrustedExtensionKey(extensionTrustKey)}
+            onDisable={() => setTrustedExtensionKey(null)}
+          />
+        ) : null}
+
+        {compileError || renderError ? (
           <pre className="overflow-auto rounded-md border bg-fd-error/10 p-4 text-sm text-fd-error">
-            {error}
+            {compileError ?? renderError}
           </pre>
         ) : null}
 
-        {Mdx && !error ? (
-          <MdxRenderBoundary sourceKey={file.compiledSource} onError={setError}>
+        {Mdx && !compileError ? (
+          <MdxRenderBoundary sourceKey={renderSourceKey} onError={setRenderError}>
             <DocsBody className="mdxforge-mdx max-w-none text-fd-foreground/90 dark:prose-invert">
               <Mdx components={mdxComponents} />
             </DocsBody>
@@ -280,6 +382,103 @@ function Backlinks({
       </div>
     </section>
   )
+}
+
+function ExtensionSafetyNotice({
+  enabled,
+  packages,
+  warnings,
+  error,
+  onEnable,
+  onDisable
+}: {
+  enabled: boolean
+  packages: NonNullable<MdxWorkspace['extensions']>['packages']
+  warnings: NonNullable<MdxWorkspace['extensions']>['warnings']
+  error: string | null
+  onEnable: () => void
+  onDisable: () => void
+}): React.JSX.Element {
+  return (
+    <section className="rounded-lg border bg-fd-card p-4 text-sm">
+      <div className="flex flex-wrap items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <p className="font-medium">
+            {enabled ? m.extensions_trusted_mode_title() : m.extensions_safe_mode_title()}
+          </p>
+          <p className="mt-1 text-fd-muted-foreground">
+            {enabled
+              ? m.extensions_trusted_mode_description()
+              : m.extensions_safe_mode_description()}
+          </p>
+        </div>
+        {packages.length > 0 ? (
+          <button
+            type="button"
+            onClick={enabled ? onDisable : onEnable}
+            className="rounded-md border bg-fd-background px-3 py-2 font-medium transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
+          >
+            {enabled ? m.extensions_disable() : m.extensions_enable_workspace()}
+          </button>
+        ) : null}
+      </div>
+
+      {packages.length > 0 ? (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {packages.map((extensionPackage) => (
+            <span
+              key={`${extensionPackage.name}@${extensionPackage.version}`}
+              className="rounded-md border bg-fd-secondary/50 px-2 py-1 text-xs text-fd-muted-foreground"
+            >
+              {extensionPackage.name}@{extensionPackage.version}
+            </span>
+          ))}
+        </div>
+      ) : null}
+
+      {warnings.length > 0 ? (
+        <ul className="mt-3 grid gap-1 text-xs text-fd-muted-foreground">
+          {warnings.map((warning) => (
+            <li key={`${warning.source}:${warning.reason}`}>
+              {warning.source}: {warning.reason}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {error ? (
+        <pre className="mt-3 overflow-auto rounded-md border bg-fd-error/10 p-3 text-xs text-fd-error">
+          {error}
+        </pre>
+      ) : null}
+    </section>
+  )
+}
+
+function loadExtensionStyle(url: string): void {
+  const id = `mdxforge-extension-style:${url}`
+  if (document.getElementById(id)) return
+
+  const link = document.createElement('link')
+  link.id = id
+  link.rel = 'stylesheet'
+  link.href = url
+  document.head.appendChild(link)
+}
+
+function serializeExtensionLoadPackages(
+  packages: NonNullable<MdxWorkspace['extensions']>['packages']
+): string {
+  return JSON.stringify(
+    packages.map((extensionPackage) => ({
+      entryUrl: extensionPackage.entryUrl,
+      styles: extensionPackage.styles.map((style) => ({ url: style.url }))
+    }))
+  )
+}
+
+function parseExtensionLoadPackages(snapshot: string): ExtensionLoadPackage[] {
+  return JSON.parse(snapshot) as ExtensionLoadPackage[]
 }
 
 function PreviewSidebar({

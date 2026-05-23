@@ -1,13 +1,18 @@
 import { electronApp, is, optimizer } from '@electron-toolkit/utils'
-import { app, BrowserWindow, clipboard, ipcMain, shell } from 'electron'
-import { type FSWatcher, watch } from 'fs'
-import { join, resolve } from 'path'
+import { app, BrowserWindow, clipboard, ipcMain, protocol, shell } from 'electron'
+import { type FSWatcher, readFileSync, watch } from 'fs'
+import { extname, join, resolve } from 'path'
 
 if (process.platform === 'win32') {
   app.setPath('userData', join(app.getPath('temp'), 'mdxforge-dev'))
 }
 
 import icon from '../../resources/icon.png?asset'
+import {
+  getWorkspaceExtensionAssetPath,
+  getWorkspaceExtensionTrustKey,
+  type WorkspaceExtensionManifest
+} from './extensions'
 import { registerLocalImageProtocol, registerLocalImageScheme } from './local-image-protocol'
 import {
   getLastOpenFile,
@@ -37,8 +42,21 @@ let mdxWatchTimer: NodeJS.Timeout | null = null
 let watchedMdxPath: string | null = null
 let watchedWorkspaceRoot: string | undefined
 let watchedOpenedPath: string | null = null
+let currentExtensionManifest: WorkspaceExtensionManifest | null = null
+let workspaceExtensionsEnabled = false
 
 registerLocalImageScheme()
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'mdxforge-extension',
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      corsEnabled: true
+    }
+  }
+])
 
 function getMdxPathFromArgv(argv: string[]): string | null {
   return (
@@ -54,6 +72,7 @@ async function openMdxPath(filePath: string): Promise<void> {
 
   try {
     const workspace = await readMdxWorkspace(filePath)
+    setCurrentExtensionManifest(workspace.extensions ?? null)
     setLastOpenPath(workspace.file.path)
     watchMdxWorkspace(filePath, workspace.folder?.rootPath)
     mainWindow.webContents.send('mdx:file-opened', workspace)
@@ -104,6 +123,7 @@ async function reloadWatchedMdxWorkspace(): Promise<void> {
 
   try {
     const workspace = await readMdxWorkspace(watchedOpenedPath, watchedWorkspaceRoot)
+    setCurrentExtensionManifest(workspace.extensions ?? null)
     mainWindow.webContents.send('mdx:file-changed', workspace)
   } catch (cause) {
     mainWindow.webContents.send(
@@ -111,6 +131,11 @@ async function reloadWatchedMdxWorkspace(): Promise<void> {
       cause instanceof Error ? cause.message : String(cause)
     )
   }
+}
+
+function setCurrentExtensionManifest(manifest: WorkspaceExtensionManifest | null): void {
+  currentExtensionManifest = manifest
+  workspaceExtensionsEnabled = false
 }
 
 const pendingOpenPath = getMdxPathFromArgv(process.argv)
@@ -173,6 +198,19 @@ app.whenReady().then(() => {
 
   registerUpdaterIpc(() => mainWindow)
   registerLocalImageProtocol()
+  protocol.handle('mdxforge-extension', (request) => {
+    if (!workspaceExtensionsEnabled) return new Response('Not found', { status: 404 })
+    if (!currentExtensionManifest) return new Response('Not found', { status: 404 })
+
+    const assetPath = getWorkspaceExtensionAssetPath(currentExtensionManifest, request.url)
+    if (!assetPath) return new Response('Not found', { status: 404 })
+
+    return new Response(readFileSync(assetPath), {
+      headers: {
+        'content-type': getExtensionAssetContentType(assetPath)
+      }
+    })
+  })
 
   // IPC test
   ipcMain.on('ping', () => console.log('pong'))
@@ -187,20 +225,26 @@ app.whenReady().then(() => {
   ipcMain.handle('window:is-maximized', () => mainWindow?.isMaximized() ?? false)
   ipcMain.handle('mdx:open-file', async () => {
     const workspace = await openMdxFile()
-    if (workspace) watchMdxWorkspace(workspace.file.path, workspace.folder?.rootPath)
+    if (workspace) {
+      setCurrentExtensionManifest(workspace.extensions ?? null)
+      watchMdxWorkspace(workspace.file.path, workspace.folder?.rootPath)
+    }
     return workspace
   })
   ipcMain.handle('mdx:open-folder', async () => {
     const workspace = await openMdxFolder()
-    if (workspace)
+    if (workspace) {
+      setCurrentExtensionManifest(workspace.extensions ?? null)
       watchMdxWorkspace(
         workspace.folder?.rootPath ?? workspace.file.path,
         workspace.folder?.rootPath
       )
+    }
     return workspace
   })
   ipcMain.handle('mdx:open-path', async (_, filePath: string, workspaceRoot?: string) => {
     const workspace = await readMdxWorkspace(filePath, workspaceRoot)
+    setCurrentExtensionManifest(workspace.extensions ?? null)
     watchMdxWorkspace(filePath, workspace.folder?.rootPath)
     return workspace
   })
@@ -208,8 +252,19 @@ app.whenReady().then(() => {
     'mdx:rename-path',
     async (_, targetPath: string, nextName: string, workspaceRoot?: string) => {
       const workspace = await renameMdxPath(targetPath, nextName, workspaceRoot)
+      setCurrentExtensionManifest(workspace.extensions ?? null)
       watchMdxWorkspace(workspace.file.path, workspace.folder?.rootPath)
       return workspace
+    }
+  )
+  ipcMain.handle(
+    'mdx:set-workspace-extensions-enabled',
+    (_, enabled: boolean, trustKey?: string) => {
+      const currentTrustKey = currentExtensionManifest
+        ? getWorkspaceExtensionTrustKey(currentExtensionManifest)
+        : null
+      workspaceExtensionsEnabled = enabled && Boolean(trustKey && trustKey === currentTrustKey)
+      return workspaceExtensionsEnabled
     }
   )
   ipcMain.handle('mdx:copy-raw-source', (_, filePath: string) => {
@@ -250,6 +305,20 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
+
+function getExtensionAssetContentType(filePath: string): string {
+  switch (extname(filePath).toLowerCase()) {
+    case '.js':
+    case '.mjs':
+      return 'text/javascript; charset=utf-8'
+    case '.css':
+      return 'text/css; charset=utf-8'
+    case '.json':
+      return 'application/json; charset=utf-8'
+    default:
+      return 'application/octet-stream'
+  }
+}
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
