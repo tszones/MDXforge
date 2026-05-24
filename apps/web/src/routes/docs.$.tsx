@@ -4,6 +4,7 @@ import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layo
 import { getMDXComponents } from '@/components/docs/mdx-components'
 import { Logo } from '@/components/shared/logo'
 import { SITE_URL } from '@/config/seo'
+import { getCurrentLocale } from '@/lib/i18n'
 import { source } from '@/lib/source'
 import { m } from '@/paraglide/messages'
 
@@ -35,7 +36,7 @@ export const Route = createFileRoute('/docs/$')({
 function DocsRoute() {
   const params = Route.useParams()
   const slugs = params._splat ? params._splat.split('/').filter(Boolean) : undefined
-  const page = source.getPage(slugs) ?? source.getPage([])
+  const page = source.getPage(slugs, getCurrentLocale()) ?? source.getPage([], getCurrentLocale())
 
   if (!page) return <DocsNotFound />
 
@@ -43,7 +44,7 @@ function DocsRoute() {
 
   return (
     <DocsLayout
-      tree={source.pageTree}
+      tree={source.getPageTree(getCurrentLocale())}
       nav={{
         title: <Logo />,
         url: '/',

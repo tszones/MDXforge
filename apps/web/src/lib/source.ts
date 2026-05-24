@@ -3,5 +3,11 @@ import { docs } from '../../.source/server'
 
 export const source = loader({
   source: docs.toFumadocsSource(),
-  baseUrl: '/docs'
+  baseUrl: '/docs',
+  i18n: {
+    parser: 'none',
+    languages: ['en', 'zh'],
+    defaultLanguage: 'en',
+    hideLocale: 'always'
+  }
 })

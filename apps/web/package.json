@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "vite dev --port 3000 --host 0.0.0.0",
     "start": "vite preview --port 3000 --host 0.0.0.0",
-    "build": "vite build",
+    "build": "pnpm run paraglide:compile && vite build",
     "paraglide:compile": "node ./scripts/compile-paraglide.mjs",
     "typecheck": "pnpm run paraglide:compile && tsc --noEmit -p tsconfig.json",
     "lint": "biome ci .",
