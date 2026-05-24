@@ -13,3 +13,7 @@ out
 C:/
 
 **/.wrangler
+**/.source
+**/.tanstack
+**/.output
+**/.vercel
