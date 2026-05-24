@@ -1,0 +1,476 @@
+---
+title: Skill Installation UX
+description: A product design for making MDXForge skills easy, safe, and friendly to install.
+---
+
+# Skill Installation UX
+
+MDXForge skills should feel like local document capabilities, not developer packages. A user should be able to discover a skill, understand what it adds, enable it for the right workspace, and copy the matching AI writing rules without learning npm, git, or package metadata first.
+
+<Callout title="Design principle">
+Installation and activation should be separate. Installing a skill makes it available; enabling a skill decides where its code or rules can run.
+</Callout>
+
+## Target Experience
+
+```txt
+open MDXForge
+-> open Skills
+-> browse or add a skill
+-> review preview, components, rules, and permissions
+-> install
+-> enable for current workspace
+-> copy active AI writing rules
+-> use the registered components in MDX
+```
+
+The default path should optimize for non-technical users:
+
+- clear names and previews
+- one-click install
+- workspace-scoped enablement
+- visible safety explanation
+- quick recovery when a component is missing
+
+Advanced users can still install from npm, git, or a local folder, but those should be secondary actions.
+
+## Skill Types
+
+Skills should be grouped by capability so users understand what each one changes.
+
+| Type | Purpose | Default Risk |
+| --- | --- | --- |
+| Writing Skill | Adds AI-readable MDX authoring rules. | Low |
+| Component Skill | Registers MDX components. | Medium |
+| Template Skill | Adds starter documents or workspace templates. | Low |
+| Transform Skill | Adds remark or rehype compile behavior. | High |
+
+The first user-facing version should support Writing, Component, and Template skills. Transform skills should wait until the low-risk path is stable.
+
+## Navigation
+
+Add a Skills page under settings:
+
+```txt
+Settings
+  General
+  Appearance
+  Language
+  Skills
+```
+
+The Skills page should have four sections:
+
+```txt
+Skills
+  Active
+  Browse
+  Local
+  AI Rules
+```
+
+## Browse Skills
+
+The Browse tab is the friendly install surface. Each card should explain what the skill does before asking for trust.
+
+```txt
+Charts
+Visualize metrics, trends, and static report data.
+
+Adds:
+- MetricCard
+- LineChart
+- BarChart
+
+Permissions:
+- Runs React components in the preview renderer
+- Loads 1 stylesheet
+- Adds AI writing rules
+
+[Preview] [Install]
+```
+
+A catalog item can start as static metadata:
+
+```ts
+type SkillCatalogItem = {
+  name: string
+  title: string
+  description: string
+  author: string
+  version: string
+  types: Array<'writing' | 'component' | 'template' | 'transform'>
+  install: string
+  components?: string[]
+  templates?: string[]
+  permissions: string[]
+  previewImage?: string
+  demoMdx?: string
+}
+```
+
+Install flow:
+
+<Steps>
+  <Step>
+    User clicks Install.
+  </Step>
+  <Step>
+    MDXForge downloads and validates the package metadata.
+  </Step>
+  <Step>
+    The skill is stored locally but remains disabled.
+  </Step>
+  <Step>
+    MDXForge asks where to enable it.
+  </Step>
+</Steps>
+
+Recommended enable dialog:
+
+```txt
+Enable Charts Skill?
+
+This skill can:
+- Add 3 MDX components
+- Load 1 stylesheet
+- Add AI writing rules
+
+It cannot:
+- Access local files
+- Run shell commands
+- Use Node APIs
+
+[Enable for this workspace] [Enable globally] [Cancel]
+```
+
+The primary action should be **Enable for this workspace**.
+
+## Local Skills
+
+Local skills are important because MDXForge is local-first and AI-document-workflow-first. Users should be able to create project-specific skills without publishing anything.
+
+The Local tab should expose two actions:
+
+```txt
+Create Local Skill
+Add Existing Folder
+```
+
+Create Local Skill asks only for:
+
+1. skill name
+2. skill type
+3. target workspace
+
+Then MDXForge creates:
+
+<Files>
+  <Folder name="docs" defaultOpen>
+    <File name="mdxforge.config.json" />
+    <Folder name=".mdxforge" defaultOpen>
+      <Folder name="skills" defaultOpen>
+        <Folder name="local-dashboard" defaultOpen>
+          <File name="package.json" />
+          <File name="rules.mdx" />
+          <File name="demo.mdx" />
+          <Folder name="src" defaultOpen>
+            <File name="extension.tsx" />
+          </Folder>
+        </Folder>
+      </Folder>
+    </Folder>
+  </Folder>
+</Files>
+
+The workspace config references the local skill:
+
+```json
+{
+  "skills": ["./.mdxforge/skills/local-dashboard"],
+  "disabledSkills": []
+}
+```
+
+A local skill card should show status and quick actions:
+
+```txt
+Local Dashboard
+Status: Ready
+Components: MetricCard, RevenueChart
+
+[Open Folder] [Rebuild] [Copy AI Rules] [Disable]
+```
+
+## Active Skills
+
+The Active tab should answer three questions:
+
+1. What skills are enabled here?
+2. What do they add?
+3. How do I disable or fix them?
+
+Example:
+
+```txt
+Current workspace: ./docs
+
+Enabled:
+- @mdxforge/charts
+- ./.mdxforge/skills/local-dashboard
+
+Safe Preview: Off
+
+[Open Safe Preview] [Disable All Workspace Skills]
+```
+
+Each active skill should show:
+
+- source
+- version
+- enabled scope
+- components
+- rules
+- permissions
+- load status
+
+## AI Rules
+
+This is the key MDXForge-specific value. Enabled skills should produce a merged authoring guide that users can paste into Claude, Codex, or another local assistant.
+
+Actions:
+
+```txt
+Copy Active AI Rules
+Export MDXFORGE_RULES.md
+Open Rules Preview
+```
+
+Generated output:
+
+```md
+# Active MDXForge Writing Rules
+
+## Core Rules
+
+- Do not write import or export in MDX.
+- Use only registered components.
+- Prefer Markdown for prose.
+- Avoid arbitrary HTML and script tags.
+
+## Enabled Skills
+
+### Charts
+
+Use `<MetricCard />` for single KPI summaries.
+
+Props:
+- label: string, required
+- value: string, required
+- trend: string, optional
+
+Example:
+
+<MetricCard label="MRR" value="$24,800" trend="+12%" />
+```
+
+CLI equivalent:
+
+```bash
+mdxforge skill rules ./docs > MDXFORGE_RULES.md
+```
+
+## Missing Component Recovery
+
+If an MDX document uses an unknown component, MDXForge should offer fixes instead of only showing a compile error.
+
+Example error:
+
+```txt
+Unknown component: MetricCard
+
+Possible fixes:
+1. Install Charts Skill
+2. Enable local-dashboard Skill
+3. Open in Safe Preview
+
+[Find Skill] [Enable Installed] [Safe Preview]
+```
+
+If the catalog knows which skill provides the component, show direct suggestions:
+
+```txt
+MetricCard is provided by:
+- @mdxforge/charts
+- @acme/dashboard-components
+```
+
+## Install Sources
+
+The UI should present simple labels:
+
+```txt
+Browse Marketplace
+Install from npm
+Install from Git
+Install from Local Folder
+Create Local Skill
+```
+
+The shared installer can support command forms:
+
+```bash
+mdxforge skill install npm:@acme/mdxforge-charts
+mdxforge skill install git:https://github.com/acme/mdxforge-charts
+mdxforge skill install ./local-dashboard
+mdxforge skill list
+mdxforge skill enable @acme/mdxforge-charts --workspace ./docs
+mdxforge skill disable @acme/mdxforge-charts --workspace ./docs
+mdxforge skill rules ./docs
+```
+
+## Storage Model
+
+Global installed skills live in app data:
+
+<Files>
+  <Folder name="userData" defaultOpen>
+    <Folder name="skills" defaultOpen>
+      <File name="registry.json" />
+      <File name="trust.json" />
+      <Folder name="packages" defaultOpen>
+        <Folder name="@acme" defaultOpen>
+          <Folder name="mdxforge-charts">
+            <File name="package.json" />
+            <File name="rules.mdx" />
+            <File name="dist/extension.js" />
+          </Folder>
+        </Folder>
+      </Folder>
+    </Folder>
+  </Folder>
+</Files>
+
+Workspace skills stay with the document folder:
+
+<Files>
+  <Folder name="docs" defaultOpen>
+    <File name="mdxforge.config.json" />
+    <Folder name=".mdxforge" defaultOpen>
+      <Folder name="skills" defaultOpen>
+        <Folder name="local-dashboard">
+          <File name="package.json" />
+          <File name="rules.mdx" />
+        </Folder>
+      </Folder>
+    </Folder>
+  </Folder>
+</Files>
+
+## Trust Model
+
+MDXForge should expose three clear modes:
+
+| Mode | Behavior | Best For |
+| --- | --- | --- |
+| Safe Preview | Only built-in components render. | Unknown documents. |
+| Trusted Skills | Explicitly enabled skills can run. | Daily use. |
+| Local Dev Mode | Workspace-local source skills can build and reload. | User-authored components. |
+
+When opening an unknown workspace that declares skills, default to Safe Preview:
+
+```txt
+This workspace requests 2 skills:
+
+- @acme/charts
+- ./local-dashboard
+
+Open in Safe Preview until you trust them.
+
+[Safe Preview] [Review Skills]
+```
+
+Trust should be stored by name, version, source, and integrity. Updating a skill changes trust state if the executable bundle changes.
+
+```json
+{
+  "trustedSkills": [
+    {
+      "name": "@acme/mdxforge-charts",
+      "version": "1.0.0",
+      "source": "npm",
+      "integrity": "sha256-...",
+      "scope": "workspace",
+      "trustedAt": "2026-05-24T00:00:00.000Z"
+    }
+  ]
+}
+```
+
+## Recommended Implementation Phases
+
+### Phase 1: Rules-only Skills
+
+This is the safest first release.
+
+Acceptance criteria:
+
+- install or add a skill folder
+- read `rules.mdx`
+- show installed skills
+- merge active rules
+- copy active AI rules
+
+### Phase 2: Local Component Skills
+
+Acceptance criteria:
+
+- read `mdxforge.config.json`
+- resolve workspace-local skill paths
+- read skill metadata
+- load compiled ESM component bundle
+- merge registered components into MDX rendering
+- show load errors in Skills UI
+
+### Phase 3: Skill Manager UI
+
+Acceptance criteria:
+
+- Active tab
+- Local tab
+- AI Rules tab
+- enable and disable by workspace
+- Safe Preview toggle
+
+### Phase 4: npm and Git Install
+
+Acceptance criteria:
+
+- install `npm:` and `git:` sources into app data
+- validate metadata
+- record source, version, integrity, and install time
+- require explicit enablement after install
+
+### Phase 5: Marketplace
+
+Acceptance criteria:
+
+- fetch static catalog JSON
+- show skill cards
+- preview demo MDX
+- install selected skill
+- suggest skills for unknown components
+
+## First Cut Recommendation
+
+Start with this product slice:
+
+```txt
+local skill folder
+-> rules.mdx
+-> workspace enablement
+-> merged AI rules
+-> Copy Active AI Rules
+```
+
+Then add component registration after the rules workflow feels smooth. This gives MDXForge a useful skill experience early without making the first version depend on remote package installation or third-party JavaScript execution.
