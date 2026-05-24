@@ -11,6 +11,26 @@ import { getLocale, experimentalStaticLocale } from "../runtime.js"
 /** @typedef {{}} Language_SwitcherInputs */
 /** @typedef {{}} Language_EnInputs */
 /** @typedef {{}} Language_ZhInputs */
+/** @typedef {{}} Theme_ToggleInputs */
+/** @typedef {{}} Theme_LightInputs */
+/** @typedef {{}} Theme_DarkInputs */
+/** @typedef {{}} Theme_SystemInputs */
+/** @typedef {{}} Nav_MainInputs */
+/** @typedef {{}} Nav_HomeInputs */
+/** @typedef {{}} Nav_Toggle_MenuInputs */
+/** @typedef {{}} Nav_Mobile_MenuInputs */
+/** @typedef {{}} Nav_FeaturesInputs */
+/** @typedef {{}} Nav_WorkflowInputs */
+/** @typedef {{}} Nav_SafetyInputs */
+/** @typedef {{}} Nav_DownloadInputs */
+/** @typedef {{}} Nav_ContactInputs */
+/** @typedef {{}} Footer_ProductInputs */
+/** @typedef {{}} Footer_ResourcesInputs */
+/** @typedef {{}} Footer_CompanyInputs */
+/** @typedef {{}} Footer_GithubInputs */
+/** @typedef {{}} Footer_SocialInputs */
+/** @typedef {{}} Footer_TaglineInputs */
+/** @typedef {{}} Footer_RightsInputs */
 /** @typedef {{}} Home_Meta_TitleInputs */
 /** @typedef {{}} Home_Meta_DescriptionInputs */
 /** @typedef {{}} Home_BadgeInputs */
@@ -18,12 +38,25 @@ import { getLocale, experimentalStaticLocale } from "../runtime.js"
 /** @typedef {{}} Home_DescriptionInputs */
 /** @typedef {{}} Home_GithubInputs */
 /** @typedef {{}} Home_Features_LinkInputs */
+/** @typedef {{}} Home_Features_TitleInputs */
+/** @typedef {{}} Home_Features_DescriptionInputs */
 /** @typedef {{}} Home_Feature_Local_TitleInputs */
 /** @typedef {{}} Home_Feature_Local_DescriptionInputs */
 /** @typedef {{}} Home_Feature_Docs_TitleInputs */
 /** @typedef {{}} Home_Feature_Docs_DescriptionInputs */
 /** @typedef {{}} Home_Feature_Safe_TitleInputs */
 /** @typedef {{}} Home_Feature_Safe_DescriptionInputs */
+/** @typedef {{}} Home_Workflow_TitleInputs */
+/** @typedef {{}} Home_Workflow_DescriptionInputs */
+/** @typedef {{}} Home_Workflow_GenerateInputs */
+/** @typedef {{}} Home_Workflow_OpenInputs */
+/** @typedef {{}} Home_Workflow_ReviewInputs */
+/** @typedef {{}} Home_Workflow_ShareInputs */
+/** @typedef {{}} Home_Safety_TitleInputs */
+/** @typedef {{}} Home_Safety_DescriptionInputs */
+/** @typedef {{}} Home_Download_TitleInputs */
+/** @typedef {{}} Home_Download_DescriptionInputs */
+/** @typedef {{}} Home_Download_CtaInputs */
 import * as __en from "./en.js"
 import * as __zh from "./zh.js"
 /**
@@ -155,6 +188,286 @@ export const language_zh = /** @type {((inputs?: Language_ZhInputs, options?: { 
 /**
 * | output |
 * | --- |
+* | "Toggle theme" |
+*
+* @param {Theme_ToggleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const theme_toggle = /** @type {((inputs?: Theme_ToggleInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Theme_ToggleInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.theme_toggle(inputs)
+	return __zh.theme_toggle(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Light" |
+*
+* @param {Theme_LightInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const theme_light = /** @type {((inputs?: Theme_LightInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Theme_LightInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.theme_light(inputs)
+	return __zh.theme_light(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Dark" |
+*
+* @param {Theme_DarkInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const theme_dark = /** @type {((inputs?: Theme_DarkInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Theme_DarkInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.theme_dark(inputs)
+	return __zh.theme_dark(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "System" |
+*
+* @param {Theme_SystemInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const theme_system = /** @type {((inputs?: Theme_SystemInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Theme_SystemInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.theme_system(inputs)
+	return __zh.theme_system(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Main navigation" |
+*
+* @param {Nav_MainInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const nav_main = /** @type {((inputs?: Nav_MainInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Nav_MainInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.nav_main(inputs)
+	return __zh.nav_main(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Home" |
+*
+* @param {Nav_HomeInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const nav_home = /** @type {((inputs?: Nav_HomeInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Nav_HomeInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.nav_home(inputs)
+	return __zh.nav_home(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Toggle menu" |
+*
+* @param {Nav_Toggle_MenuInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const nav_toggle_menu = /** @type {((inputs?: Nav_Toggle_MenuInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Nav_Toggle_MenuInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.nav_toggle_menu(inputs)
+	return __zh.nav_toggle_menu(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Mobile navigation" |
+*
+* @param {Nav_Mobile_MenuInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const nav_mobile_menu = /** @type {((inputs?: Nav_Mobile_MenuInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Nav_Mobile_MenuInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.nav_mobile_menu(inputs)
+	return __zh.nav_mobile_menu(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Features" |
+*
+* @param {Nav_FeaturesInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const nav_features = /** @type {((inputs?: Nav_FeaturesInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Nav_FeaturesInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.nav_features(inputs)
+	return __zh.nav_features(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Workflow" |
+*
+* @param {Nav_WorkflowInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const nav_workflow = /** @type {((inputs?: Nav_WorkflowInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Nav_WorkflowInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.nav_workflow(inputs)
+	return __zh.nav_workflow(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Safety" |
+*
+* @param {Nav_SafetyInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const nav_safety = /** @type {((inputs?: Nav_SafetyInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Nav_SafetyInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.nav_safety(inputs)
+	return __zh.nav_safety(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Download" |
+*
+* @param {Nav_DownloadInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const nav_download = /** @type {((inputs?: Nav_DownloadInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Nav_DownloadInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.nav_download(inputs)
+	return __zh.nav_download(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Contact" |
+*
+* @param {Nav_ContactInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const nav_contact = /** @type {((inputs?: Nav_ContactInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Nav_ContactInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.nav_contact(inputs)
+	return __zh.nav_contact(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Product" |
+*
+* @param {Footer_ProductInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const footer_product = /** @type {((inputs?: Footer_ProductInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Footer_ProductInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.footer_product(inputs)
+	return __zh.footer_product(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Resources" |
+*
+* @param {Footer_ResourcesInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const footer_resources = /** @type {((inputs?: Footer_ResourcesInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Footer_ResourcesInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.footer_resources(inputs)
+	return __zh.footer_resources(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Company" |
+*
+* @param {Footer_CompanyInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const footer_company = /** @type {((inputs?: Footer_CompanyInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Footer_CompanyInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.footer_company(inputs)
+	return __zh.footer_company(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "GitHub" |
+*
+* @param {Footer_GithubInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const footer_github = /** @type {((inputs?: Footer_GithubInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Footer_GithubInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.footer_github(inputs)
+	return __zh.footer_github(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Social links" |
+*
+* @param {Footer_SocialInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const footer_social = /** @type {((inputs?: Footer_SocialInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Footer_SocialInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.footer_social(inputs)
+	return __zh.footer_social(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "A safe, local-first desktop reader for AI-generated MDX and Markdown documents." |
+*
+* @param {Footer_TaglineInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const footer_tagline = /** @type {((inputs?: Footer_TaglineInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Footer_TaglineInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.footer_tagline(inputs)
+	return __zh.footer_tagline(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "All rights reserved." |
+*
+* @param {Footer_RightsInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const footer_rights = /** @type {((inputs?: Footer_RightsInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Footer_RightsInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.footer_rights(inputs)
+	return __zh.footer_rights(inputs)
+});
+/**
+* | output |
+* | --- |
 * | "MDXForge - Preview AI-generated MDX locally" |
 *
 * @param {Home_Meta_TitleInputs} inputs
@@ -253,6 +566,34 @@ export const home_features_link = /** @type {((inputs?: Home_Features_LinkInputs
 /**
 * | output |
 * | --- |
+* | "Everything focused on local AI docs review." |
+*
+* @param {Home_Features_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_features_title = /** @type {((inputs?: Home_Features_TitleInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Features_TitleInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_features_title(inputs)
+	return __zh.home_features_title(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "No SaaS dashboard, no generic editor, no cloud sync. Just a controlled preview target for generated documentation." |
+*
+* @param {Home_Features_DescriptionInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_features_description = /** @type {((inputs?: Home_Features_DescriptionInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Features_DescriptionInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_features_description(inputs)
+	return __zh.home_features_description(inputs)
+});
+/**
+* | output |
+* | --- |
 * | "Open local MDX" |
 *
 * @param {Home_Feature_Local_TitleInputs} inputs
@@ -333,4 +674,158 @@ export const home_feature_safe_description = /** @type {((inputs?: Home_Feature_
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return __en.home_feature_safe_description(inputs)
 	return __zh.home_feature_safe_description(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "A simple AI documentation workflow." |
+*
+* @param {Home_Workflow_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_workflow_title = /** @type {((inputs?: Home_Workflow_TitleInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Workflow_TitleInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_workflow_title(inputs)
+	return __zh.home_workflow_title(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Give AI a clear MDX target, then review the result locally before sharing or publishing." |
+*
+* @param {Home_Workflow_DescriptionInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_workflow_description = /** @type {((inputs?: Home_Workflow_DescriptionInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Workflow_DescriptionInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_workflow_description(inputs)
+	return __zh.home_workflow_description(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Generate structured MDX or Markdown with AI using MDXForge authoring rules." |
+*
+* @param {Home_Workflow_GenerateInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_workflow_generate = /** @type {((inputs?: Home_Workflow_GenerateInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Workflow_GenerateInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_workflow_generate(inputs)
+	return __zh.home_workflow_generate(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Open a local file or folder directly in the desktop app." |
+*
+* @param {Home_Workflow_OpenInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_workflow_open = /** @type {((inputs?: Home_Workflow_OpenInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Workflow_OpenInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_workflow_open(inputs)
+	return __zh.home_workflow_open(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Navigate documents, inspect the outline, validate formatting, and read in a docs-style UI." |
+*
+* @param {Home_Workflow_ReviewInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_workflow_review = /** @type {((inputs?: Home_Workflow_ReviewInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Workflow_ReviewInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_workflow_review(inputs)
+	return __zh.home_workflow_review(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Share the source file or export path with confidence after human review." |
+*
+* @param {Home_Workflow_ShareInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_workflow_share = /** @type {((inputs?: Home_Workflow_ShareInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Workflow_ShareInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_workflow_share(inputs)
+	return __zh.home_workflow_share(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Designed around controlled MDX." |
+*
+* @param {Home_Safety_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_safety_title = /** @type {((inputs?: Home_Safety_TitleInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Safety_TitleInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_safety_title(inputs)
+	return __zh.home_safety_title(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "MDXForge favors a curated component whitelist and predictable rendering over arbitrary runtime capabilities." |
+*
+* @param {Home_Safety_DescriptionInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_safety_description = /** @type {((inputs?: Home_Safety_DescriptionInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Safety_DescriptionInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_safety_description(inputs)
+	return __zh.home_safety_description(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Desktop first, web for discovery." |
+*
+* @param {Home_Download_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_download_title = /** @type {((inputs?: Home_Download_TitleInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Download_TitleInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_download_title(inputs)
+	return __zh.home_download_title(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "The website explains the product. The core experience remains a local desktop app for Windows, macOS, and Linux." |
+*
+* @param {Home_Download_DescriptionInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_download_description = /** @type {((inputs?: Home_Download_DescriptionInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Download_DescriptionInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_download_description(inputs)
+	return __zh.home_download_description(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "View releases" |
+*
+* @param {Home_Download_CtaInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const home_download_cta = /** @type {((inputs?: Home_Download_CtaInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Home_Download_CtaInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.home_download_cta(inputs)
+	return __zh.home_download_cta(inputs)
 });

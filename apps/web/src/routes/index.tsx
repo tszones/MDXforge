@@ -12,10 +12,11 @@ import {
   IconBrandGithub,
   IconDeviceDesktop,
   IconFileTypeTsx,
-  IconShieldCheck
+  IconRoute,
+  IconShieldCheck,
+  IconSparkles
 } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
-import { LanguageSwitcher } from '@/components/language/language-switcher'
 import { m } from '@/paraglide/messages'
 
 export const Route = createFileRoute('/')({
@@ -51,15 +52,21 @@ function getFeatures() {
   ] as const
 }
 
+function getWorkflow() {
+  return [
+    m.home_workflow_generate(),
+    m.home_workflow_open(),
+    m.home_workflow_review(),
+    m.home_workflow_share()
+  ]
+}
+
 function HomePage() {
   const features = getFeatures()
+  const workflow = getWorkflow()
 
   return (
     <main className="min-h-screen overflow-hidden bg-background">
-      <div className="absolute top-4 right-4 z-10 sm:top-6 sm:right-6">
-        <LanguageSwitcher />
-      </div>
-
       <section className="relative border-b">
         <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,oklch(0.74_0.14_181/.18),transparent_34rem)]" />
         <div className="mx-auto flex max-w-6xl flex-col items-center px-6 py-20 text-center sm:py-28">
@@ -94,6 +101,11 @@ function HomePage() {
       </section>
 
       <section id="features" className="mx-auto max-w-6xl px-6 py-16 sm:py-24">
+        <div className="mb-10 max-w-2xl">
+          <p className="text-sm font-medium text-primary">{m.nav_features()}</p>
+          <h2 className="mt-3 text-3xl font-semibold tracking-tight">{m.home_features_title()}</h2>
+          <p className="mt-3 text-muted-foreground">{m.home_features_description()}</p>
+        </div>
         <div className="grid gap-4 md:grid-cols-3">
           {features.map((feature) => {
             const Icon = feature.icon
@@ -113,6 +125,66 @@ function HomePage() {
             )
           })}
         </div>
+      </section>
+
+      <section id="workflow" className="border-y bg-muted/30">
+        <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 sm:py-24 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          <div>
+            <p className="text-sm font-medium text-primary">{m.nav_workflow()}</p>
+            <h2 className="mt-3 text-3xl font-semibold tracking-tight">
+              {m.home_workflow_title()}
+            </h2>
+            <p className="mt-4 text-muted-foreground">{m.home_workflow_description()}</p>
+          </div>
+          <div className="grid gap-3">
+            {workflow.map((item, index) => (
+              <div
+                key={item}
+                className="flex items-start gap-4 rounded-xl border bg-card p-4 shadow-sm"
+              >
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                  {index + 1}
+                </div>
+                <p className="text-sm text-muted-foreground">{item}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="safety"
+        className="mx-auto grid max-w-6xl gap-4 px-6 py-16 sm:py-24 md:grid-cols-2"
+      >
+        <Card className="bg-card/70">
+          <CardHeader>
+            <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <IconShieldCheck className="size-5" />
+            </div>
+            <CardTitle>{m.home_safety_title()}</CardTitle>
+            <CardDescription>{m.home_safety_description()}</CardDescription>
+          </CardHeader>
+        </Card>
+        <Card id="download" className="bg-card/70">
+          <CardHeader>
+            <div className="mb-3 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <IconSparkles className="size-5" />
+            </div>
+            <CardTitle>{m.home_download_title()}</CardTitle>
+            <CardDescription>{m.home_download_description()}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <a
+              href="https://github.com/tszones/MDXforge/releases"
+              target="_blank"
+              rel="noreferrer"
+              className={cn(buttonVariants({ variant: 'outline' }), 'gap-2')}
+            >
+              <IconRoute className="size-4" />
+              {m.home_download_cta()}
+            </a>
+          </CardContent>
+        </Card>
       </section>
     </main>
   )

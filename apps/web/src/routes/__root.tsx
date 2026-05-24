@@ -1,5 +1,8 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
+import { Footer } from '@/components/layout/footer'
+import { Navbar } from '@/components/layout/navbar'
+import { ThemeProvider } from '@/components/theme/theme-provider'
 import { getCurrentLocale } from '@/lib/i18n'
 import { m } from '@/paraglide/messages'
 import appCss from '../styles.css?url'
@@ -33,7 +36,15 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
-  return <Outlet />
+  return (
+    <div className="flex min-h-screen flex-col">
+      <Navbar scroll />
+      <main id="main-content" className="flex-1">
+        <Outlet />
+      </main>
+      <Footer />
+    </div>
+  )
 }
 
 function NotFound() {
@@ -53,7 +64,7 @@ function RootDocument({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
         <Scripts />
       </body>
     </html>

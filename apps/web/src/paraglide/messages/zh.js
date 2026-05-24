@@ -9,6 +9,26 @@
 /** @typedef {{}} Language_SwitcherInputs */
 /** @typedef {{}} Language_EnInputs */
 /** @typedef {{}} Language_ZhInputs */
+/** @typedef {{}} Theme_ToggleInputs */
+/** @typedef {{}} Theme_LightInputs */
+/** @typedef {{}} Theme_DarkInputs */
+/** @typedef {{}} Theme_SystemInputs */
+/** @typedef {{}} Nav_MainInputs */
+/** @typedef {{}} Nav_HomeInputs */
+/** @typedef {{}} Nav_Toggle_MenuInputs */
+/** @typedef {{}} Nav_Mobile_MenuInputs */
+/** @typedef {{}} Nav_FeaturesInputs */
+/** @typedef {{}} Nav_WorkflowInputs */
+/** @typedef {{}} Nav_SafetyInputs */
+/** @typedef {{}} Nav_DownloadInputs */
+/** @typedef {{}} Nav_ContactInputs */
+/** @typedef {{}} Footer_ProductInputs */
+/** @typedef {{}} Footer_ResourcesInputs */
+/** @typedef {{}} Footer_CompanyInputs */
+/** @typedef {{}} Footer_GithubInputs */
+/** @typedef {{}} Footer_SocialInputs */
+/** @typedef {{}} Footer_TaglineInputs */
+/** @typedef {{}} Footer_RightsInputs */
 /** @typedef {{}} Home_Meta_TitleInputs */
 /** @typedef {{}} Home_Meta_DescriptionInputs */
 /** @typedef {{}} Home_BadgeInputs */
@@ -16,12 +36,25 @@
 /** @typedef {{}} Home_DescriptionInputs */
 /** @typedef {{}} Home_GithubInputs */
 /** @typedef {{}} Home_Features_LinkInputs */
+/** @typedef {{}} Home_Features_TitleInputs */
+/** @typedef {{}} Home_Features_DescriptionInputs */
 /** @typedef {{}} Home_Feature_Local_TitleInputs */
 /** @typedef {{}} Home_Feature_Local_DescriptionInputs */
 /** @typedef {{}} Home_Feature_Docs_TitleInputs */
 /** @typedef {{}} Home_Feature_Docs_DescriptionInputs */
 /** @typedef {{}} Home_Feature_Safe_TitleInputs */
 /** @typedef {{}} Home_Feature_Safe_DescriptionInputs */
+/** @typedef {{}} Home_Workflow_TitleInputs */
+/** @typedef {{}} Home_Workflow_DescriptionInputs */
+/** @typedef {{}} Home_Workflow_GenerateInputs */
+/** @typedef {{}} Home_Workflow_OpenInputs */
+/** @typedef {{}} Home_Workflow_ReviewInputs */
+/** @typedef {{}} Home_Workflow_ShareInputs */
+/** @typedef {{}} Home_Safety_TitleInputs */
+/** @typedef {{}} Home_Safety_DescriptionInputs */
+/** @typedef {{}} Home_Download_TitleInputs */
+/** @typedef {{}} Home_Download_DescriptionInputs */
+/** @typedef {{}} Home_Download_CtaInputs */
 
 
 export const site_name = /** @type {(inputs: Site_NameInputs) => LocalizedString} */ () => {
@@ -60,6 +93,86 @@ export const language_zh = /** @type {(inputs: Language_ZhInputs) => LocalizedSt
 	return /** @type {LocalizedString} */ (`中文`)
 };
 
+export const theme_toggle = /** @type {(inputs: Theme_ToggleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`切换主题`)
+};
+
+export const theme_light = /** @type {(inputs: Theme_LightInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`浅色`)
+};
+
+export const theme_dark = /** @type {(inputs: Theme_DarkInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`深色`)
+};
+
+export const theme_system = /** @type {(inputs: Theme_SystemInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`跟随系统`)
+};
+
+export const nav_main = /** @type {(inputs: Nav_MainInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`主导航`)
+};
+
+export const nav_home = /** @type {(inputs: Nav_HomeInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`首页`)
+};
+
+export const nav_toggle_menu = /** @type {(inputs: Nav_Toggle_MenuInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`打开或关闭菜单`)
+};
+
+export const nav_mobile_menu = /** @type {(inputs: Nav_Mobile_MenuInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`移动端导航`)
+};
+
+export const nav_features = /** @type {(inputs: Nav_FeaturesInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`功能`)
+};
+
+export const nav_workflow = /** @type {(inputs: Nav_WorkflowInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`工作流`)
+};
+
+export const nav_safety = /** @type {(inputs: Nav_SafetyInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`安全`)
+};
+
+export const nav_download = /** @type {(inputs: Nav_DownloadInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`下载`)
+};
+
+export const nav_contact = /** @type {(inputs: Nav_ContactInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`联系`)
+};
+
+export const footer_product = /** @type {(inputs: Footer_ProductInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`产品`)
+};
+
+export const footer_resources = /** @type {(inputs: Footer_ResourcesInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`资源`)
+};
+
+export const footer_company = /** @type {(inputs: Footer_CompanyInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`公司`)
+};
+
+export const footer_github = /** @type {(inputs: Footer_GithubInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`GitHub`)
+};
+
+export const footer_social = /** @type {(inputs: Footer_SocialInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`社交链接`)
+};
+
+export const footer_tagline = /** @type {(inputs: Footer_TaglineInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`一个安全、本地优先的桌面阅读器，用于阅读 AI 生成的 MDX 和 Markdown 文档。`)
+};
+
+export const footer_rights = /** @type {(inputs: Footer_RightsInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`保留所有权利。`)
+};
+
 export const home_meta_title = /** @type {(inputs: Home_Meta_TitleInputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`MDXForge - 在本地预览 AI 生成的 MDX`)
 };
@@ -88,6 +201,14 @@ export const home_features_link = /** @type {(inputs: Home_Features_LinkInputs) 
 	return /** @type {LocalizedString} */ (`了解功能`)
 };
 
+export const home_features_title = /** @type {(inputs: Home_Features_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`所有能力都聚焦本地 AI 文档审阅。`)
+};
+
+export const home_features_description = /** @type {(inputs: Home_Features_DescriptionInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`不做 SaaS 控制台，不做通用编辑器，不做云同步。只给生成式文档一个可控的预览目标。`)
+};
+
 export const home_feature_local_title = /** @type {(inputs: Home_Feature_Local_TitleInputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`打开本地 MDX`)
 };
@@ -110,4 +231,48 @@ export const home_feature_safe_title = /** @type {(inputs: Home_Feature_Safe_Tit
 
 export const home_feature_safe_description = /** @type {(inputs: Home_Feature_Safe_DescriptionInputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`使用经过约束的组件集合，让生成的 MDX 更安全、可预测、便于审阅。`)
+};
+
+export const home_workflow_title = /** @type {(inputs: Home_Workflow_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`一条简单的 AI 文档工作流。`)
+};
+
+export const home_workflow_description = /** @type {(inputs: Home_Workflow_DescriptionInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`给 AI 一个明确的 MDX 输出目标，然后在本地审阅结果，再决定是否分享或发布。`)
+};
+
+export const home_workflow_generate = /** @type {(inputs: Home_Workflow_GenerateInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`让 AI 按 MDXForge 写作规则生成结构化 MDX 或 Markdown。`)
+};
+
+export const home_workflow_open = /** @type {(inputs: Home_Workflow_OpenInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`在桌面应用中直接打开本地文件或文件夹。`)
+};
+
+export const home_workflow_review = /** @type {(inputs: Home_Workflow_ReviewInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`切换文档、查看大纲、检查格式，并用文档站式界面阅读。`)
+};
+
+export const home_workflow_share = /** @type {(inputs: Home_Workflow_ShareInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`人工审阅后，再放心分享源文件或导出路径。`)
+};
+
+export const home_safety_title = /** @type {(inputs: Home_Safety_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`围绕受控 MDX 设计。`)
+};
+
+export const home_safety_description = /** @type {(inputs: Home_Safety_DescriptionInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`MDXForge 优先选择组件白名单和可预测渲染，而不是开放任意运行能力。`)
+};
+
+export const home_download_title = /** @type {(inputs: Home_Download_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`桌面优先，官网用于介绍。`)
+};
+
+export const home_download_description = /** @type {(inputs: Home_Download_DescriptionInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`官网负责解释产品；核心体验仍然是面向 Windows、macOS 和 Linux 的本地桌面应用。`)
+};
+
+export const home_download_cta = /** @type {(inputs: Home_Download_CtaInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`查看发布版本`)
 };
