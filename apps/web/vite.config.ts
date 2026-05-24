@@ -14,7 +14,8 @@ export default defineConfig(async () => ({
   },
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+      'node:path': fileURLToPath(new URL('./src/lib/node-path-browser.ts', import.meta.url))
     }
   },
   plugins: [
