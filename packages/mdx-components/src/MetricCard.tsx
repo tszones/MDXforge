@@ -1,6 +1,6 @@
 import { cn } from '@mdxforge/ui/lib/utils'
 
-type MetricCardProps = {
+export type MetricCardProps = {
   label: string
   value: string | number
   description?: string

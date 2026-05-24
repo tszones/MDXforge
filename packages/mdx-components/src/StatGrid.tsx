@@ -1,7 +1,7 @@
 import { cn } from '@mdxforge/ui/lib/utils'
-import { MetricCard } from './MetricCard'
+import { MetricCard } from './MetricCard.js'
 
-type StatGridItem = {
+export type StatGridItem = {
   label: string
   value: string | number
   description?: string
@@ -9,7 +9,7 @@ type StatGridItem = {
   tone?: 'default' | 'positive' | 'negative' | 'neutral'
 }
 
-type StatGridProps = {
+export type StatGridProps = {
   items: StatGridItem[]
   columns?: 2 | 3 | 4
 }

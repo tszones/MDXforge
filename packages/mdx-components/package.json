@@ -1,0 +1,38 @@
+{
+  "name": "@mdxforge/mdx-components",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Shared MDX component whitelist for MDXForge apps",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.tsx"
+  },
+  "scripts": {
+    "format": "biome format --write .",
+    "lint": "biome ci .",
+    "lint:fix": "biome check --write .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "build": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@mdxforge/ui": "workspace:*",
+    "@tabler/icons-react": "catalog:",
+    "fumadocs-twoslash": "^3.2.0",
+    "fumadocs-ui": "^16.9.0",
+    "mermaid": "^11.15.0",
+    "recharts": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:"
+  }
+}

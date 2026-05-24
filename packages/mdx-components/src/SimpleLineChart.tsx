@@ -7,13 +7,13 @@ import {
 import { cn } from '@mdxforge/ui/lib/utils'
 import { CartesianGrid, LabelList, Line, LineChart, XAxis, YAxis } from 'recharts'
 
-type ChartPoint = {
+export type LineChartPoint = {
   name: string
   value: number
 }
 
-type SimpleLineChartProps = {
-  data: ChartPoint[]
+export type SimpleLineChartProps = {
+  data: LineChartPoint[]
   title?: string
   description?: string
   unit?: string

@@ -1,11 +1,10 @@
 import { cn } from '@mdxforge/ui/lib/utils'
 import { IconAlertTriangle, IconCircle, IconCircleCheck, IconClock } from '@tabler/icons-react'
 import type { ReactNode } from 'react'
-import { m } from '../paraglide/messages'
 
-type TodoStatus = 'todo' | 'active' | 'done' | 'blocked'
+export type TodoStatus = 'todo' | 'active' | 'done' | 'blocked'
 
-type TodoListProps = {
+export type TodoListProps = {
   id?: string
   className?: string
   title?: string
@@ -13,12 +12,19 @@ type TodoListProps = {
   children?: ReactNode
 }
 
-type TodoProps = {
+export type TodoProps = {
   id?: string
   className?: string
   checked?: boolean
   status?: TodoStatus
   children?: ReactNode
+}
+
+const statusAriaLabels: Record<TodoStatus, string> = {
+  todo: 'Todo',
+  active: 'Active',
+  done: 'Done',
+  blocked: 'Blocked'
 }
 
 const statusStyles: Record<
@@ -28,7 +34,7 @@ const statusStyles: Record<
     marker: string
     content: string
     icon: typeof IconCircle
-    ariaLabel: () => string
+    ariaLabel: string
   }
 > = {
   todo: {
@@ -36,28 +42,28 @@ const statusStyles: Record<
     marker: 'border-fd-border text-fd-muted-foreground',
     content: 'text-fd-card-foreground',
     icon: IconCircle,
-    ariaLabel: () => m.todo_status_todo()
+    ariaLabel: statusAriaLabels.todo
   },
   active: {
     item: 'border-fd-primary/30 bg-fd-primary/5',
     marker: 'border-fd-primary/30 text-fd-primary',
     content: 'text-fd-card-foreground',
     icon: IconClock,
-    ariaLabel: () => m.todo_status_active()
+    ariaLabel: statusAriaLabels.active
   },
   done: {
     item: 'border-emerald-500/25 bg-emerald-500/10',
     marker: 'border-emerald-500/30 bg-emerald-500 text-white dark:text-emerald-950',
     content: 'text-fd-muted-foreground line-through decoration-emerald-500/55',
     icon: IconCircleCheck,
-    ariaLabel: () => m.todo_status_done()
+    ariaLabel: statusAriaLabels.done
   },
   blocked: {
     item: 'border-red-500/25 bg-red-500/10',
     marker: 'border-red-500/30 text-red-600 dark:text-red-400',
     content: 'text-fd-card-foreground',
     icon: IconAlertTriangle,
-    ariaLabel: () => m.todo_status_blocked()
+    ariaLabel: statusAriaLabels.blocked
   }
 }
 
@@ -102,7 +108,7 @@ export function Todo({ id, checked, status, children, className }: TodoProps) {
       )}
     >
       <span
-        aria-label={styles.ariaLabel()}
+        aria-label={styles.ariaLabel}
         role="img"
         className={cn(
           'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border',

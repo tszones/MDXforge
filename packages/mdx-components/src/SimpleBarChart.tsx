@@ -7,12 +7,12 @@ import {
 import { cn } from '@mdxforge/ui/lib/utils'
 import { Bar, BarChart, CartesianGrid, LabelList, XAxis, YAxis } from 'recharts'
 
-type ChartPoint = {
+export type ChartPoint = {
   name: string
   value: number
 }
 
-type SimpleBarChartProps = {
+export type SimpleBarChartProps = {
   data: ChartPoint[]
   title?: string
   description?: string

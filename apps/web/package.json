@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@mdxforge/mdx": "workspace:*",
+    "@mdxforge/mdx-components": "workspace:*",
     "@mdxforge/ui": "workspace:*",
     "@react-email/components": "catalog:email",
     "@tabler/icons-react": "catalog:",
