@@ -12,6 +12,7 @@ import {
   setAppSettings
 } from './settings'
 import { searchMdxWorkspaceFiles } from './workspace-search'
+import { addLocalSkillFolder, createLocalSkill, readWorkspaceSkills, type SkillType } from './skills'
 
 export function registerAppIpc(options: {
   getMainWindow: () => BrowserWindow | null
@@ -112,6 +113,16 @@ export function registerAppIpc(options: {
   ipcMain.handle('mdx:search-workspace', async (_, workspaceRoot: string, query: string) => {
     const folder = readMdxFolder(workspaceRoot)
     return searchMdxWorkspaceFiles(folder.files, query)
+  })
+  ipcMain.handle('skills:get-workspace', (_, workspaceRoot: string) => readWorkspaceSkills(workspaceRoot))
+  ipcMain.handle('skills:add-local-folder', async (_, workspaceRoot: string) =>
+    addLocalSkillFolder(workspaceRoot)
+  )
+  ipcMain.handle('skills:create-local', (_, workspaceRoot: string, name: string, type: SkillType) =>
+    createLocalSkill(workspaceRoot, name, type)
+  )
+  ipcMain.handle('skills:copy-rules', (_, rules: string) => {
+    clipboard.writeText(rules)
   })
   ipcMain.handle('mdx:register-default-app', () => app.setAsDefaultProtocolClient('mdx'))
   ipcMain.handle('mdx:is-default-app', () => app.isDefaultProtocolClient('mdx'))

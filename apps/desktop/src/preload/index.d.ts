@@ -120,6 +120,27 @@ export interface WorkspaceExtensionManifest {
   warnings: WorkspaceExtensionWarning[]
 }
 
+export interface WorkspaceSkillsState {
+  workspaceRoot: string
+  skills: WorkspaceSkill[]
+  mergedRules: string
+}
+
+export interface WorkspaceSkill {
+  source: string
+  kind: 'workspace' | 'npm' | 'git' | 'unknown'
+  status: 'active' | 'disabled' | 'missing' | 'invalid' | 'unsupported' | 'blocked'
+  name: string
+  title: string
+  version: string
+  types: Array<'writing' | 'component' | 'template' | 'transform'>
+  rootPath?: string
+  rules: Array<{ path: string; content: string }>
+  components: string[]
+  permissions: string[]
+  reason?: string
+}
+
 export interface MdxWorkspace {
   file: MdxFile
   folder?: MdxFolder
@@ -188,6 +209,14 @@ export interface AppAPI {
   copyMdxRawSource: (filePath: string) => Promise<void>
   searchMdxWorkspace: (workspaceRoot: string, query: string) => Promise<MdxWorkspaceSearchResult[]>
   setWorkspaceExtensionsEnabled: (enabled: boolean, trustKey?: string) => Promise<boolean>
+  getWorkspaceSkills: (workspaceRoot: string) => Promise<WorkspaceSkillsState>
+  addLocalSkillFolder: (workspaceRoot: string) => Promise<WorkspaceSkillsState | null>
+  createLocalSkill: (
+    workspaceRoot: string,
+    name: string,
+    type: 'writing' | 'component' | 'template' | 'transform'
+  ) => Promise<WorkspaceSkillsState>
+  copySkillRules: (rules: string) => Promise<void>
   registerDefaultMdxApp: () => Promise<boolean>
   isDefaultMdxApp: () => Promise<boolean>
   getSettings: () => Promise<AppSettings>

@@ -126,6 +126,27 @@ export interface WorkspaceExtensionManifest {
   warnings: WorkspaceExtensionWarning[]
 }
 
+export interface WorkspaceSkillsState {
+  workspaceRoot: string
+  skills: WorkspaceSkill[]
+  mergedRules: string
+}
+
+export interface WorkspaceSkill {
+  source: string
+  kind: 'workspace' | 'npm' | 'git' | 'unknown'
+  status: 'active' | 'disabled' | 'missing' | 'invalid' | 'unsupported' | 'blocked'
+  name: string
+  title: string
+  version: string
+  types: Array<'writing' | 'component' | 'template' | 'transform'>
+  rootPath?: string
+  rules: Array<{ path: string; content: string }>
+  components: string[]
+  permissions: string[]
+  reason?: string
+}
+
 export interface MdxWorkspace {
   file: MdxFile
   folder?: MdxFolder

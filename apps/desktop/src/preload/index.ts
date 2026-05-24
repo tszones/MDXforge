@@ -18,6 +18,11 @@ const api = {
     ipcRenderer.invoke('mdx:search-workspace', workspaceRoot, query),
   setWorkspaceExtensionsEnabled: (enabled: boolean, trustKey?: string) =>
     ipcRenderer.invoke('mdx:set-workspace-extensions-enabled', enabled, trustKey),
+  getWorkspaceSkills: (workspaceRoot: string) => ipcRenderer.invoke('skills:get-workspace', workspaceRoot),
+  addLocalSkillFolder: (workspaceRoot: string) => ipcRenderer.invoke('skills:add-local-folder', workspaceRoot),
+  createLocalSkill: (workspaceRoot: string, name: string, type: string) =>
+    ipcRenderer.invoke('skills:create-local', workspaceRoot, name, type),
+  copySkillRules: (rules: string) => ipcRenderer.invoke('skills:copy-rules', rules),
   registerDefaultMdxApp: () => ipcRenderer.invoke('mdx:register-default-app'),
   isDefaultMdxApp: () => ipcRenderer.invoke('mdx:is-default-app'),
   getSettings: () => ipcRenderer.invoke('settings:get'),

@@ -263,6 +263,7 @@ function AppContent({
         onModeChange={onColorModeChange}
         onLanguageChange={onLanguageChange}
         onFontChange={onFontChange}
+        workspaceRoot={workspace?.folder?.rootPath}
         onBack={() => navigate('/')}
       />
     )
@@ -348,6 +349,7 @@ function AppContent({
         <Route path="/settings/language" element={renderSettingsRoute('language')} />
         <Route path="/settings/appearance" element={renderSettingsRoute('appearance')} />
         <Route path="/settings/updates" element={renderSettingsRoute('updates')} />
+        <Route path="/settings/skills" element={renderSettingsRoute('skills')} />
         <Route path="/settings/*" element={<Navigate to="/settings/language" replace />} />
         <Route path="*" element={previewRoute} />
       </Routes>
