@@ -17,6 +17,7 @@ import {
   IconSparkles
 } from '@tabler/icons-react'
 import { createFileRoute } from '@tanstack/react-router'
+import { SITE_URL } from '@/config/seo'
 import { m } from '@/paraglide/messages'
 
 export const Route = createFileRoute('/')({
@@ -26,6 +27,18 @@ export const Route = createFileRoute('/')({
       {
         name: 'description',
         content: m.home_meta_description()
+      },
+      {
+        property: 'og:title',
+        content: m.home_meta_title()
+      },
+      {
+        property: 'og:description',
+        content: m.home_meta_description()
+      },
+      {
+        property: 'og:url',
+        content: SITE_URL
       }
     ]
   }),

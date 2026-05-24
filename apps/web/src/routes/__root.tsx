@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { Footer } from '@/components/layout/footer'
 import { Navbar } from '@/components/layout/navbar'
 import { ThemeProvider } from '@/components/theme/theme-provider'
+import { absoluteUrl, SEO_DEFAULT_KEYWORDS, SITE_URL } from '@/config/seo'
 import { getCurrentLocale } from '@/lib/i18n'
 import { m } from '@/paraglide/messages'
 import appCss from '../styles.css?url'
@@ -21,6 +22,58 @@ export const Route = createRootRoute({
       {
         name: 'description',
         content: m.site_description()
+      },
+      {
+        name: 'keywords',
+        content: SEO_DEFAULT_KEYWORDS.join(', ')
+      },
+      {
+        name: 'robots',
+        content: 'index, follow'
+      },
+      {
+        name: 'theme-color',
+        content: '#8a05ff'
+      },
+      {
+        property: 'og:type',
+        content: 'website'
+      },
+      {
+        property: 'og:site_name',
+        content: m.site_name()
+      },
+      {
+        property: 'og:title',
+        content: m.site_title()
+      },
+      {
+        property: 'og:description',
+        content: m.site_description()
+      },
+      {
+        property: 'og:url',
+        content: SITE_URL
+      },
+      {
+        property: 'og:image',
+        content: absoluteUrl('/logo.png')
+      },
+      {
+        name: 'twitter:card',
+        content: 'summary_large_image'
+      },
+      {
+        name: 'twitter:title',
+        content: m.site_title()
+      },
+      {
+        name: 'twitter:description',
+        content: m.site_description()
+      },
+      {
+        name: 'twitter:image',
+        content: absoluteUrl('/logo.png')
       }
     ],
     links: [
@@ -31,6 +84,29 @@ export const Route = createRootRoute({
       {
         rel: 'apple-touch-icon',
         href: '/logo.png'
+      },
+      {
+        rel: 'manifest',
+        href: '/site.webmanifest'
+      },
+      {
+        rel: 'canonical',
+        href: SITE_URL
+      },
+      {
+        rel: 'alternate',
+        hrefLang: 'en',
+        href: `${SITE_URL}/en`
+      },
+      {
+        rel: 'alternate',
+        hrefLang: 'zh',
+        href: `${SITE_URL}/zh`
+      },
+      {
+        rel: 'alternate',
+        hrefLang: 'x-default',
+        href: SITE_URL
       },
       {
         rel: 'stylesheet',

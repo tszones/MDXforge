@@ -3,6 +3,7 @@ import { DocsLayout } from 'fumadocs-ui/layouts/docs'
 import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/layouts/docs/page'
 import { getMDXComponents } from '@/components/docs/mdx-components'
 import { Logo } from '@/components/shared/logo'
+import { SITE_URL } from '@/config/seo'
 import { source } from '@/lib/source'
 import { m } from '@/paraglide/messages'
 
@@ -13,6 +14,18 @@ export const Route = createFileRoute('/docs/$')({
       {
         name: 'description',
         content: m.site_description()
+      },
+      {
+        property: 'og:title',
+        content: `${m.nav_docs()} · ${m.site_title()}`
+      },
+      {
+        property: 'og:description',
+        content: m.site_description()
+      },
+      {
+        property: 'og:url',
+        content: `${SITE_URL}/docs`
       }
     ]
   }),

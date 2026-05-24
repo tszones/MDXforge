@@ -14,6 +14,18 @@
   // TanStack Start custom server entry.
   "main": "./src/server.ts",
 
+  // Public custom domains. DNS must be on Cloudflare for these to activate.
+  "routes": [
+    {
+      "pattern": "mdxforge.dev",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.mdxforge.dev",
+      "custom_domain": true
+    }
+  ],
+
   // Keep manually configured dashboard vars/secrets across deploys.
   "keep_vars": true,
 
@@ -22,12 +34,13 @@
       "enabled": true,
       "invocation_logs": true
     }
-  },
+  }
 
-  "r2_buckets": [
-    {
-      "binding": "PUBLIC_DOWNLOADS",
-      "bucket_name": "mdxforge-public-downloads"
-    }
-  ]
+  // Downloads can be enabled later when the deploy token has R2 permissions.
+  // "r2_buckets": [
+  //   {
+  //     "binding": "PUBLIC_DOWNLOADS",
+  //     "bucket_name": "mdxforge-public-downloads"
+  //   }
+  // ]
 }

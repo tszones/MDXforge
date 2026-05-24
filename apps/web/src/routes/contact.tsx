@@ -6,6 +6,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { ContactFormCard } from '@/components/contact/contact-form-card'
 import Container from '@/components/layout/container'
 import { Logo } from '@/components/shared/logo'
+import { SITE_URL } from '@/config/seo'
 import { websiteConfig } from '@/config/website'
 import { getMailtoUrl } from '@/lib/urls'
 import { m } from '@/paraglide/messages'
@@ -17,6 +18,18 @@ export const Route = createFileRoute('/contact')({
       {
         name: 'description',
         content: m.contact_meta_description()
+      },
+      {
+        property: 'og:title',
+        content: m.contact_meta_title()
+      },
+      {
+        property: 'og:description',
+        content: m.contact_meta_description()
+      },
+      {
+        property: 'og:url',
+        content: `${SITE_URL}/contact`
       }
     ]
   }),
