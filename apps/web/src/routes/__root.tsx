@@ -1,4 +1,10 @@
-import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
+import {
+  createRootRoute,
+  HeadContent,
+  Outlet,
+  Scripts,
+  useRouterState
+} from '@tanstack/react-router'
 import { RootProvider as FumadocsProvider } from 'fumadocs-ui/provider/tanstack'
 import type { ReactNode } from 'react'
 import { Footer } from '@/components/layout/footer'
@@ -121,6 +127,11 @@ export const Route = createRootRoute({
 })
 
 function RootComponent() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const isDocsRoute = /^\/(en|zh)?\/?docs(?:\/|$)/.test(pathname)
+
+  if (isDocsRoute) return <Outlet />
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar scroll />
