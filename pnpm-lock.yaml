@@ -193,6 +193,9 @@ importers:
       '@cloudflare/vite-plugin':
         specifier: ^1.13.8
         version: 1.38.0(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))(workerd@1.20260521.1)(wrangler@4.94.0)
+      '@inlang/paraglide-js':
+        specifier: ^2.18.1
+        version: 2.18.1(typescript@5.9.3)
       '@tailwindcss/vite':
         specifier: ^4.3.0
         version: 4.3.0(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))

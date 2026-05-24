@@ -4,11 +4,14 @@
   "files": {
     "includes": [
       "src/**",
+      "messages/**",
       "*.ts",
       "*.json",
       "*.jsonc",
       "*.md",
       "!src/routeTree.gen.ts",
+      "!src/paraglide",
+      "!project.inlang",
       "!worker-configuration.d.ts",
       "!dist",
       "!node_modules"

@@ -1,4 +1,5 @@
 import handler from '@tanstack/react-start/server-entry'
+import { paraglideMiddleware } from './paraglide/server'
 
 /**
  * Cloudflare Workers entry for the MDXForge website.
@@ -10,6 +11,6 @@ export default {
     void env
     void ctx
 
-    return handler.fetch(request)
+    return paraglideMiddleware(request, () => handler.fetch(request))
   }
 }

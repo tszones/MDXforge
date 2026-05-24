@@ -20,7 +20,7 @@
       "cache": false
     },
     "paraglide:compile": {
-      "outputs": ["src/renderer/src/paraglide/**"]
+      "outputs": ["src/renderer/src/paraglide/**", "src/paraglide/**"]
     },
     "typecheck:node": {
       "outputs": []
