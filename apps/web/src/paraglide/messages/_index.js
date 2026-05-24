@@ -57,6 +57,26 @@ import { getLocale, experimentalStaticLocale } from "../runtime.js"
 /** @typedef {{}} Home_Download_TitleInputs */
 /** @typedef {{}} Home_Download_DescriptionInputs */
 /** @typedef {{}} Home_Download_CtaInputs */
+/** @typedef {{}} Contact_Meta_TitleInputs */
+/** @typedef {{}} Contact_Meta_DescriptionInputs */
+/** @typedef {{}} Contact_TitleInputs */
+/** @typedef {{}} Contact_DescriptionInputs */
+/** @typedef {{}} Contact_Email_TitleInputs */
+/** @typedef {{}} Contact_Email_DescriptionInputs */
+/** @typedef {{}} Contact_Form_TitleInputs */
+/** @typedef {{}} Contact_NameInputs */
+/** @typedef {{}} Contact_EmailInputs */
+/** @typedef {{}} Contact_MessageInputs */
+/** @typedef {{}} Contact_SendInputs */
+/** @typedef {{}} Contact_SendingInputs */
+/** @typedef {{}} Contact_SuccessInputs */
+/** @typedef {{}} Contact_ErrorInputs */
+/** @typedef {{}} Contact_Email_CtaInputs */
+/** @typedef {{}} Contact_Github_CtaInputs */
+/** @typedef {{}} Mail_Contact_SubjectInputs */
+/** @typedef {{}} Mail_Contact_NameInputs */
+/** @typedef {{}} Mail_Contact_EmailInputs */
+/** @typedef {{}} Mail_Contact_MessageInputs */
 import * as __en from "./en.js"
 import * as __zh from "./zh.js"
 /**
@@ -828,4 +848,284 @@ export const home_download_cta = /** @type {((inputs?: Home_Download_CtaInputs, 
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return __en.home_download_cta(inputs)
 	return __zh.home_download_cta(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Contact MDXForge" |
+*
+* @param {Contact_Meta_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_meta_title = /** @type {((inputs?: Contact_Meta_TitleInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_Meta_TitleInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_meta_title(inputs)
+	return __zh.contact_meta_title(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Contact the MDXForge team for product questions, docs workflow feedback, and local MDX preview suggestions." |
+*
+* @param {Contact_Meta_DescriptionInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_meta_description = /** @type {((inputs?: Contact_Meta_DescriptionInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_Meta_DescriptionInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_meta_description(inputs)
+	return __zh.contact_meta_description(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Tell us how you review AI-generated docs." |
+*
+* @param {Contact_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_title = /** @type {((inputs?: Contact_TitleInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_TitleInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_title(inputs)
+	return __zh.contact_title(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Questions, feedback, and workflow notes are welcome. MDXForge stays focused on local MDX and Markdown preview for AI documentation." |
+*
+* @param {Contact_DescriptionInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_description = /** @type {((inputs?: Contact_DescriptionInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_DescriptionInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_description(inputs)
+	return __zh.contact_description(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Email the MDXForge team" |
+*
+* @param {Contact_Email_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_email_title = /** @type {((inputs?: Contact_Email_TitleInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_Email_TitleInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_email_title(inputs)
+	return __zh.contact_email_title(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Use email for product feedback, bug reports, and collaboration ideas. No account or cloud workspace required." |
+*
+* @param {Contact_Email_DescriptionInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_email_description = /** @type {((inputs?: Contact_Email_DescriptionInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_Email_DescriptionInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_email_description(inputs)
+	return __zh.contact_email_description(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Send a message" |
+*
+* @param {Contact_Form_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_form_title = /** @type {((inputs?: Contact_Form_TitleInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_Form_TitleInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_form_title(inputs)
+	return __zh.contact_form_title(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Name" |
+*
+* @param {Contact_NameInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_name = /** @type {((inputs?: Contact_NameInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_NameInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_name(inputs)
+	return __zh.contact_name(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Email" |
+*
+* @param {Contact_EmailInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_email = /** @type {((inputs?: Contact_EmailInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_EmailInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_email(inputs)
+	return __zh.contact_email(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Message" |
+*
+* @param {Contact_MessageInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_message = /** @type {((inputs?: Contact_MessageInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_MessageInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_message(inputs)
+	return __zh.contact_message(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Send message" |
+*
+* @param {Contact_SendInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_send = /** @type {((inputs?: Contact_SendInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_SendInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_send(inputs)
+	return __zh.contact_send(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Sending..." |
+*
+* @param {Contact_SendingInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_sending = /** @type {((inputs?: Contact_SendingInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_SendingInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_sending(inputs)
+	return __zh.contact_sending(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Thanks, your message was sent." |
+*
+* @param {Contact_SuccessInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_success = /** @type {((inputs?: Contact_SuccessInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_SuccessInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_success(inputs)
+	return __zh.contact_success(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Failed to send the message. Please try again later." |
+*
+* @param {Contact_ErrorInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_error = /** @type {((inputs?: Contact_ErrorInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_ErrorInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_error(inputs)
+	return __zh.contact_error(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Open email app" |
+*
+* @param {Contact_Email_CtaInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_email_cta = /** @type {((inputs?: Contact_Email_CtaInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_Email_CtaInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_email_cta(inputs)
+	return __zh.contact_email_cta(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Open GitHub" |
+*
+* @param {Contact_Github_CtaInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_github_cta = /** @type {((inputs?: Contact_Github_CtaInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Contact_Github_CtaInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.contact_github_cta(inputs)
+	return __zh.contact_github_cta(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "New MDXForge contact message" |
+*
+* @param {Mail_Contact_SubjectInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const mail_contact_subject = /** @type {((inputs?: Mail_Contact_SubjectInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Mail_Contact_SubjectInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.mail_contact_subject(inputs)
+	return __zh.mail_contact_subject(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Name:" |
+*
+* @param {Mail_Contact_NameInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const mail_contact_name = /** @type {((inputs?: Mail_Contact_NameInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Mail_Contact_NameInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.mail_contact_name(inputs)
+	return __zh.mail_contact_name(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Email:" |
+*
+* @param {Mail_Contact_EmailInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const mail_contact_email = /** @type {((inputs?: Mail_Contact_EmailInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Mail_Contact_EmailInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.mail_contact_email(inputs)
+	return __zh.mail_contact_email(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Message:" |
+*
+* @param {Mail_Contact_MessageInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const mail_contact_message = /** @type {((inputs?: Mail_Contact_MessageInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Mail_Contact_MessageInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.mail_contact_message(inputs)
+	return __zh.mail_contact_message(inputs)
 });

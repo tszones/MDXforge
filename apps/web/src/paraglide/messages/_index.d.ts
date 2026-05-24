@@ -768,6 +768,286 @@ export const home_download_cta: ((inputs?: Home_Download_CtaInputs, options?: {
 }) => LocalizedString) & import("../runtime.js").MessageMetadata<Home_Download_CtaInputs, {
     locale?: "en" | "zh";
 }, {}>;
+/**
+* | output |
+* | --- |
+* | "Contact MDXForge" |
+*
+* @param {Contact_Meta_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_meta_title: ((inputs?: Contact_Meta_TitleInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_Meta_TitleInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Contact the MDXForge team for product questions, docs workflow feedback, and local MDX preview suggestions." |
+*
+* @param {Contact_Meta_DescriptionInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_meta_description: ((inputs?: Contact_Meta_DescriptionInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_Meta_DescriptionInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Tell us how you review AI-generated docs." |
+*
+* @param {Contact_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_title: ((inputs?: Contact_TitleInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_TitleInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Questions, feedback, and workflow notes are welcome. MDXForge stays focused on local MDX and Markdown preview for AI documentation." |
+*
+* @param {Contact_DescriptionInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_description: ((inputs?: Contact_DescriptionInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_DescriptionInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Email the MDXForge team" |
+*
+* @param {Contact_Email_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_email_title: ((inputs?: Contact_Email_TitleInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_Email_TitleInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Use email for product feedback, bug reports, and collaboration ideas. No account or cloud workspace required." |
+*
+* @param {Contact_Email_DescriptionInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_email_description: ((inputs?: Contact_Email_DescriptionInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_Email_DescriptionInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Send a message" |
+*
+* @param {Contact_Form_TitleInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_form_title: ((inputs?: Contact_Form_TitleInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_Form_TitleInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Name" |
+*
+* @param {Contact_NameInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_name: ((inputs?: Contact_NameInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_NameInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Email" |
+*
+* @param {Contact_EmailInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_email: ((inputs?: Contact_EmailInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_EmailInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Message" |
+*
+* @param {Contact_MessageInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_message: ((inputs?: Contact_MessageInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_MessageInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Send message" |
+*
+* @param {Contact_SendInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_send: ((inputs?: Contact_SendInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_SendInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Sending..." |
+*
+* @param {Contact_SendingInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_sending: ((inputs?: Contact_SendingInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_SendingInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Thanks, your message was sent." |
+*
+* @param {Contact_SuccessInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_success: ((inputs?: Contact_SuccessInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_SuccessInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Failed to send the message. Please try again later." |
+*
+* @param {Contact_ErrorInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_error: ((inputs?: Contact_ErrorInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_ErrorInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Open email app" |
+*
+* @param {Contact_Email_CtaInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_email_cta: ((inputs?: Contact_Email_CtaInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_Email_CtaInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Open GitHub" |
+*
+* @param {Contact_Github_CtaInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const contact_github_cta: ((inputs?: Contact_Github_CtaInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Contact_Github_CtaInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "New MDXForge contact message" |
+*
+* @param {Mail_Contact_SubjectInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const mail_contact_subject: ((inputs?: Mail_Contact_SubjectInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Mail_Contact_SubjectInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Name:" |
+*
+* @param {Mail_Contact_NameInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const mail_contact_name: ((inputs?: Mail_Contact_NameInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Mail_Contact_NameInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Email:" |
+*
+* @param {Mail_Contact_EmailInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const mail_contact_email: ((inputs?: Mail_Contact_EmailInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Mail_Contact_EmailInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
+* | "Message:" |
+*
+* @param {Mail_Contact_MessageInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const mail_contact_message: ((inputs?: Mail_Contact_MessageInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Mail_Contact_MessageInputs, {
+    locale?: "en" | "zh";
+}, {}>;
 export type LocalizedString = import("../runtime.js").LocalizedString;
 export type Site_NameInputs = {};
 export type Site_TitleInputs = {};
@@ -824,3 +1104,23 @@ export type Home_Safety_DescriptionInputs = {};
 export type Home_Download_TitleInputs = {};
 export type Home_Download_DescriptionInputs = {};
 export type Home_Download_CtaInputs = {};
+export type Contact_Meta_TitleInputs = {};
+export type Contact_Meta_DescriptionInputs = {};
+export type Contact_TitleInputs = {};
+export type Contact_DescriptionInputs = {};
+export type Contact_Email_TitleInputs = {};
+export type Contact_Email_DescriptionInputs = {};
+export type Contact_Form_TitleInputs = {};
+export type Contact_NameInputs = {};
+export type Contact_EmailInputs = {};
+export type Contact_MessageInputs = {};
+export type Contact_SendInputs = {};
+export type Contact_SendingInputs = {};
+export type Contact_SuccessInputs = {};
+export type Contact_ErrorInputs = {};
+export type Contact_Email_CtaInputs = {};
+export type Contact_Github_CtaInputs = {};
+export type Mail_Contact_SubjectInputs = {};
+export type Mail_Contact_NameInputs = {};
+export type Mail_Contact_EmailInputs = {};
+export type Mail_Contact_MessageInputs = {};

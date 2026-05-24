@@ -26,6 +26,9 @@ export const websiteConfig = {
     github: 'https://github.com/tszones/MDXforge'
   },
   mail: {
+    enable: true,
+    provider: 'cloudflare' as 'cloudflare' | 'resend',
+    fromEmail: 'MDXForge <support@mdxforge.dev>',
     supportEmail: 'MDXForge <support@mdxforge.dev>'
   }
 }

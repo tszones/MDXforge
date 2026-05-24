@@ -55,6 +55,26 @@
 /** @typedef {{}} Home_Download_TitleInputs */
 /** @typedef {{}} Home_Download_DescriptionInputs */
 /** @typedef {{}} Home_Download_CtaInputs */
+/** @typedef {{}} Contact_Meta_TitleInputs */
+/** @typedef {{}} Contact_Meta_DescriptionInputs */
+/** @typedef {{}} Contact_TitleInputs */
+/** @typedef {{}} Contact_DescriptionInputs */
+/** @typedef {{}} Contact_Email_TitleInputs */
+/** @typedef {{}} Contact_Email_DescriptionInputs */
+/** @typedef {{}} Contact_Form_TitleInputs */
+/** @typedef {{}} Contact_NameInputs */
+/** @typedef {{}} Contact_EmailInputs */
+/** @typedef {{}} Contact_MessageInputs */
+/** @typedef {{}} Contact_SendInputs */
+/** @typedef {{}} Contact_SendingInputs */
+/** @typedef {{}} Contact_SuccessInputs */
+/** @typedef {{}} Contact_ErrorInputs */
+/** @typedef {{}} Contact_Email_CtaInputs */
+/** @typedef {{}} Contact_Github_CtaInputs */
+/** @typedef {{}} Mail_Contact_SubjectInputs */
+/** @typedef {{}} Mail_Contact_NameInputs */
+/** @typedef {{}} Mail_Contact_EmailInputs */
+/** @typedef {{}} Mail_Contact_MessageInputs */
 
 
 export const site_name = /** @type {(inputs: Site_NameInputs) => LocalizedString} */ () => {
@@ -275,4 +295,84 @@ export const home_download_description = /** @type {(inputs: Home_Download_Descr
 
 export const home_download_cta = /** @type {(inputs: Home_Download_CtaInputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`查看发布版本`)
+};
+
+export const contact_meta_title = /** @type {(inputs: Contact_Meta_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`联系 MDXForge`)
+};
+
+export const contact_meta_description = /** @type {(inputs: Contact_Meta_DescriptionInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`联系 MDXForge 团队，反馈产品问题、文档工作流建议和本地 MDX 预览体验。`)
+};
+
+export const contact_title = /** @type {(inputs: Contact_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`告诉我们你如何审阅 AI 生成的文档。`)
+};
+
+export const contact_description = /** @type {(inputs: Contact_DescriptionInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`欢迎发送问题、反馈和工作流建议。MDXForge 会持续聚焦面向 AI 文档的本地 MDX 和 Markdown 预览。`)
+};
+
+export const contact_email_title = /** @type {(inputs: Contact_Email_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`给 MDXForge 团队发邮件`)
+};
+
+export const contact_email_description = /** @type {(inputs: Contact_Email_DescriptionInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`可以通过邮件反馈产品建议、Bug 和协作想法。无需账号，也不需要云端工作区。`)
+};
+
+export const contact_form_title = /** @type {(inputs: Contact_Form_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`发送消息`)
+};
+
+export const contact_name = /** @type {(inputs: Contact_NameInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`姓名`)
+};
+
+export const contact_email = /** @type {(inputs: Contact_EmailInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`邮箱`)
+};
+
+export const contact_message = /** @type {(inputs: Contact_MessageInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`内容`)
+};
+
+export const contact_send = /** @type {(inputs: Contact_SendInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`发送消息`)
+};
+
+export const contact_sending = /** @type {(inputs: Contact_SendingInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`发送中...`)
+};
+
+export const contact_success = /** @type {(inputs: Contact_SuccessInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`感谢，消息已发送。`)
+};
+
+export const contact_error = /** @type {(inputs: Contact_ErrorInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`发送失败，请稍后再试。`)
+};
+
+export const contact_email_cta = /** @type {(inputs: Contact_Email_CtaInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`打开邮件应用`)
+};
+
+export const contact_github_cta = /** @type {(inputs: Contact_Github_CtaInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`打开 GitHub`)
+};
+
+export const mail_contact_subject = /** @type {(inputs: Mail_Contact_SubjectInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`来自 MDXForge 的联系消息`)
+};
+
+export const mail_contact_name = /** @type {(inputs: Mail_Contact_NameInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`姓名：`)
+};
+
+export const mail_contact_email = /** @type {(inputs: Mail_Contact_EmailInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`邮箱：`)
+};
+
+export const mail_contact_message = /** @type {(inputs: Mail_Contact_MessageInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`内容：`)
 };

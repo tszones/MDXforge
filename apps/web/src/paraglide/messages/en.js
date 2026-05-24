@@ -55,6 +55,26 @@
 /** @typedef {{}} Home_Download_TitleInputs */
 /** @typedef {{}} Home_Download_DescriptionInputs */
 /** @typedef {{}} Home_Download_CtaInputs */
+/** @typedef {{}} Contact_Meta_TitleInputs */
+/** @typedef {{}} Contact_Meta_DescriptionInputs */
+/** @typedef {{}} Contact_TitleInputs */
+/** @typedef {{}} Contact_DescriptionInputs */
+/** @typedef {{}} Contact_Email_TitleInputs */
+/** @typedef {{}} Contact_Email_DescriptionInputs */
+/** @typedef {{}} Contact_Form_TitleInputs */
+/** @typedef {{}} Contact_NameInputs */
+/** @typedef {{}} Contact_EmailInputs */
+/** @typedef {{}} Contact_MessageInputs */
+/** @typedef {{}} Contact_SendInputs */
+/** @typedef {{}} Contact_SendingInputs */
+/** @typedef {{}} Contact_SuccessInputs */
+/** @typedef {{}} Contact_ErrorInputs */
+/** @typedef {{}} Contact_Email_CtaInputs */
+/** @typedef {{}} Contact_Github_CtaInputs */
+/** @typedef {{}} Mail_Contact_SubjectInputs */
+/** @typedef {{}} Mail_Contact_NameInputs */
+/** @typedef {{}} Mail_Contact_EmailInputs */
+/** @typedef {{}} Mail_Contact_MessageInputs */
 
 
 export const site_name = /** @type {(inputs: Site_NameInputs) => LocalizedString} */ () => {
@@ -275,4 +295,84 @@ export const home_download_description = /** @type {(inputs: Home_Download_Descr
 
 export const home_download_cta = /** @type {(inputs: Home_Download_CtaInputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`View releases`)
+};
+
+export const contact_meta_title = /** @type {(inputs: Contact_Meta_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Contact MDXForge`)
+};
+
+export const contact_meta_description = /** @type {(inputs: Contact_Meta_DescriptionInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Contact the MDXForge team for product questions, docs workflow feedback, and local MDX preview suggestions.`)
+};
+
+export const contact_title = /** @type {(inputs: Contact_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Tell us how you review AI-generated docs.`)
+};
+
+export const contact_description = /** @type {(inputs: Contact_DescriptionInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Questions, feedback, and workflow notes are welcome. MDXForge stays focused on local MDX and Markdown preview for AI documentation.`)
+};
+
+export const contact_email_title = /** @type {(inputs: Contact_Email_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Email the MDXForge team`)
+};
+
+export const contact_email_description = /** @type {(inputs: Contact_Email_DescriptionInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Use email for product feedback, bug reports, and collaboration ideas. No account or cloud workspace required.`)
+};
+
+export const contact_form_title = /** @type {(inputs: Contact_Form_TitleInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Send a message`)
+};
+
+export const contact_name = /** @type {(inputs: Contact_NameInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Name`)
+};
+
+export const contact_email = /** @type {(inputs: Contact_EmailInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Email`)
+};
+
+export const contact_message = /** @type {(inputs: Contact_MessageInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Message`)
+};
+
+export const contact_send = /** @type {(inputs: Contact_SendInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Send message`)
+};
+
+export const contact_sending = /** @type {(inputs: Contact_SendingInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Sending...`)
+};
+
+export const contact_success = /** @type {(inputs: Contact_SuccessInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Thanks, your message was sent.`)
+};
+
+export const contact_error = /** @type {(inputs: Contact_ErrorInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Failed to send the message. Please try again later.`)
+};
+
+export const contact_email_cta = /** @type {(inputs: Contact_Email_CtaInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Open email app`)
+};
+
+export const contact_github_cta = /** @type {(inputs: Contact_Github_CtaInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Open GitHub`)
+};
+
+export const mail_contact_subject = /** @type {(inputs: Mail_Contact_SubjectInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`New MDXForge contact message`)
+};
+
+export const mail_contact_name = /** @type {(inputs: Mail_Contact_NameInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Name:`)
+};
+
+export const mail_contact_email = /** @type {(inputs: Mail_Contact_EmailInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Email:`)
+};
+
+export const mail_contact_message = /** @type {(inputs: Mail_Contact_MessageInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Message:`)
 };

@@ -54,6 +54,26 @@
 /** @typedef {{}} Home_Download_TitleInputs */
 /** @typedef {{}} Home_Download_DescriptionInputs */
 /** @typedef {{}} Home_Download_CtaInputs */
+/** @typedef {{}} Contact_Meta_TitleInputs */
+/** @typedef {{}} Contact_Meta_DescriptionInputs */
+/** @typedef {{}} Contact_TitleInputs */
+/** @typedef {{}} Contact_DescriptionInputs */
+/** @typedef {{}} Contact_Email_TitleInputs */
+/** @typedef {{}} Contact_Email_DescriptionInputs */
+/** @typedef {{}} Contact_Form_TitleInputs */
+/** @typedef {{}} Contact_NameInputs */
+/** @typedef {{}} Contact_EmailInputs */
+/** @typedef {{}} Contact_MessageInputs */
+/** @typedef {{}} Contact_SendInputs */
+/** @typedef {{}} Contact_SendingInputs */
+/** @typedef {{}} Contact_SuccessInputs */
+/** @typedef {{}} Contact_ErrorInputs */
+/** @typedef {{}} Contact_Email_CtaInputs */
+/** @typedef {{}} Contact_Github_CtaInputs */
+/** @typedef {{}} Mail_Contact_SubjectInputs */
+/** @typedef {{}} Mail_Contact_NameInputs */
+/** @typedef {{}} Mail_Contact_EmailInputs */
+/** @typedef {{}} Mail_Contact_MessageInputs */
 export const site_name: (inputs: Site_NameInputs) => LocalizedString;
 export const site_title: (inputs: Site_TitleInputs) => LocalizedString;
 export const site_description: (inputs: Site_DescriptionInputs) => LocalizedString;
@@ -109,6 +129,26 @@ export const home_safety_description: (inputs: Home_Safety_DescriptionInputs) =>
 export const home_download_title: (inputs: Home_Download_TitleInputs) => LocalizedString;
 export const home_download_description: (inputs: Home_Download_DescriptionInputs) => LocalizedString;
 export const home_download_cta: (inputs: Home_Download_CtaInputs) => LocalizedString;
+export const contact_meta_title: (inputs: Contact_Meta_TitleInputs) => LocalizedString;
+export const contact_meta_description: (inputs: Contact_Meta_DescriptionInputs) => LocalizedString;
+export const contact_title: (inputs: Contact_TitleInputs) => LocalizedString;
+export const contact_description: (inputs: Contact_DescriptionInputs) => LocalizedString;
+export const contact_email_title: (inputs: Contact_Email_TitleInputs) => LocalizedString;
+export const contact_email_description: (inputs: Contact_Email_DescriptionInputs) => LocalizedString;
+export const contact_form_title: (inputs: Contact_Form_TitleInputs) => LocalizedString;
+export const contact_name: (inputs: Contact_NameInputs) => LocalizedString;
+export const contact_email: (inputs: Contact_EmailInputs) => LocalizedString;
+export const contact_message: (inputs: Contact_MessageInputs) => LocalizedString;
+export const contact_send: (inputs: Contact_SendInputs) => LocalizedString;
+export const contact_sending: (inputs: Contact_SendingInputs) => LocalizedString;
+export const contact_success: (inputs: Contact_SuccessInputs) => LocalizedString;
+export const contact_error: (inputs: Contact_ErrorInputs) => LocalizedString;
+export const contact_email_cta: (inputs: Contact_Email_CtaInputs) => LocalizedString;
+export const contact_github_cta: (inputs: Contact_Github_CtaInputs) => LocalizedString;
+export const mail_contact_subject: (inputs: Mail_Contact_SubjectInputs) => LocalizedString;
+export const mail_contact_name: (inputs: Mail_Contact_NameInputs) => LocalizedString;
+export const mail_contact_email: (inputs: Mail_Contact_EmailInputs) => LocalizedString;
+export const mail_contact_message: (inputs: Mail_Contact_MessageInputs) => LocalizedString;
 export type LocalizedString = import("../runtime.js").LocalizedString;
 export type Site_NameInputs = {};
 export type Site_TitleInputs = {};
@@ -165,3 +205,23 @@ export type Home_Safety_DescriptionInputs = {};
 export type Home_Download_TitleInputs = {};
 export type Home_Download_DescriptionInputs = {};
 export type Home_Download_CtaInputs = {};
+export type Contact_Meta_TitleInputs = {};
+export type Contact_Meta_DescriptionInputs = {};
+export type Contact_TitleInputs = {};
+export type Contact_DescriptionInputs = {};
+export type Contact_Email_TitleInputs = {};
+export type Contact_Email_DescriptionInputs = {};
+export type Contact_Form_TitleInputs = {};
+export type Contact_NameInputs = {};
+export type Contact_EmailInputs = {};
+export type Contact_MessageInputs = {};
+export type Contact_SendInputs = {};
+export type Contact_SendingInputs = {};
+export type Contact_SuccessInputs = {};
+export type Contact_ErrorInputs = {};
+export type Contact_Email_CtaInputs = {};
+export type Contact_Github_CtaInputs = {};
+export type Mail_Contact_SubjectInputs = {};
+export type Mail_Contact_NameInputs = {};
+export type Mail_Contact_EmailInputs = {};
+export type Mail_Contact_MessageInputs = {};
