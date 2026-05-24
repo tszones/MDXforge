@@ -9,6 +9,7 @@
       "*.jsonc",
       "*.md",
       "!src/routeTree.gen.ts",
+      "!worker-configuration.d.ts",
       "!dist",
       "!node_modules"
     ],

@@ -11,3 +11,5 @@ out
 *.log*
 *.tsbuildinfo
 C:/
+
+**/.wrangler

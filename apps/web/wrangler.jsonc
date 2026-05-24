@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "mdxforge-web",
+  "compatibility_date": "2025-09-02",
+  "compatibility_flags": [
+    // Enable Node.js APIs required by TanStack Start SSR on Workers.
+    "nodejs_compat",
+    // Populate process.env from Worker vars/secrets for future server-only config.
+    "nodejs_compat_populate_process_env",
+    // Keep fetch behavior strict and public for SSR requests.
+    "global_fetch_strictly_public"
+  ],
+
+  // TanStack Start custom server entry.
+  "main": "./src/server.ts",
+
+  // Keep manually configured dashboard vars/secrets across deploys.
+  "keep_vars": true,
+
+  "observability": {
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
+  }
+}

@@ -62,7 +62,7 @@
     },
     "build": {
       "dependsOn": ["^build", "typecheck"],
-      "outputs": ["out/**", "dist/**", ".output/**", ".vercel/output/**"]
+      "outputs": ["out/**", "dist/**", ".output/**", ".vercel/output/**", ".wrangler/**"]
     },
     "build:unpack": {
       "dependsOn": ["build"],
@@ -82,6 +82,14 @@
     },
     "test": {
       "outputs": []
+    },
+    "deploy": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "passThroughEnv": ["CLOUDFLARE_ACCOUNT_ID", "CLOUDFLARE_API_TOKEN"]
+    },
+    "cf-typegen": {
+      "outputs": ["worker-configuration.d.ts"]
     }
   }
 }
