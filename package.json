@@ -38,7 +38,7 @@
     "cf-typegen:web": "turbo run cf-typegen --filter=@mdxforge/web"
   },
   "devDependencies": {
-    "electron": "^39.2.6",
+    "electron": "catalog:electron",
     "turbo": "^2.9.14"
   },
   "pnpm": {

@@ -4,12 +4,125 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  cloudflare:
+    '@cloudflare/vite-plugin':
+      specifier: ^1.13.8
+      version: 1.38.0
+    wrangler:
+      specifier: ^4.84.1
+      version: 4.94.0
+  default:
+    '@biomejs/biome':
+      specifier: ^2.4.15
+      version: 2.4.15
+    '@inlang/paraglide-js':
+      specifier: ^2.18.1
+      version: 2.18.1
+    '@tabler/icons-react':
+      specifier: ^3.36.1
+      version: 3.44.0
+    '@tailwindcss/vite':
+      specifier: ^4.3.0
+      version: 4.3.0
+    '@types/node':
+      specifier: ^22.19.1
+      version: 22.19.19
+    '@types/react':
+      specifier: ^19.2.7
+      version: 19.2.15
+    '@types/react-dom':
+      specifier: ^19.2.3
+      version: 19.2.3
+    '@vitejs/plugin-react':
+      specifier: ^5.1.1
+      version: 5.2.0
+    react:
+      specifier: ^19.2.1
+      version: 19.2.6
+    react-dom:
+      specifier: ^19.2.1
+      version: 19.2.6
+    recharts:
+      specifier: 3.8.0
+      version: 3.8.0
+    tailwindcss:
+      specifier: ^4.3.0
+      version: 4.3.0
+    tw-animate-css:
+      specifier: ^1.3.6
+      version: 1.4.0
+    typescript:
+      specifier: ^5.9.3
+      version: 5.9.3
+    vite:
+      specifier: ^7.2.6
+      version: 7.3.3
+    vite-tsconfig-paths:
+      specifier: ^6.1.1
+      version: 6.1.1
+  electron:
+    electron:
+      specifier: ^39.2.6
+      version: 39.8.10
+    electron-builder:
+      specifier: ^26.0.12
+      version: 26.8.1
+    electron-vite:
+      specifier: ^5.0.0
+      version: 5.0.0
+  email:
+    '@react-email/components':
+      specifier: ^1.0.7
+      version: 1.0.12
+    resend:
+      specifier: ^6.9.2
+      version: 6.12.3
+  tanstack:
+    '@tanstack/react-router':
+      specifier: 1.159.5
+      version: 1.159.5
+    '@tanstack/react-start':
+      specifier: 1.159.5
+      version: 1.159.5
+  ui:
+    '@base-ui/react':
+      specifier: ^1.2.0
+      version: 1.5.0
+    class-variance-authority:
+      specifier: ^0.7.1
+      version: 0.7.1
+    clsx:
+      specifier: ^2.1.1
+      version: 2.1.1
+    cmdk:
+      specifier: ^1.1.1
+      version: 1.1.1
+    embla-carousel-react:
+      specifier: ^8.6.0
+      version: 8.6.0
+    react-day-picker:
+      specifier: ^9.14.0
+      version: 9.14.0
+    react-hook-form:
+      specifier: ^7.71.1
+      version: 7.76.1
+    react-resizable-panels:
+      specifier: ^4.6.4
+      version: 4.11.1
+    tailwind-merge:
+      specifier: ^3.0.2
+      version: 3.6.0
+    vaul:
+      specifier: ^1.1.2
+      version: 1.1.2
+
 importers:
 
   .:
     devDependencies:
       electron:
-        specifier: ^39.2.6
+        specifier: catalog:electron
         version: 39.8.10
       turbo:
         specifier: ^2.9.14
@@ -39,10 +152,10 @@ importers:
         specifier: ^7.15.1
         version: 7.15.1(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(react-router@7.15.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(tsx@4.22.3)(typescript@5.9.3)(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))(wrangler@4.94.0)
       '@tabler/icons-react':
-        specifier: ^3.36.1
+        specifier: 'catalog:'
         version: 3.44.0(react@19.2.6)
       '@tailwindcss/vite':
-        specifier: ^4.3.0
+        specifier: 'catalog:'
         version: 4.3.0(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))
       '@tanstack/react-hotkeys':
         specifier: ^0.10.0
@@ -87,16 +200,16 @@ importers:
         specifier: ^2.1.3
         version: 2.1.3
       react:
-        specifier: ^19.2.1
+        specifier: 'catalog:'
         version: 19.2.6
       react-dom:
-        specifier: ^19.2.1
+        specifier: 'catalog:'
         version: 19.2.6(react@19.2.6)
       react-router:
         specifier: ^7.15.1
         version: 7.15.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       recharts:
-        specifier: 3.8.0
+        specifier: 'catalog:'
         version: 3.8.0(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react-is@19.2.6)(react@19.2.6)(redux@5.0.1)
       rehype-katex:
         specifier: ^7.0.1
@@ -111,10 +224,10 @@ importers:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       tailwindcss:
-        specifier: ^4.3.0
+        specifier: 'catalog:'
         version: 4.3.0
       tw-animate-css:
-        specifier: ^1.3.6
+        specifier: 'catalog:'
         version: 1.4.0
       twoslash:
         specifier: ^0.3.8
@@ -123,47 +236,47 @@ importers:
         specifier: 0.3.8
         version: 0.3.8
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
     devDependencies:
       '@biomejs/biome':
-        specifier: ^2.4.15
+        specifier: 'catalog:'
         version: 2.4.15
       '@electron-toolkit/tsconfig':
         specifier: ^2.0.0
         version: 2.0.0(@types/node@22.19.19)
       '@inlang/paraglide-js':
-        specifier: ^2.18.1
+        specifier: 'catalog:'
         version: 2.18.1(typescript@5.9.3)
       '@types/node':
-        specifier: ^22.19.1
+        specifier: 'catalog:'
         version: 22.19.19
       '@types/react':
-        specifier: ^19.2.7
+        specifier: 'catalog:'
         version: 19.2.15
       '@types/react-dom':
-        specifier: ^19.2.3
+        specifier: 'catalog:'
         version: 19.2.3(@types/react@19.2.15)
       '@vitejs/plugin-react':
-        specifier: ^5.1.1
+        specifier: 'catalog:'
         version: 5.2.0(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))
       electron:
-        specifier: ^39.2.6
+        specifier: catalog:electron
         version: 39.8.10
       electron-builder:
-        specifier: ^26.0.12
+        specifier: catalog:electron
         version: 26.8.1(electron-builder-squirrel-windows@26.8.1)
       electron-vite:
-        specifier: ^5.0.0
+        specifier: catalog:electron
         version: 5.0.0(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))
       jiti:
         specifier: ^2.7.0
         version: 2.7.0
       vite:
-        specifier: ^7.2.6
+        specifier: 'catalog:'
         version: 7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3)
       vite-tsconfig-paths:
-        specifier: ^6.1.1
+        specifier: 'catalog:'
         version: 6.1.1(typescript@5.9.3)(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))
 
   apps/web:
@@ -172,132 +285,132 @@ importers:
         specifier: workspace:*
         version: link:../../packages/ui
       '@react-email/components':
-        specifier: ^1.0.7
+        specifier: catalog:email
         version: 1.0.12(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@tabler/icons-react':
-        specifier: ^3.36.1
+        specifier: 'catalog:'
         version: 3.44.0(react@19.2.6)
       '@tanstack/react-router':
-        specifier: 1.159.5
+        specifier: catalog:tanstack
         version: 1.159.5(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@tanstack/react-start':
-        specifier: 1.159.5
+        specifier: catalog:tanstack
         version: 1.159.5(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))
       react:
-        specifier: ^19.2.1
+        specifier: 'catalog:'
         version: 19.2.6
       react-dom:
-        specifier: ^19.2.1
+        specifier: 'catalog:'
         version: 19.2.6(react@19.2.6)
       resend:
-        specifier: ^6.9.2
+        specifier: catalog:email
         version: 6.12.3(@react-email/render@2.0.6(react-dom@19.2.6(react@19.2.6))(react@19.2.6))
       zod:
         specifier: ^4.3.6
         version: 4.4.3
     devDependencies:
       '@biomejs/biome':
-        specifier: ^2.4.15
+        specifier: 'catalog:'
         version: 2.4.15
       '@cloudflare/vite-plugin':
-        specifier: ^1.13.8
+        specifier: catalog:cloudflare
         version: 1.38.0(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))(workerd@1.20260521.1)(wrangler@4.94.0)
       '@inlang/paraglide-js':
-        specifier: ^2.18.1
+        specifier: 'catalog:'
         version: 2.18.1(typescript@5.9.3)
       '@tailwindcss/vite':
-        specifier: ^4.3.0
+        specifier: 'catalog:'
         version: 4.3.0(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))
       '@types/node':
-        specifier: ^22.19.1
+        specifier: 'catalog:'
         version: 22.19.19
       '@types/react':
-        specifier: ^19.2.7
+        specifier: 'catalog:'
         version: 19.2.15
       '@types/react-dom':
-        specifier: ^19.2.3
+        specifier: 'catalog:'
         version: 19.2.3(@types/react@19.2.15)
       '@vitejs/plugin-react':
-        specifier: ^5.1.1
+        specifier: 'catalog:'
         version: 5.2.0(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))
       tailwindcss:
-        specifier: ^4.3.0
+        specifier: 'catalog:'
         version: 4.3.0
       tw-animate-css:
-        specifier: ^1.3.6
+        specifier: 'catalog:'
         version: 1.4.0
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
       vite:
-        specifier: ^7.2.6
+        specifier: 'catalog:'
         version: 7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3)
       vite-tsconfig-paths:
-        specifier: ^6.1.1
+        specifier: 'catalog:'
         version: 6.1.1(typescript@5.9.3)(vite@7.3.3(@types/node@22.19.19)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.22.3))
       wrangler:
-        specifier: ^4.84.1
+        specifier: catalog:cloudflare
         version: 4.94.0
 
   packages/ui:
     dependencies:
       '@base-ui/react':
-        specifier: ^1.2.0
+        specifier: catalog:ui
         version: 1.5.0(@date-fns/tz@1.5.0)(@types/react@19.2.15)(date-fns@4.3.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@tabler/icons-react':
-        specifier: ^3.36.1
+        specifier: 'catalog:'
         version: 3.44.0(react@19.2.6)
       class-variance-authority:
-        specifier: ^0.7.1
+        specifier: catalog:ui
         version: 0.7.1
       clsx:
-        specifier: ^2.1.1
+        specifier: catalog:ui
         version: 2.1.1
       cmdk:
-        specifier: ^1.1.1
+        specifier: catalog:ui
         version: 1.1.1(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       embla-carousel-react:
-        specifier: ^8.6.0
+        specifier: catalog:ui
         version: 8.6.0(react@19.2.6)
       react-day-picker:
-        specifier: ^9.14.0
+        specifier: catalog:ui
         version: 9.14.0(react@19.2.6)
       react-hook-form:
-        specifier: ^7.71.1
+        specifier: catalog:ui
         version: 7.76.1(react@19.2.6)
       react-resizable-panels:
-        specifier: ^4.6.4
+        specifier: catalog:ui
         version: 4.11.1(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       recharts:
-        specifier: 3.8.0
+        specifier: 'catalog:'
         version: 3.8.0(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react-is@19.2.6)(react@19.2.6)(redux@5.0.1)
       tailwind-merge:
-        specifier: ^3.0.2
+        specifier: catalog:ui
         version: 3.6.0
       vaul:
-        specifier: ^1.1.2
+        specifier: catalog:ui
         version: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
     devDependencies:
       '@biomejs/biome':
-        specifier: ^2.4.15
+        specifier: 'catalog:'
         version: 2.4.15
       '@types/react':
-        specifier: ^19.2.7
+        specifier: 'catalog:'
         version: 19.2.15
       '@types/react-dom':
-        specifier: ^19.2.3
+        specifier: 'catalog:'
         version: 19.2.3(@types/react@19.2.15)
       react:
-        specifier: ^19.2.1
+        specifier: 'catalog:'
         version: 19.2.6
       react-dom:
-        specifier: ^19.2.1
+        specifier: 'catalog:'
         version: 19.2.6(react@19.2.6)
       shadcn:
         specifier: ^4.0.0
         version: 4.8.0(@types/node@22.19.19)(typescript@5.9.3)
       typescript:
-        specifier: ^5.9.3
+        specifier: 'catalog:'
         version: 5.9.3
 
 packages:
