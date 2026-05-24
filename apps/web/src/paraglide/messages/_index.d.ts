@@ -295,6 +295,20 @@ export const nav_download: ((inputs?: Nav_DownloadInputs, options?: {
 /**
 * | output |
 * | --- |
+* | "Docs" |
+*
+* @param {Nav_DocsInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const nav_docs: ((inputs?: Nav_DocsInputs, options?: {
+    locale?: "en" | "zh";
+}) => LocalizedString) & import("../runtime.js").MessageMetadata<Nav_DocsInputs, {
+    locale?: "en" | "zh";
+}, {}>;
+/**
+* | output |
+* | --- |
 * | "Contact" |
 *
 * @param {Nav_ContactInputs} inputs
@@ -1070,6 +1084,7 @@ export type Nav_FeaturesInputs = {};
 export type Nav_WorkflowInputs = {};
 export type Nav_SafetyInputs = {};
 export type Nav_DownloadInputs = {};
+export type Nav_DocsInputs = {};
 export type Nav_ContactInputs = {};
 export type Footer_ProductInputs = {};
 export type Footer_ResourcesInputs = {};

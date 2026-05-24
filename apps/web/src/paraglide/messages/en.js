@@ -21,6 +21,7 @@
 /** @typedef {{}} Nav_WorkflowInputs */
 /** @typedef {{}} Nav_SafetyInputs */
 /** @typedef {{}} Nav_DownloadInputs */
+/** @typedef {{}} Nav_DocsInputs */
 /** @typedef {{}} Nav_ContactInputs */
 /** @typedef {{}} Footer_ProductInputs */
 /** @typedef {{}} Footer_ResourcesInputs */
@@ -159,6 +160,10 @@ export const nav_safety = /** @type {(inputs: Nav_SafetyInputs) => LocalizedStri
 
 export const nav_download = /** @type {(inputs: Nav_DownloadInputs) => LocalizedString} */ () => {
 	return /** @type {LocalizedString} */ (`Download`)
+};
+
+export const nav_docs = /** @type {(inputs: Nav_DocsInputs) => LocalizedString} */ () => {
+	return /** @type {LocalizedString} */ (`Docs`)
 };
 
 export const nav_contact = /** @type {(inputs: Nav_ContactInputs) => LocalizedString} */ () => {

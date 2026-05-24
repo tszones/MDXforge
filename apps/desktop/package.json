@@ -11,9 +11,9 @@
     "df": "bin/mdxforge.cjs"
   },
   "scripts": {
-    "format": "biome format --write ../..",
-    "lint": "biome ci ../..",
-    "lint:fix": "biome check --write ../..",
+    "format": "biome format --write .",
+    "lint": "biome ci .",
+    "lint:fix": "biome check --write .",
     "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
     "paraglide:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/renderer/src/paraglide --strategy localStorage preferredLanguage baseLocale --emit-ts-declarations --output-structure locale-modules --silent",
     "typecheck:web": "pnpm run paraglide:compile && tsc --noEmit -p tsconfig.web.json --composite false",
@@ -43,6 +43,7 @@
     "@fontsource/bricolage-grotesque": "^5.2.10",
     "@mdx-js/mdx": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
+    "@mdxforge/mdx": "workspace:*",
     "@mdxforge/ui": "workspace:*",
     "@react-router/dev": "^7.15.1",
     "@tabler/icons-react": "catalog:",

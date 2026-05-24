@@ -20,6 +20,7 @@
 /** @typedef {{}} Nav_WorkflowInputs */
 /** @typedef {{}} Nav_SafetyInputs */
 /** @typedef {{}} Nav_DownloadInputs */
+/** @typedef {{}} Nav_DocsInputs */
 /** @typedef {{}} Nav_ContactInputs */
 /** @typedef {{}} Footer_ProductInputs */
 /** @typedef {{}} Footer_ResourcesInputs */
@@ -95,6 +96,7 @@ export const nav_features: (inputs: Nav_FeaturesInputs) => LocalizedString;
 export const nav_workflow: (inputs: Nav_WorkflowInputs) => LocalizedString;
 export const nav_safety: (inputs: Nav_SafetyInputs) => LocalizedString;
 export const nav_download: (inputs: Nav_DownloadInputs) => LocalizedString;
+export const nav_docs: (inputs: Nav_DocsInputs) => LocalizedString;
 export const nav_contact: (inputs: Nav_ContactInputs) => LocalizedString;
 export const footer_product: (inputs: Footer_ProductInputs) => LocalizedString;
 export const footer_resources: (inputs: Footer_ResourcesInputs) => LocalizedString;
@@ -171,6 +173,7 @@ export type Nav_FeaturesInputs = {};
 export type Nav_WorkflowInputs = {};
 export type Nav_SafetyInputs = {};
 export type Nav_DownloadInputs = {};
+export type Nav_DocsInputs = {};
 export type Nav_ContactInputs = {};
 export type Footer_ProductInputs = {};
 export type Footer_ResourcesInputs = {};

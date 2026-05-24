@@ -1,0 +1,45 @@
+---
+title: AI MDX Writing Guide
+description: Rules for AI-generated MDX that renders well in MDXForge.
+---
+
+# AI MDX Writing Guide
+
+AI-generated MDX should be structured, explicit, and safe.
+
+## Use frontmatter
+
+```mdx
+---
+title: Architecture Review
+description: Rendering and safety model for a local MDX workflow
+---
+```
+
+## Prefer document structure
+
+Use headings, short paragraphs, lists, tables, and code blocks.
+
+```mdx
+## Decision
+
+Use a local-first renderer.
+
+## Rationale
+
+- Keeps documents private
+- Avoids cloud dependencies
+- Makes AI output reviewable
+```
+
+## Avoid arbitrary HTML
+
+Prefer Markdown and whitelisted components. Avoid raw scripts, inline event handlers, and unknown embeds.
+
+## Keep documents readable
+
+- One idea per section
+- Descriptive headings
+- Short code examples
+- Tables only when comparison helps
+- Callouts only for important notes

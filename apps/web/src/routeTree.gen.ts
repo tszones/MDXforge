@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DownloadsSplatRouteImport } from './routes/downloads.$'
+import { Route as DocsSplatRouteImport } from './routes/docs.$'
 
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
@@ -28,34 +29,43 @@ const DownloadsSplatRoute = DownloadsSplatRouteImport.update({
   path: '/downloads/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DocsSplatRoute = DocsSplatRouteImport.update({
+  id: '/docs/$',
+  path: '/docs/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
+  '/docs/$': typeof DocsSplatRoute
   '/downloads/$': typeof DownloadsSplatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
+  '/docs/$': typeof DocsSplatRoute
   '/downloads/$': typeof DownloadsSplatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/contact': typeof ContactRoute
+  '/docs/$': typeof DocsSplatRoute
   '/downloads/$': typeof DownloadsSplatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/contact' | '/downloads/$'
+  fullPaths: '/' | '/contact' | '/docs/$' | '/downloads/$'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/contact' | '/downloads/$'
-  id: '__root__' | '/' | '/contact' | '/downloads/$'
+  to: '/' | '/contact' | '/docs/$' | '/downloads/$'
+  id: '__root__' | '/' | '/contact' | '/docs/$' | '/downloads/$'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ContactRoute: typeof ContactRoute
+  DocsSplatRoute: typeof DocsSplatRoute
   DownloadsSplatRoute: typeof DownloadsSplatRoute
 }
 
@@ -82,12 +92,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DownloadsSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/docs/$': {
+      id: '/docs/$'
+      path: '/docs/$'
+      fullPath: '/docs/$'
+      preLoaderRoute: typeof DocsSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ContactRoute: ContactRoute,
+  DocsSplatRoute: DocsSplatRoute,
   DownloadsSplatRoute: DownloadsSplatRoute,
 }
 export const routeTree = rootRouteImport

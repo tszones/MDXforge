@@ -5,5 +5,6 @@ export const Routes = {
   Safety: '/#safety',
   Download: '/#download',
   Contact: '/contact',
-  GitHub: 'https://github.com/tszones/MDXforge'
+  GitHub: 'https://github.com/tszones/MDXforge',
+  Docs: '/docs'
 } as const

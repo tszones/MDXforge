@@ -23,6 +23,7 @@ import { getLocale, experimentalStaticLocale } from "../runtime.js"
 /** @typedef {{}} Nav_WorkflowInputs */
 /** @typedef {{}} Nav_SafetyInputs */
 /** @typedef {{}} Nav_DownloadInputs */
+/** @typedef {{}} Nav_DocsInputs */
 /** @typedef {{}} Nav_ContactInputs */
 /** @typedef {{}} Footer_ProductInputs */
 /** @typedef {{}} Footer_ResourcesInputs */
@@ -372,6 +373,20 @@ export const nav_download = /** @type {((inputs?: Nav_DownloadInputs, options?: 
 	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
 	if (locale === "en") return __en.nav_download(inputs)
 	return __zh.nav_download(inputs)
+});
+/**
+* | output |
+* | --- |
+* | "Docs" |
+*
+* @param {Nav_DocsInputs} inputs
+* @param {{ locale?: "en" | "zh" }} options
+* @returns {LocalizedString}
+*/
+export const nav_docs = /** @type {((inputs?: Nav_DocsInputs, options?: { locale?: "en" | "zh" }) => LocalizedString) & import('../runtime.js').MessageMetadata<Nav_DocsInputs, { locale?: "en" | "zh" }, {}>} */ ((inputs = {}, options = {}) => {
+	const locale = experimentalStaticLocale ?? options.locale ?? getLocale()
+	if (locale === "en") return __en.nav_docs(inputs)
+	return __zh.nav_docs(inputs)
 });
 /**
 * | output |

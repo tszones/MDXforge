@@ -4,10 +4,11 @@ import { paraglideVitePlugin } from '@inlang/paraglide-js'
 import tailwindcss from '@tailwindcss/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
+import mdx from 'fumadocs-mdx/vite'
 import { defineConfig } from 'vite'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 
-export default defineConfig({
+export default defineConfig(async () => ({
   server: {
     allowedHosts: ['.trycloudflare.com']
   },
@@ -18,6 +19,7 @@ export default defineConfig({
   },
   plugins: [
     tailwindcss(),
+    ...(await mdx()),
     paraglideVitePlugin({
       project: './project.inlang',
       outdir: './src/paraglide',
@@ -50,4 +52,4 @@ export default defineConfig({
       }
     })
   ]
-})
+}))
