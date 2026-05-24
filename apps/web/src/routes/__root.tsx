@@ -1,4 +1,5 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
+import { RootProvider as FumadocsProvider } from 'fumadocs-ui/provider/tanstack'
 import type { ReactNode } from 'react'
 import { Footer } from '@/components/layout/footer'
 import { Navbar } from '@/components/layout/navbar'
@@ -148,7 +149,9 @@ function RootDocument({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <FumadocsProvider>{children}</FumadocsProvider>
+        </ThemeProvider>
         <Scripts />
       </body>
     </html>
