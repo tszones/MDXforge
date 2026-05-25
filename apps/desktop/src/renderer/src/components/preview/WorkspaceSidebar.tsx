@@ -10,6 +10,8 @@ import {
 } from 'fumadocs-ui/components/sidebar/base'
 import {
   BookOpen,
+  ChevronDown,
+  ChevronRight,
   Copy,
   ExternalLink,
   FileText,
@@ -46,6 +48,8 @@ type FileTreeNode =
   | { type: 'separator'; label: string; icon?: string }
   | { type: 'link'; label: string; href: string; external?: boolean; icon?: string }
 
+type SidebarTab = 'files' | 'search'
+
 export function PreviewSidebar({
   workspace,
   onOpenFile,
@@ -68,19 +72,24 @@ export function PreviewSidebar({
   onExpandSidebar?: () => void
 }): React.JSX.Element {
   const file = workspace.file
-  const [query, setQuery] = useState('')
+  const [activeTab, setActiveTab] = useState<SidebarTab>('files')
+  const [fileFilterQuery, setFileFilterQuery] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
   const [renamingPath, setRenamingPath] = useState<string | null>(null)
   const [workspaceSearchResults, setWorkspaceSearchResults] = useState<MdxWorkspaceSearchResult[]>(
     []
   )
   const [workspaceSearchLoading, setWorkspaceSearchLoading] = useState(false)
+  const [collapsedSearchFiles, setCollapsedSearchFiles] = useState<Set<string>>(new Set())
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; path: string } | null>(null)
-  const searchInputRef = useRef<HTMLInputElement>(null)
+  const fileFilterInputRef = useRef<HTMLInputElement>(null)
+  const workspaceSearchInputRef = useRef<HTMLInputElement>(null)
   const tree = useMemo(
     () => buildFileTree(workspace.folder?.files ?? [], workspace.folder?.tree, workspace.folder?.rootPath),
     [workspace.folder]
   )
-  const searching = query.trim().length > 0
+  const filteredTree = useMemo(() => filterFileTree(tree, fileFilterQuery), [tree, fileFilterQuery])
+  const searching = searchQuery.trim().length > 0
 
   useHotkeys(
     [
@@ -89,15 +98,16 @@ export function PreviewSidebar({
         callback: () => {
           onExpandSidebar?.()
           window.setTimeout(() => {
-            searchInputRef.current?.focus()
-            searchInputRef.current?.select()
+            setActiveTab('search')
+            workspaceSearchInputRef.current?.focus()
+            workspaceSearchInputRef.current?.select()
           }, 0)
         },
         options: {
           enabled: Boolean(workspace.folder),
           meta: {
             name: 'Search workspace',
-            description: 'Focus the workspace search field in the sidebar.'
+            description: 'Open the workspace search tab in the sidebar.'
           }
         }
       }
@@ -106,11 +116,15 @@ export function PreviewSidebar({
   )
 
   useEffect(() => {
+    setCollapsedSearchFiles(new Set())
+  }, [searchQuery])
+
+  useEffect(() => {
     let canceled = false
     const workspaceRoot = workspace.folder?.rootPath
-    const trimmedQuery = query.trim()
+    const trimmedQuery = searchQuery.trim()
 
-    if (!workspaceRoot || !trimmedQuery) {
+    if (!workspaceRoot || activeTab !== 'search' || !trimmedQuery) {
       setWorkspaceSearchResults([])
       setWorkspaceSearchLoading(false)
       return
@@ -136,7 +150,7 @@ export function PreviewSidebar({
       canceled = true
       window.clearTimeout(timer)
     }
-  }, [workspace.folder?.rootPath, query])
+  }, [activeTab, searchQuery, workspace.folder?.rootPath])
 
   useEffect(() => {
     if (!contextMenu) return
@@ -194,26 +208,65 @@ export function PreviewSidebar({
             ) : null}
           </div>
           {workspace.folder ? (
-            <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground focus-within:border-fd-primary/50 focus-within:text-fd-foreground">
-              <Search className="size-4 shrink-0" />
-              <input
-                ref={searchInputRef}
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={m.search_workspace_placeholder()}
-                className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-fd-muted-foreground"
-              />
-              {query ? (
+            <>
+              <div className="grid grid-cols-2 rounded-lg border bg-fd-secondary/50 p-1 text-xs font-medium text-fd-muted-foreground">
                 <button
                   type="button"
-                  onClick={() => setQuery('')}
-                  className="rounded p-0.5 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground"
-                  aria-label={m.preview_clear_search()}
+                  onClick={() => setActiveTab('files')}
+                  className={
+                    activeTab === 'files'
+                      ? 'rounded-md bg-fd-background px-2 py-1.5 text-fd-foreground shadow-sm'
+                      : 'rounded-md px-2 py-1.5 transition-colors hover:text-fd-foreground'
+                  }
                 >
-                  <X className="size-3.5" />
+                  {m.preview_tab_files()}
                 </button>
-              ) : null}
-            </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('search')}
+                  className={
+                    activeTab === 'search'
+                      ? 'rounded-md bg-fd-background px-2 py-1.5 text-fd-foreground shadow-sm'
+                      : 'rounded-md px-2 py-1.5 transition-colors hover:text-fd-foreground'
+                  }
+                >
+                  {m.preview_tab_search()}
+                </button>
+              </div>
+              <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground focus-within:border-fd-primary/50 focus-within:text-fd-foreground">
+                <Search className="size-4 shrink-0" />
+                {activeTab === 'files' ? (
+                  <input
+                    ref={fileFilterInputRef}
+                    value={fileFilterQuery}
+                    onChange={(event) => setFileFilterQuery(event.target.value)}
+                    placeholder={m.preview_filter_files_placeholder()}
+                    className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-fd-muted-foreground"
+                  />
+                ) : (
+                  <input
+                    ref={workspaceSearchInputRef}
+                    value={searchQuery}
+                    onChange={(event) => setSearchQuery(event.target.value)}
+                    placeholder={m.preview_search_workspace_placeholder()}
+                    className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-fd-muted-foreground"
+                  />
+                )}
+                {(activeTab === 'files' ? fileFilterQuery : searchQuery) ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (activeTab === 'files') setFileFilterQuery('')
+                      else setSearchQuery('')
+                    }}
+                    className="rounded p-0.5 text-fd-muted-foreground hover:bg-fd-accent hover:text-fd-accent-foreground"
+                    aria-label={m.preview_clear_search()}
+                  >
+                    <X className="size-3.5" />
+                  </button>
+                ) : null}
+              </div>
+            </>
           ) : (
             <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground">
               <FileText className="size-4" />
@@ -223,71 +276,96 @@ export function PreviewSidebar({
         </div>
 
         <div className="fd-scroll-container min-h-0 flex-1 overflow-auto px-3 py-2 [mask:linear-gradient(to_bottom,transparent,white_12px,white_calc(100%-12px),transparent)]">
-          <p className="mb-1 px-2 text-xs font-medium text-fd-muted-foreground">
-            {searching
-              ? workspaceSearchLoading
-                ? m.search_loading()
-                : m.preview_search_results({
-                    count: workspaceSearchResults.reduce(
-                      (count, result) => count + result.matches.length,
-                      0
-                    )
-                  })
-              : workspace.folder
-                ? m.preview_files_nav()
-                : m.preview_current_file()}
-          </p>
-          {searching ? (
-            workspaceSearchLoading ? (
-              <SidebarEmptyState>{m.search_loading()}</SidebarEmptyState>
-            ) : workspaceSearchResults.length > 0 ? (
-              <div className="flex flex-col gap-0.5">
-                {workspaceSearchResults.flatMap((result) =>
-                  result.matches.map((match) => (
-                    <WorkspaceSearchResultItem
-                      key={`${result.path}:${match.line}:${match.column}:${match.preview}`}
-                      result={result}
-                      match={match}
-                      active={result.path === file.path}
-                      onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
-                    />
-                  ))
-                )}
-              </div>
-            ) : (
-              <SidebarEmptyState>{m.search_empty_no_results()}</SidebarEmptyState>
-            )
-          ) : tree.length > 0 ? (
-            <div className="flex flex-col gap-0.5">
-              {tree.map((node, index) => (
-                <FileTreeNodeView
-                  key={getTreeNodeKey(node, index)}
-                  node={node}
-                  activePath={file.path}
-                  onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
-                  onRenamePath={(targetPath, nextName) =>
-                    onRenamePath(targetPath, nextName, workspace.folder?.rootPath)
-                  }
-                  renamingPath={renamingPath}
-                  onStartRename={setRenamingPath}
-                  onStopRename={() => setRenamingPath(null)}
-                  onOpenContextMenu={openContextMenu}
-                />
-              ))}
-              <FileTreeNodeContextMenu
-                menu={contextMenu}
-                onCopyPath={(path) => void copyPath(path)}
-                onRename={(path) => {
-                  setContextMenu(null)
-                  setRenamingPath(path)
-                }}
-              />
-            </div>
+          {workspace.folder && activeTab === 'search' ? (
+            <>
+              <p className="mb-1 px-2 text-xs font-medium text-fd-muted-foreground">
+                {searching
+                  ? workspaceSearchLoading
+                    ? m.search_loading()
+                    : m.preview_search_results({
+                        count: workspaceSearchResults.reduce(
+                          (count, result) => count + result.matches.length,
+                          0
+                        )
+                      })
+                  : m.preview_search_tab()}
+              </p>
+              {searching ? (
+                workspaceSearchLoading ? (
+                  <SidebarEmptyState>{m.search_loading()}</SidebarEmptyState>
+                ) : workspaceSearchResults.length > 0 ? (
+                  <div className="flex flex-col gap-0.5">
+                    {workspaceSearchResults.map((result) => (
+                      <WorkspaceSearchResultGroup
+                        key={result.path}
+                        result={result}
+                        active={result.path === file.path}
+                        collapsed={collapsedSearchFiles.has(result.path)}
+                        onToggle={() => {
+                          setCollapsedSearchFiles((current) => {
+                            const next = new Set(current)
+                            if (next.has(result.path)) next.delete(result.path)
+                            else next.add(result.path)
+                            return next
+                          })
+                        }}
+                        onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <SidebarEmptyState>{m.search_empty_no_results()}</SidebarEmptyState>
+                )
+              ) : (
+                <SidebarEmptyState>{m.preview_search_empty()}</SidebarEmptyState>
+              )}
+            </>
           ) : (
-            <div className="relative flex flex-row items-center gap-2 rounded-lg bg-fd-primary/10 p-2 text-start text-fd-primary wrap-anywhere">
-              <FileText className="size-4 shrink-0" />
-              <span className="truncate">{file.name}</span>
-            </div>
+            <>
+              <p className="mb-1 px-2 text-xs font-medium text-fd-muted-foreground">
+                {workspace.folder && fileFilterQuery.trim().length > 0
+                  ? m.preview_filtered_files()
+                  : workspace.folder
+                    ? m.preview_files_nav()
+                    : m.preview_current_file()}
+              </p>
+              {(workspace.folder ? filteredTree : tree).length > 0 ? (
+                <div className="flex flex-col gap-0.5">
+                  {(workspace.folder ? filteredTree : tree).map((node, index) => (
+                    <FileTreeNodeView
+                      key={getTreeNodeKey(node, index)}
+                      node={node}
+                      activePath={file.path}
+                      onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
+                      onRenamePath={(targetPath, nextName) =>
+                        onRenamePath(targetPath, nextName, workspace.folder?.rootPath)
+                      }
+                      renamingPath={renamingPath}
+                      onStartRename={setRenamingPath}
+                      onStopRename={() => setRenamingPath(null)}
+                      onOpenContextMenu={openContextMenu}
+                    />
+                  ))}
+                  <FileTreeNodeContextMenu
+                    menu={contextMenu}
+                    onCopyPath={(path) => void copyPath(path)}
+                    onRename={(path) => {
+                      setContextMenu(null)
+                      setRenamingPath(path)
+                    }}
+                  />
+                </div>
+              ) : workspace.folder ? (
+                <SidebarEmptyState>
+                  {fileFilterQuery.trim().length > 0 ? m.preview_no_file_matches() : m.preview_empty_files()}
+                </SidebarEmptyState>
+              ) : (
+                <div className="relative flex flex-row items-center gap-2 rounded-lg bg-fd-primary/10 p-2 text-start text-fd-primary wrap-anywhere">
+                  <FileText className="size-4 shrink-0" />
+                  <span className="truncate">{file.name}</span>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -714,15 +792,63 @@ function buildFileTreeFromPageTree(
     .filter((node): node is FileTreeNode => node !== null)
 }
 
-function WorkspaceSearchResultItem({
+function WorkspaceSearchResultGroup({
+  result,
+  active,
+  collapsed,
+  onToggle,
+  onOpenPath
+}: {
+  result: MdxWorkspaceSearchResult
+  active: boolean
+  collapsed: boolean
+  onToggle: () => void
+  onOpenPath: (filePath: string) => void
+}): React.JSX.Element {
+  return (
+    <div className="rounded-lg text-fd-muted-foreground data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary" data-active={active}>
+      <button
+        type="button"
+        title={result.relativePath}
+        onClick={onToggle}
+        className="flex w-full items-center gap-2 rounded-lg p-2 text-start transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80"
+      >
+        {collapsed ? (
+          <ChevronRight className="size-3.5 shrink-0" />
+        ) : (
+          <ChevronDown className="size-3.5 shrink-0" />
+        )}
+        <FileText className="size-4 shrink-0" />
+        <span className="min-w-0 flex-1 truncate text-sm font-medium">
+          {result.title ?? result.displayPath ?? result.name}
+        </span>
+        <span className="shrink-0 rounded-full bg-fd-secondary px-1.5 py-0.5 text-[0.6875rem] leading-none text-fd-muted-foreground">
+          {result.matches.length}
+        </span>
+      </button>
+      {collapsed ? null : (
+        <div className="ms-7 flex flex-col gap-0.5 border-s border-fd-border ps-2 pb-1">
+          {result.matches.map((match) => (
+            <WorkspaceSearchMatchItem
+              key={`${result.path}:${match.line}:${match.column}:${match.preview}`}
+              result={result}
+              match={match}
+              onOpenPath={onOpenPath}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function WorkspaceSearchMatchItem({
   result,
   match,
-  active,
   onOpenPath
 }: {
   result: MdxWorkspaceSearchResult
   match: MdxWorkspaceSearchResult['matches'][number]
-  active: boolean
   onOpenPath: (filePath: string) => void
 }): React.JSX.Element {
   return (
@@ -730,14 +856,9 @@ function WorkspaceSearchResultItem({
       type="button"
       title={`${result.relativePath}:${match.line}:${match.column}`}
       onClick={() => onOpenPath(result.path)}
-      className="relative flex w-full flex-col rounded-lg p-2 text-start text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary"
-      data-active={active}
+      className="flex w-full flex-col rounded-md px-2 py-1.5 text-start text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80"
     >
-      <span className="truncate text-sm font-medium">
-        {result.title ?? result.displayPath ?? result.name}
-      </span>
-      <span className="mt-0.5 truncate text-xs opacity-70">{result.relativePath}</span>
-      <span className="mt-1 truncate text-xs opacity-80">
+      <span className="truncate text-xs opacity-80">
         {m.search_line_column({ line: match.line, column: match.column })}
       </span>
       <span className="mt-0.5 line-clamp-2 text-xs leading-5 text-fd-foreground/80">
@@ -788,6 +909,40 @@ function getDisplayName(entry: MdxFolderEntry): string {
   if (name) return name
 
   return entry.name
+}
+
+function filterFileTree(nodes: FileTreeNode[], query: string): FileTreeNode[] {
+  const normalizedQuery = query.trim().toLowerCase()
+  if (!normalizedQuery) return nodes
+
+  return nodes
+    .map((node): FileTreeNode | null => {
+      if (node.type === 'file') return fileNodeMatches(node, normalizedQuery) ? node : null
+      if (node.type === 'folder') {
+        const children = filterFileTree(node.children, normalizedQuery)
+        if (children.length > 0 || folderNodeMatches(node, normalizedQuery)) {
+          return { ...node, defaultOpen: true, children }
+        }
+        return null
+      }
+      if (node.type === 'link') return node.label.toLowerCase().includes(normalizedQuery) ? node : null
+      if (node.type === 'separator') return null
+      return null
+    })
+    .filter((node): node is FileTreeNode => node !== null)
+}
+
+function fileNodeMatches(node: Extract<FileTreeNode, { type: 'file' }>, query: string): boolean {
+  const entry = node.entry
+  return [entry.name, entry.title, entry.relativePath, entry.displayPath]
+    .filter(Boolean)
+    .some((value) => value?.toLowerCase().includes(query))
+}
+
+function folderNodeMatches(node: Extract<FileTreeNode, { type: 'folder' }>, query: string): boolean {
+  return [node.name, node.path, node.description]
+    .filter(Boolean)
+    .some((value) => value?.toLowerCase().includes(query))
 }
 
 function joinWorkspacePath(root: string, relativePath: string): string {
