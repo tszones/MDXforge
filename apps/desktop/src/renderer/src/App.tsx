@@ -2,6 +2,7 @@ import { useHotkeys } from '@tanstack/react-hotkeys'
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { MdxPreview } from './components/MdxPreview'
+import { FindInPageBar } from './components/FindInPageBar'
 import { SearchOverlay } from './components/SearchOverlay'
 import { SettingsPage, type SettingsRoute } from './components/SettingsPage'
 import { WindowTitleBar } from './components/WindowTitleBar'
@@ -358,6 +359,7 @@ function AppContent({
         onBackToPreview={() => navigate('/')}
         onOpenSettings={() => navigate('/settings/language')}
       />
+      <FindInPageBar enabled={Boolean(workspace && !inSettingsRoute)} sourceKey={workspace?.file.path ?? ''} />
       <SearchOverlay workspace={workspace} onOpenPath={openPath} />
       <Routes>
         <Route path="/settings" element={<Navigate to="/settings/language" replace />} />
