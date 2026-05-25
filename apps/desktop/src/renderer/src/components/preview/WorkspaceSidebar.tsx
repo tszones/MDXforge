@@ -492,9 +492,14 @@ function RenameInput({
   useEffect(() => setNextName(value), [value])
 
   useEffect(() => {
-    inputRef.current?.focus()
-    inputRef.current?.select()
-  }, [])
+    const input = inputRef.current
+    if (!input) return
+
+    input.focus()
+
+    const extensionStart = getExtensionStart(value)
+    input.setSelectionRange(0, extensionStart)
+  }, [value])
 
   async function submit(): Promise<void> {
     const trimmed = nextName.trim()
@@ -525,6 +530,12 @@ function RenameInput({
       className="min-w-0 flex-1 rounded border bg-fd-background px-1.5 py-0.5 text-sm text-fd-foreground outline-none ring-fd-primary focus:ring-1"
     />
   )
+}
+
+function getExtensionStart(fileName: string): number {
+  const extensionStart = fileName.lastIndexOf('.')
+  if (extensionStart <= 0) return fileName.length
+  return extensionStart
 }
 
 function buildFileTree(entries: MdxFolderEntry[], pageTree?: MdxFolderTreeNode[]): FileTreeNode[] {
