@@ -76,8 +76,16 @@ function createWindow(): void {
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url)
+    if (openExternalNavigation(details.url, mainWindow?.webContents.getURL())) {
+      return { action: 'deny' }
+    }
+
     return { action: 'deny' }
+  })
+
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    if (!openExternalNavigation(url, mainWindow?.webContents.getURL())) return
+    event.preventDefault()
   })
 
   // HMR for renderer base on electron-vite cli.
@@ -151,6 +159,24 @@ app.whenReady().then(() => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
 })
+
+function isAppNavigationUrl(url: string, currentUrl?: string): boolean {
+  if (currentUrl && url === currentUrl) return true
+  if (url.startsWith('file://')) return true
+
+  if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
+    return url.startsWith(process.env['ELECTRON_RENDERER_URL'])
+  }
+
+  return false
+}
+
+function openExternalNavigation(url: string, currentUrl?: string): boolean {
+  if (isAppNavigationUrl(url, currentUrl)) return false
+
+  void shell.openExternal(url)
+  return true
+}
 
 function getExtensionAssetContentType(filePath: string): string {
   switch (extname(filePath).toLowerCase()) {
