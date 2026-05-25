@@ -12,6 +12,7 @@
     "build:desktop": "turbo run build --filter=@mdxforge/desktop",
     "build:unpack": "turbo run build:unpack --filter=@mdxforge/desktop",
     "build:win": "turbo run build:win --filter=@mdxforge/desktop",
+    "build:win64": "turbo run build:win64 --filter=@mdxforge/desktop",
     "build:mac": "turbo run build:mac --filter=@mdxforge/desktop",
     "build:linux": "turbo run build:linux --filter=@mdxforge/desktop",
     "build:icons": "turbo run build:icons --filter=@mdxforge/desktop",
