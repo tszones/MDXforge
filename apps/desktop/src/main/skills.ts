@@ -1,36 +1,18 @@
 import { dialog } from 'electron'
 import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'fs'
 import { basename, isAbsolute, join, relative, resolve, sep } from 'path'
+import { readLocalSkill } from './skills/manifest'
+import { buildCopyablePrompt } from './skills/rules'
+import {
+  type SkillSourceKind,
+  type SkillStatus,
+  type SkillType,
+  supportedSkillTypes,
+  type WorkspaceSkill,
+  type WorkspaceSkillsState
+} from './skills/types'
 
-export type SkillType = 'writing' | 'component' | 'template' | 'transform'
-export type SkillSourceKind = 'workspace' | 'npm' | 'git' | 'unknown'
-export type SkillStatus = 'active' | 'disabled' | 'missing' | 'invalid' | 'unsupported' | 'blocked'
-
-export interface SkillRuleAsset {
-  path: string
-  content: string
-}
-
-export interface WorkspaceSkill {
-  source: string
-  kind: SkillSourceKind
-  status: SkillStatus
-  name: string
-  title: string
-  version: string
-  types: SkillType[]
-  rootPath?: string
-  rules: SkillRuleAsset[]
-  components: string[]
-  permissions: string[]
-  reason?: string
-}
-
-export interface WorkspaceSkillsState {
-  workspaceRoot: string
-  skills: WorkspaceSkill[]
-  mergedRules: string
-}
+export type { SkillType, WorkspaceSkill, WorkspaceSkillsState } from './skills/types'
 
 interface WorkspaceConfig {
   skills?: unknown
@@ -38,28 +20,13 @@ interface WorkspaceConfig {
   disabledSkills?: unknown
 }
 
-interface PackageJson {
-  name?: unknown
-  version?: unknown
-  description?: unknown
-  mdxforge?: unknown
-}
-
-interface MdxForgeSkillConfig {
-  type?: unknown
-  types?: unknown
-  title?: unknown
-  rules?: unknown
-  components?: unknown
-}
-
 const configName = 'mdxforge.config.json'
-const supportedTypes = new Set<SkillType>(['writing', 'component', 'template', 'transform'])
 
 export function readWorkspaceSkills(workspaceRoot: string): WorkspaceSkillsState {
   const root = resolve(workspaceRoot)
   const config = readWorkspaceConfig(root)
   const sources = uniqueStrings([
+    'builtin:mdxforge-mdx',
     ...readStringList(config.skills),
     ...readStringList(config.packages)
   ])
@@ -73,7 +40,9 @@ export function readWorkspaceSkills(workspaceRoot: string): WorkspaceSkillsState
   }
 }
 
-export async function addLocalSkillFolder(workspaceRoot: string): Promise<WorkspaceSkillsState | null> {
+export async function addLocalSkillFolder(
+  workspaceRoot: string
+): Promise<WorkspaceSkillsState | null> {
   const result = await dialog.showOpenDialog({
     title: 'Add local MDXForge skill',
     properties: ['openDirectory']
@@ -102,7 +71,7 @@ export function createLocalSkill(
   const root = resolve(workspaceRoot)
   const slug = slugifySkillName(inputName)
   if (!slug) throw new Error('Skill name is required.')
-  if (!supportedTypes.has(type)) throw new Error(`Unsupported skill type: ${type}`)
+  if (!supportedSkillTypes.has(type)) throw new Error(`Unsupported skill type: ${type}`)
 
   const skillRoot = join(root, '.mdxforge', 'skills', slug)
   if (existsSync(skillRoot)) throw new Error(`Skill already exists: ${slug}`)
@@ -111,14 +80,18 @@ export function createLocalSkill(
   if (type === 'component') mkdirSync(join(skillRoot, 'src'), { recursive: true })
 
   writeFileSync(
-    join(skillRoot, 'package.json'),
-    `${JSON.stringify(createSkillPackageJson(slug, type), null, 2)}\n`,
+    join(skillRoot, 'mdxforge.skill.json'),
+    `${JSON.stringify(createSkillManifestJson(slug, type), null, 2)}\n`,
     'utf-8'
   )
-  writeFileSync(join(skillRoot, 'rules.mdx'), createSkillRules(slug, type), 'utf-8')
+  writeFileSync(join(skillRoot, 'SKILL.md'), createSkillRules(slug, type), 'utf-8')
   writeFileSync(join(skillRoot, 'demo.mdx'), createSkillDemo(slug, type), 'utf-8')
   if (type === 'component') {
-    writeFileSync(join(skillRoot, 'src', 'extension.tsx'), createComponentSkillSource(slug), 'utf-8')
+    writeFileSync(
+      join(skillRoot, 'src', 'extension.tsx'),
+      createComponentSkillSource(slug),
+      'utf-8'
+    )
   }
 
   const source = `./${relative(root, skillRoot).split(sep).join('/')}`
@@ -128,23 +101,55 @@ export function createLocalSkill(
   return readWorkspaceSkills(root)
 }
 
-function readSkillReference(workspaceRoot: string, source: string, disabled: boolean): WorkspaceSkill {
-  if (source.startsWith('npm:')) return placeholderSkill(source, 'npm', 'unsupported', 'npm install is not supported yet.')
-  if (source.startsWith('git:')) return placeholderSkill(source, 'git', 'unsupported', 'git install is not supported yet.')
+function readSkillReference(
+  workspaceRoot: string,
+  source: string,
+  disabled: boolean
+): WorkspaceSkill {
+  if (source === 'builtin:mdxforge-mdx') {
+    const rootPath = resolveBuiltinSkillPath()
+    const parsed = readLocalSkill(rootPath)
+    if (typeof parsed === 'string')
+      return placeholderSkill(source, 'builtin', 'invalid', parsed, rootPath)
+    return {
+      ...parsed,
+      source,
+      kind: 'builtin',
+      status: disabled ? 'disabled' : 'active',
+      rootPath
+    }
+  }
+  if (source.startsWith('npm:')) {
+    return placeholderSkill(source, 'npm', 'unsupported', 'npm install is not supported yet.')
+  }
+  if (source.startsWith('git:')) {
+    return placeholderSkill(source, 'git', 'unsupported', 'git install is not supported yet.')
+  }
   if (!source.startsWith('.') && !isAbsolute(source)) {
-    return placeholderSkill(source, 'unknown', 'unsupported', 'Only workspace-local skills are supported yet.')
+    return placeholderSkill(
+      source,
+      'unknown',
+      'unsupported',
+      'Only workspace-local skills are supported yet.'
+    )
   }
 
   const rootPath = resolve(workspaceRoot, source)
   if (!isPathInside(workspaceRoot, rootPath)) {
-    return placeholderSkill(source, 'workspace', 'blocked', 'Skill path must stay inside the workspace.')
+    return placeholderSkill(
+      source,
+      'workspace',
+      'blocked',
+      'Skill path must stay inside the workspace.'
+    )
   }
   if (!existsSync(rootPath) || !statSync(rootPath).isDirectory()) {
     return placeholderSkill(source, 'workspace', 'missing', 'Skill folder does not exist.')
   }
 
   const parsed = readLocalSkill(rootPath)
-  if (typeof parsed === 'string') return placeholderSkill(source, 'workspace', 'invalid', parsed, rootPath)
+  if (typeof parsed === 'string')
+    return placeholderSkill(source, 'workspace', 'invalid', parsed, rootPath)
 
   return {
     ...parsed,
@@ -155,46 +160,17 @@ function readSkillReference(workspaceRoot: string, source: string, disabled: boo
   }
 }
 
-function readLocalSkill(rootPath: string): Omit<WorkspaceSkill, 'source' | 'kind' | 'status'> | string {
-  const packagePath = join(rootPath, 'package.json')
-  if (!existsSync(packagePath) || !statSync(packagePath).isFile()) {
-    return 'Skill is missing package.json.'
-  }
-
-  let packageJson: PackageJson
-  try {
-    packageJson = JSON.parse(readFileSync(packagePath, 'utf-8')) as PackageJson
-  } catch {
-    return 'Skill package.json could not be parsed.'
-  }
-
-  if (typeof packageJson.name !== 'string' || packageJson.name.length === 0) {
-    return 'Skill package.json must include a string name.'
-  }
-
-  const mdxforge = isSkillConfig(packageJson.mdxforge) ? packageJson.mdxforge : {}
-  const types = normalizeSkillTypes(mdxforge)
-  const rulePaths = readStringList(mdxforge.rules)
-  const rules = rulePaths
-    .map((rulePath) => resolveSkillAsset(rootPath, rulePath))
-    .filter((rulePath): rulePath is string => Boolean(rulePath))
-    .filter((rulePath) => existsSync(rulePath) && statSync(rulePath).isFile())
-    .map((rulePath) => ({ path: rulePath, content: readFileSync(rulePath, 'utf-8') }))
-
-  return {
-    name: packageJson.name,
-    title:
-      typeof mdxforge.title === 'string'
-        ? mdxforge.title
-        : typeof packageJson.description === 'string'
-          ? packageJson.description
-          : packageJson.name,
-    version: typeof packageJson.version === 'string' ? packageJson.version : '0.0.0',
-    types,
-    rules,
-    components: readStringList(mdxforge.components),
-    permissions: permissionsForTypes(types)
-  }
+function resolveBuiltinSkillPath(): string {
+  const candidates = [
+    resolve(process.cwd(), 'skills', 'mdxforge-mdx'),
+    resolve(process.cwd(), '..', '..', 'skills', 'mdxforge-mdx'),
+    resolve(__dirname, '..', '..', '..', '..', 'skills', 'mdxforge-mdx'),
+    resolve(__dirname, '..', '..', '..', '..', '..', 'skills', 'mdxforge-mdx')
+  ]
+  return (
+    candidates.find((candidate) => existsSync(candidate) && statSync(candidate).isDirectory()) ??
+    candidates[0]
+  )
 }
 
 function placeholderSkill(
@@ -223,10 +199,7 @@ function placeholderSkill(
 function buildMergedRules(skills: WorkspaceSkill[]): string {
   const sections = skills
     .filter((skill) => skill.rules.length > 0)
-    .map((skill) => {
-      const body = skill.rules.map((rule) => rule.content.trim()).filter(Boolean).join('\n\n')
-      return body ? `## ${skill.title}\n\nSource: ${skill.source}\n\n${body}` : ''
-    })
+    .map(buildCopyablePrompt)
     .filter(Boolean)
 
   return [
@@ -245,19 +218,17 @@ function buildMergedRules(skills: WorkspaceSkill[]): string {
     .trim()
 }
 
-function createSkillPackageJson(slug: string, type: SkillType): Record<string, unknown> {
+function createSkillManifestJson(slug: string, type: SkillType): Record<string, unknown> {
   return {
+    schema: 1,
     name: slug,
-    private: true,
+    title: titleFromSlug(slug),
     version: '0.0.0',
-    description: titleFromSlug(slug),
-    mdxforge: {
-      schema: 1,
-      title: titleFromSlug(slug),
-      types: [type],
-      rules: ['./rules.mdx'],
-      components: type === 'component' ? ['ExampleCard'] : []
-    }
+    description: `${titleFromSlug(slug)} local skill.`,
+    types: [type],
+    rules: ['./SKILL.md'],
+    components: type === 'component' ? ['ExampleCard'] : [],
+    agentAdapters: ['claude-code', 'cursor', 'codex', 'aider']
   }
 }
 
@@ -319,17 +290,6 @@ function writeWorkspaceConfig(workspaceRoot: string, config: WorkspaceConfig): v
   writeFileSync(join(workspaceRoot, configName), `${JSON.stringify(config, null, 2)}\n`, 'utf-8')
 }
 
-function isSkillConfig(value: unknown): value is MdxForgeSkillConfig {
-  return typeof value === 'object' && value !== null
-}
-
-function normalizeSkillTypes(config: MdxForgeSkillConfig): SkillType[] {
-  const raw = readStringList(config.types)
-  if (typeof config.type === 'string') raw.unshift(config.type)
-  const types = uniqueStrings(raw).filter((item): item is SkillType => supportedTypes.has(item as SkillType))
-  return types.length > 0 ? types : ['writing']
-}
-
 function readStringList(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return value.filter((item): item is string => typeof item === 'string' && item.length > 0)
@@ -337,22 +297,6 @@ function readStringList(value: unknown): string[] {
 
 function uniqueStrings(values: string[]): string[] {
   return [...new Set(values)]
-}
-
-function permissionsForTypes(types: SkillType[]): string[] {
-  const permissions = new Set<string>()
-  for (const type of types) {
-    if (type === 'writing') permissions.add('Adds AI writing rules')
-    if (type === 'component') permissions.add('Registers MDX components')
-    if (type === 'template') permissions.add('Adds document templates')
-    if (type === 'transform') permissions.add('Changes MDX compile behavior')
-  }
-  return [...permissions]
-}
-
-function resolveSkillAsset(rootPath: string, assetPath: string): string | null {
-  const resolvedPath = resolve(rootPath, assetPath)
-  return isPathInside(rootPath, resolvedPath) ? resolvedPath : null
 }
 
 function isPathInside(parentPath: string, childPath: string): boolean {

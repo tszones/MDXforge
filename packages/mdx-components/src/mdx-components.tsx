@@ -1,4 +1,3 @@
-import type { ComponentPropsWithoutRef } from 'react'
 import {
   Table,
   TableBody,
@@ -21,6 +20,7 @@ import { Step, Steps } from 'fumadocs-ui/components/steps'
 import { Tab, Tabs, TabsContent, TabsList, TabsTrigger } from 'fumadocs-ui/components/tabs'
 import { TypeTable } from 'fumadocs-ui/components/type-table'
 import type { MDXComponents } from 'mdx/types'
+import type { ComponentPropsWithoutRef } from 'react'
 import { Mermaid } from './Mermaid.js'
 import { MetricCard } from './MetricCard.js'
 import { SimpleBarChart } from './SimpleBarChart.js'

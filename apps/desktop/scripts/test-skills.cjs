@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict')
-const { mkdtempSync, mkdirSync, readFileSync, writeFileSync } = require('node:fs')
+const { mkdtempSync, mkdirSync, readFileSync, writeFileSync, existsSync } = require('node:fs')
 const { tmpdir } = require('node:os')
 const { join } = require('node:path')
 const jiti = require('jiti')
@@ -61,37 +61,52 @@ assert.doesNotMatch(replaced.content, /\nRules\n/)
 assert.equal(upsertManagedBlock('<!-- mdxforge:managed:start -->', 'Rules').conflict, true)
 
 const claudePreview = previewAgentInstall(root, 'claude-code')
-assert.equal(claudePreview.relativePath, 'CLAUDE.md')
+assert.equal(claudePreview.kind, 'directory')
+assert.equal(claudePreview.relativePath, '.claude/skills/mdxforge-mdx')
 assert.equal(claudePreview.action, 'create')
-assert.match(claudePreview.diff, /Active MDXForge Writing Rules/)
+assert.match(claudePreview.after, /SKILL\.md/)
 applyAgentInstall(root, 'claude-code')
-assert.match(readFileSync(join(root, 'CLAUDE.md'), 'utf-8'), /mdxforge:managed:start/)
-writeFileSync(
-  join(root, 'CLAUDE.md'),
-  `User intro\n\n${readFileSync(join(root, 'CLAUDE.md'), 'utf-8')}\nUser outro\n`
+assert.match(
+  readFileSync(join(root, '.claude', 'skills', 'mdxforge-mdx', 'SKILL.md'), 'utf-8'),
+  /MDXForge MDX Skill/
+)
+assert.equal(
+  readFileSync(join(root, '.claude', 'skills', 'mdxforge-mdx', 'components', 'callout.md'), 'utf-8')
+    .length > 0,
+  true
 )
 const claudeUpdatePreview = previewAgentInstall(root, 'claude-code')
 assert.equal(claudeUpdatePreview.action, 'update')
-assert.match(claudeUpdatePreview.after, /User intro/)
-assert.match(claudeUpdatePreview.after, /User outro/)
-applyAgentInstall(root, 'claude-code')
-assert.match(readFileSync(join(root, 'CLAUDE.md'), 'utf-8'), /User intro/)
-assert.match(readFileSync(join(root, 'CLAUDE.md'), 'utf-8'), /User outro/)
 const disablePreview = previewAgentDisable(root, 'claude-code')
-assert.equal(disablePreview.action, 'update')
-assert.doesNotMatch(disablePreview.after, /mdxforge:managed:start/)
+assert.equal(disablePreview.kind, 'directory')
+assert.equal(disablePreview.action, 'delete')
 applyAgentDisable(root, 'claude-code')
-const disabledClaude = readFileSync(join(root, 'CLAUDE.md'), 'utf-8')
-assert.doesNotMatch(disabledClaude, /mdxforge:managed:start/)
-assert.match(disabledClaude, /User intro/)
-assert.match(disabledClaude, /User outro/)
+assert.equal(existsSync(join(root, '.claude', 'skills', 'mdxforge-mdx', 'SKILL.md')), false)
 
 const cursorPreview = previewAgentInstall(root, 'cursor')
-assert.equal(cursorPreview.relativePath, '.cursor/rules/mdxforge.mdc')
+assert.equal(cursorPreview.relativePath, '.cursor/skills/mdxforge-mdx')
+assert.equal(cursorPreview.kind, 'directory')
 assert.equal(cursorPreview.action, 'create')
+applyAgentInstall(root, 'cursor')
+assert.match(
+  readFileSync(join(root, '.cursor', 'skills', 'mdxforge-mdx', 'SKILL.md'), 'utf-8'),
+  /MDXForge MDX Skill/
+)
 
 const codexPreview = previewAgentInstall(root, 'codex')
-assert.equal(codexPreview.action, 'copy')
-assert.match(codexPreview.after, /Active MDXForge Writing Rules/)
+assert.equal(codexPreview.relativePath, '.codex/skills/mdxforge-mdx')
+assert.equal(codexPreview.kind, 'directory')
+assert.equal(codexPreview.action, 'create')
+applyAgentInstall(root, 'codex')
+assert.match(
+  readFileSync(join(root, '.codex', 'skills', 'mdxforge-mdx', 'SKILL.md'), 'utf-8'),
+  /MDXForge MDX Skill/
+)
+assert.equal(existsSync(join(root, '.codex', 'skills', 'mdxforge-mdx', 'patterns')), true)
+
+const aiderPreview = previewAgentInstall(root, 'aider')
+assert.equal(aiderPreview.relativePath, '.aider/skills/mdxforge-mdx')
+assert.equal(aiderPreview.kind, 'directory')
+assert.equal(aiderPreview.action, 'create')
 
 console.log('skills tests passed')

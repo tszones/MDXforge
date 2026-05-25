@@ -11,8 +11,21 @@ import {
   getAppSettings,
   setAppSettings
 } from './settings'
+import {
+  addLocalSkillFolder,
+  createLocalSkill,
+  readWorkspaceSkills,
+  type SkillType
+} from './skills'
+import { detectAgents } from './skills/agents'
+import {
+  applyAgentDisable,
+  applyAgentInstall,
+  previewAgentDisable,
+  previewAgentInstall
+} from './skills/projection'
+import type { AgentId } from './skills/types'
 import { searchMdxWorkspaceFiles } from './workspace-search'
-import { addLocalSkillFolder, createLocalSkill, readWorkspaceSkills, type SkillType } from './skills'
 
 export function registerAppIpc(options: {
   getMainWindow: () => BrowserWindow | null
@@ -117,7 +130,9 @@ export function registerAppIpc(options: {
     const folder = readMdxFolder(workspaceRoot)
     return searchMdxWorkspaceFiles(folder.files, query)
   })
-  ipcMain.handle('skills:get-workspace', (_, workspaceRoot: string) => readWorkspaceSkills(workspaceRoot))
+  ipcMain.handle('skills:get-workspace', (_, workspaceRoot: string) =>
+    readWorkspaceSkills(workspaceRoot)
+  )
   ipcMain.handle('skills:add-local-folder', async (_, workspaceRoot: string) =>
     addLocalSkillFolder(workspaceRoot)
   )
@@ -127,6 +142,22 @@ export function registerAppIpc(options: {
   ipcMain.handle('skills:copy-rules', (_, rules: string) => {
     clipboard.writeText(rules)
   })
+  ipcMain.handle('skills:detect-agents', () => detectAgents())
+  ipcMain.handle('skills:preview-agent-install', (_, workspaceRoot: string, agentId: AgentId) =>
+    previewAgentInstall(workspaceRoot, agentId)
+  )
+  ipcMain.handle('skills:apply-agent-install', (_, workspaceRoot: string, agentId: AgentId) =>
+    applyAgentInstall(workspaceRoot, agentId)
+  )
+  ipcMain.handle('skills:preview-agent-disable', (_, workspaceRoot: string, agentId: AgentId) =>
+    previewAgentDisable(workspaceRoot, agentId)
+  )
+  ipcMain.handle('skills:apply-agent-disable', (_, workspaceRoot: string, agentId: AgentId) =>
+    applyAgentDisable(workspaceRoot, agentId)
+  )
+  ipcMain.handle('skills:disable-agent-install', (_, workspaceRoot: string, agentId: AgentId) =>
+    applyAgentDisable(workspaceRoot, agentId)
+  )
   ipcMain.handle('mdx:register-default-app', () => app.setAsDefaultProtocolClient('mdx'))
   ipcMain.handle('mdx:is-default-app', () => app.isDefaultProtocolClient('mdx'))
   ipcMain.handle('settings:get', () => getAppSettings())

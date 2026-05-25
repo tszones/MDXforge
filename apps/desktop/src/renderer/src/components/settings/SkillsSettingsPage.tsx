@@ -1,12 +1,23 @@
 import { Check, Copy, FolderPlus, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { m } from '../../paraglide/messages'
-import type { WorkspaceSkillsState } from '../../types'
+import type {
+  AgentDetectionResult,
+  AgentId,
+  AgentInstallPreview,
+  WorkspaceSkillsState
+} from '../../types'
 
-export function SkillsSettingsPage({ workspaceRoot }: { workspaceRoot?: string }): React.JSX.Element {
+export function SkillsSettingsPage({
+  workspaceRoot
+}: {
+  workspaceRoot?: string
+}): React.JSX.Element {
   const [skillsState, setSkillsState] = useState<WorkspaceSkillsState | null>(null)
   const [loading, setLoading] = useState(false)
+  const [agents, setAgents] = useState<AgentDetectionResult[]>([])
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const [preview, setPreview] = useState<AgentInstallPreview | null>(null)
   const [newSkillName, setNewSkillName] = useState('local-skill')
   const [newSkillType, setNewSkillType] = useState<'writing' | 'component' | 'template'>('writing')
   const [error, setError] = useState<string | null>(null)
@@ -20,6 +31,10 @@ export function SkillsSettingsPage({ workspaceRoot }: { workspaceRoot?: string }
       .then(setSkillsState)
       .catch((cause) => setError(cause instanceof Error ? cause.message : String(cause)))
       .finally(() => setLoading(false))
+    void window.api
+      .detectAgents()
+      .then(setAgents)
+      .catch(() => setAgents([]))
   }, [workspaceRoot])
 
   useEffect(() => {
@@ -65,6 +80,42 @@ export function SkillsSettingsPage({ workspaceRoot }: { workspaceRoot?: string }
     }
   }
 
+  async function previewAgent(agentId: AgentId): Promise<void> {
+    if (!workspaceRoot) return
+    try {
+      setPreview(await window.api.previewAgentInstall(workspaceRoot, agentId))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause))
+    }
+  }
+
+  async function previewAgentDisable(agentId: AgentId): Promise<void> {
+    if (!workspaceRoot) return
+    try {
+      setPreview(await window.api.previewAgentDisable(workspaceRoot, agentId))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause))
+    }
+  }
+
+  async function applyAgent(agentId: AgentId): Promise<void> {
+    if (!workspaceRoot) return
+    try {
+      setPreview(await window.api.applyAgentInstall(workspaceRoot, agentId))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause))
+    }
+  }
+
+  async function disableAgent(agentId: AgentId): Promise<void> {
+    if (!workspaceRoot) return
+    try {
+      setPreview(await window.api.applyAgentDisable(workspaceRoot, agentId))
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause))
+    }
+  }
+
   if (!workspaceRoot) return <SkillsEmptyState />
 
   const activeCount = skillsState?.skills.filter((skill) => skill.status === 'active').length ?? 0
@@ -106,15 +157,32 @@ export function SkillsSettingsPage({ workspaceRoot }: { workspaceRoot?: string }
         onCreate={() => void createLocalSkill()}
       />
 
-      {error ? <pre className="overflow-auto rounded-lg border bg-fd-error/10 p-3 text-sm text-fd-error">{error}</pre> : null}
+      {error ? (
+        <pre className="overflow-auto rounded-lg border bg-fd-error/10 p-3 text-sm text-fd-error">
+          {error}
+        </pre>
+      ) : null}
 
       <SkillsList skillsState={skillsState} loading={loading} />
+
+      <AgentIntegrations
+        agents={agents}
+        preview={preview}
+        onPreview={(agentId) => void previewAgent(agentId)}
+        onPreviewDisable={(agentId) => void previewAgentDisable(agentId)}
+        onApply={(agentId) => void applyAgent(agentId)}
+        onDisable={(agentId) => void disableAgent(agentId)}
+      />
+
+      {preview ? <AgentDiffDialog preview={preview} onClose={() => setPreview(null)} /> : null}
 
       <section className="rounded-xl border bg-fd-card p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h2 className="font-medium">{m.skills_ai_rules_title()}</h2>
-            <p className="mt-1 text-sm text-fd-muted-foreground">{m.skills_ai_rules_description()}</p>
+            <p className="mt-1 text-sm text-fd-muted-foreground">
+              {m.skills_ai_rules_description()}
+            </p>
           </div>
           <button
             type="button"
@@ -198,6 +266,131 @@ function CreateLocalSkillForm({
         </button>
       </div>
     </section>
+  )
+}
+
+function AgentIntegrations({
+  agents,
+  preview,
+  onPreview,
+  onPreviewDisable,
+  onApply,
+  onDisable
+}: {
+  agents: AgentDetectionResult[]
+  preview: AgentInstallPreview | null
+  onPreview: (agentId: AgentId) => void
+  onPreviewDisable: (agentId: AgentId) => void
+  onApply: (agentId: AgentId) => void
+  onDisable: (agentId: AgentId) => void
+}): React.JSX.Element {
+  return (
+    <section className="rounded-xl border bg-fd-card p-4">
+      <h2 className="font-medium">{m.skills_agents_title()}</h2>
+      <p className="mt-1 text-sm text-fd-muted-foreground">{m.skills_agents_description()}</p>
+      <div className="mt-4 grid gap-3">
+        {agents.map((agent) => {
+          const installReady =
+            preview?.agentId === agent.id &&
+            preview.operation === 'install' &&
+            preview.action !== 'conflict'
+          const disableReady =
+            preview?.agentId === agent.id &&
+            preview.operation === 'disable' &&
+            preview.action !== 'conflict'
+
+          return (
+            <article key={agent.id} className="rounded-lg border bg-fd-background p-3">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <div className="font-medium">{agent.name}</div>
+                  <p className="mt-1 text-xs text-fd-muted-foreground">
+                    {agent.status === 'detected'
+                      ? m.skills_agent_detected()
+                      : agent.reason || m.skills_agent_not_detected()}
+                  </p>
+                </div>
+                <span className="rounded-md border px-2 py-1 text-xs text-fd-muted-foreground">
+                  {agent.integrationMode}
+                </span>
+              </div>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => onPreview(agent.id)}
+                  className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-fd-accent"
+                >
+                  {m.skills_preview_diff()}
+                </button>
+                {agent.integrationMode === 'managed-file' ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => onApply(agent.id)}
+                      disabled={!installReady}
+                      className="rounded-lg bg-fd-primary px-3 py-1.5 text-xs font-medium text-fd-primary-foreground disabled:opacity-50"
+                    >
+                      {m.skills_apply_rules()}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onPreviewDisable(agent.id)}
+                      className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-fd-accent"
+                    >
+                      {m.skills_preview_disable()}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDisable(agent.id)}
+                      disabled={!disableReady}
+                      className="rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-fd-accent disabled:opacity-50"
+                    >
+                      {m.skills_disable_rules()}
+                    </button>
+                  </>
+                ) : null}
+              </div>
+            </article>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function AgentDiffDialog({
+  preview,
+  onClose
+}: {
+  preview: AgentInstallPreview
+  onClose: () => void
+}): React.JSX.Element {
+  return (
+    <div className="fixed inset-0 z-[90] flex items-center justify-center bg-black/40 p-4">
+      <section className="max-h-[85vh] w-full max-w-4xl overflow-hidden rounded-xl border bg-fd-popover text-fd-popover-foreground shadow-2xl">
+        <div className="flex min-w-0 items-center justify-between gap-3 border-b p-4">
+          <div className="min-w-0">
+            <h3 className="font-medium">{m.skills_diff_dialog_title()}</h3>
+            <p className="mt-1 truncate text-xs text-fd-muted-foreground">
+              {preview.action} {preview.relativePath || preview.agentId}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="shrink-0 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-fd-accent"
+          >
+            {m.title_bar_close()}
+          </button>
+        </div>
+        {preview.reason ? (
+          <p className="border-b p-4 text-xs text-fd-error">{preview.reason}</p>
+        ) : null}
+        <pre className="max-h-[65vh] max-w-full overflow-auto whitespace-pre-wrap break-words p-4 text-xs">
+          {preview.diff || preview.after || m.skills_no_rules()}
+        </pre>
+      </section>
+    </div>
   )
 }
 

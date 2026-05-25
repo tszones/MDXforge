@@ -1,5 +1,5 @@
 import { relative } from 'path'
-import { buildFolderChildren, assignFolderMetadata, flattenFiles } from './page-tree-build'
+import { assignFolderMetadata, buildFolderChildren, flattenFiles } from './page-tree-build'
 import { attachDocumentLinks } from './page-tree-links'
 import { scanFolder } from './page-tree-scan'
 import type {
@@ -9,15 +9,14 @@ import type {
   MdxFolderEntry,
   MdxFolderTreeNode
 } from './page-tree-types'
-import { cleanSegmentName, isGroupFolder, isIndexStem, stripMarkdownExtension } from './page-tree-utils'
+import {
+  cleanSegmentName,
+  isGroupFolder,
+  isIndexStem,
+  stripMarkdownExtension
+} from './page-tree-utils'
 
-export type {
-  MdxDocumentBacklink,
-  MdxDocumentLink,
-  MdxFolder,
-  MdxFolderEntry,
-  MdxFolderTreeNode
-}
+export type { MdxDocumentBacklink, MdxDocumentLink, MdxFolder, MdxFolderEntry, MdxFolderTreeNode }
 
 export function readMdxFolder(rootPath: string): MdxFolder {
   const root = scanFolder(rootPath, '', '')

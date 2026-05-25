@@ -128,7 +128,7 @@ export interface WorkspaceSkillsState {
 
 export interface WorkspaceSkill {
   source: string
-  kind: 'workspace' | 'npm' | 'git' | 'unknown'
+  kind: 'builtin' | 'workspace' | 'npm' | 'git' | 'unknown'
   status: 'active' | 'disabled' | 'missing' | 'invalid' | 'unsupported' | 'blocked'
   name: string
   title: string
@@ -138,6 +138,29 @@ export interface WorkspaceSkill {
   rules: Array<{ path: string; content: string }>
   components: string[]
   permissions: string[]
+  reason?: string
+}
+
+export type AgentId = 'claude-code' | 'cursor' | 'codex' | 'aider'
+
+export interface AgentDetectionResult {
+  id: AgentId
+  name: string
+  status: 'detected' | 'not-detected' | 'error'
+  integrationMode: 'managed-file' | 'copy-only'
+  targetPath?: string
+  command?: string
+  reason?: string
+}
+
+export interface AgentInstallPreview {
+  agentId: AgentId
+  operation?: 'install' | 'disable'
+  relativePath: string
+  action: 'create' | 'update' | 'copy' | 'conflict'
+  before: string
+  after: string
+  diff: string
   reason?: string
 }
 
@@ -219,6 +242,12 @@ export interface AppAPI {
     type: 'writing' | 'component' | 'template' | 'transform'
   ) => Promise<WorkspaceSkillsState>
   copySkillRules: (rules: string) => Promise<void>
+  detectAgents: () => Promise<AgentDetectionResult[]>
+  previewAgentInstall: (workspaceRoot: string, agentId: AgentId) => Promise<AgentInstallPreview>
+  applyAgentInstall: (workspaceRoot: string, agentId: AgentId) => Promise<AgentInstallPreview>
+  previewAgentDisable: (workspaceRoot: string, agentId: AgentId) => Promise<AgentInstallPreview>
+  applyAgentDisable: (workspaceRoot: string, agentId: AgentId) => Promise<AgentInstallPreview>
+  disableAgentInstall: (workspaceRoot: string, agentId: AgentId) => Promise<AgentInstallPreview>
   registerDefaultMdxApp: () => Promise<boolean>
   isDefaultMdxApp: () => Promise<boolean>
   getSettings: () => Promise<AppSettings>
