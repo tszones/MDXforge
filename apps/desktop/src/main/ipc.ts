@@ -110,6 +110,9 @@ export function registerAppIpc(options: {
   ipcMain.handle('mdx:copy-raw-source', (_, filePath: string) => {
     clipboard.writeText(readMdxRawSource(filePath))
   })
+  ipcMain.handle('mdx:copy-path', (_, filePath: string) => {
+    clipboard.writeText(filePath)
+  })
   ipcMain.handle('mdx:search-workspace', async (_, workspaceRoot: string, query: string) => {
     const folder = readMdxFolder(workspaceRoot)
     return searchMdxWorkspaceFiles(folder.files, query)

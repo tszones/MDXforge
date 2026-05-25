@@ -9,6 +9,7 @@ import { RootProvider } from 'fumadocs-ui/provider/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { HashRouter } from 'react-router'
+import { Toaster } from 'sonner'
 import App from './App'
 
 createRoot(document.getElementById('root')!).render(
@@ -27,6 +28,7 @@ createRoot(document.getElementById('root')!).render(
       >
         <RootProvider search={{ enabled: false }}>
           <App />
+          <Toaster richColors position="bottom-right" />
         </RootProvider>
       </HotkeysProvider>
     </HashRouter>

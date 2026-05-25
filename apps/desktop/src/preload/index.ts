@@ -14,6 +14,7 @@ const api = {
   renameMdxPath: (targetPath: string, nextName: string, workspaceRoot?: string) =>
     ipcRenderer.invoke('mdx:rename-path', targetPath, nextName, workspaceRoot),
   copyMdxRawSource: (filePath: string) => ipcRenderer.invoke('mdx:copy-raw-source', filePath),
+  copyPath: (filePath: string) => ipcRenderer.invoke('mdx:copy-path', filePath),
   searchMdxWorkspace: (workspaceRoot: string, query: string) =>
     ipcRenderer.invoke('mdx:search-workspace', workspaceRoot, query),
   setWorkspaceExtensionsEnabled: (enabled: boolean, trustKey?: string) =>

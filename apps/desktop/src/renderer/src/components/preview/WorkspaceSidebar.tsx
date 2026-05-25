@@ -1,4 +1,6 @@
 import { useHotkeys } from '@tanstack/react-hotkeys'
+import { createPortal } from 'react-dom'
+import { toast } from 'sonner'
 import {
   SidebarFolder,
   SidebarFolderContent,
@@ -8,6 +10,7 @@ import {
 } from 'fumadocs-ui/components/sidebar/base'
 import {
   BookOpen,
+  Copy,
   ExternalLink,
   FileText,
   FolderOpen,
@@ -71,9 +74,10 @@ export function PreviewSidebar({
     []
   )
   const [workspaceSearchLoading, setWorkspaceSearchLoading] = useState(false)
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; path: string } | null>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
   const tree = useMemo(
-    () => buildFileTree(workspace.folder?.files ?? [], workspace.folder?.tree),
+    () => buildFileTree(workspace.folder?.files ?? [], workspace.folder?.tree, workspace.folder?.rootPath),
     [workspace.folder]
   )
   const searching = query.trim().length > 0
@@ -134,26 +138,52 @@ export function PreviewSidebar({
     }
   }, [workspace.folder?.rootPath, query])
 
+  useEffect(() => {
+    if (!contextMenu) return
+    const close = (): void => setContextMenu(null)
+    window.addEventListener('click', close)
+    window.addEventListener('keydown', close)
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('click', close)
+      window.removeEventListener('keydown', close)
+      window.removeEventListener('resize', close)
+    }
+  }, [contextMenu])
+
+  function openContextMenu(event: React.MouseEvent, path: string): void {
+    event.preventDefault()
+    event.stopPropagation()
+    setContextMenu({ x: event.clientX, y: event.clientY, path })
+  }
+
+  async function copyPath(path: string): Promise<void> {
+    setContextMenu(null)
+    try {
+      await window.api.copyPath(path)
+      toast.success(m.preview_file_path_copied())
+    } catch {
+      toast.error(m.preview_file_path_copy_failed())
+    }
+  }
+
   return (
     <div className="h-full min-h-0 bg-fd-card text-sm">
       <div className="flex h-full w-[268px] flex-col">
         <div className="flex flex-col gap-3 border-b p-4 pb-3">
-          <div className="flex">
-            <div className="me-auto min-w-0">
-              <div className="inline-flex items-center gap-2.5 font-medium text-[0.9375rem]">
+          <div className="flex items-center">
+            <div className="me-auto flex min-w-0 items-center">
+              <div className="inline-flex items-center gap-2.5 font-medium text-[0.9375rem] leading-none">
                 <BookOpen className="size-4 shrink-0 text-fd-primary" />
                 <span>MDXForge</span>
               </div>
-              <p className="mt-1 truncate text-xs text-fd-muted-foreground">
-                {workspace.folder ? workspace.folder.name : m.preview_single_file_preview()}
-              </p>
             </div>
             {onCollapseSidebar ? (
               <button
                 type="button"
                 aria-label={collapsed ? m.preview_expand_sidebar() : m.preview_collapse_sidebar()}
                 onClick={collapsed ? onExpandSidebar : onCollapseSidebar}
-                className="mb-auto flex size-8 items-center justify-center rounded-lg text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
+                className="flex size-8 items-center justify-center rounded-lg text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
               >
                 {collapsed ? (
                   <PanelLeft className="size-4" />
@@ -241,8 +271,17 @@ export function PreviewSidebar({
                   renamingPath={renamingPath}
                   onStartRename={setRenamingPath}
                   onStopRename={() => setRenamingPath(null)}
+                  onOpenContextMenu={openContextMenu}
                 />
               ))}
+              <FileTreeNodeContextMenu
+                menu={contextMenu}
+                onCopyPath={(path) => void copyPath(path)}
+                onRename={(path) => {
+                  setContextMenu(null)
+                  setRenamingPath(path)
+                }}
+              />
             </div>
           ) : (
             <div className="relative flex flex-row items-center gap-2 rounded-lg bg-fd-primary/10 p-2 text-start text-fd-primary wrap-anywhere">
@@ -253,27 +292,26 @@ export function PreviewSidebar({
         </div>
 
         <div className="border-t p-3">
-          <p className="mb-2 line-clamp-2 px-1 text-xs leading-5 text-fd-muted-foreground wrap-anywhere">
-            {file.path}
-          </p>
           <div className="grid grid-cols-2 gap-2">
             <button
               type="button"
               onClick={onOpenFile}
               disabled={opening}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg border bg-fd-secondary/50 px-2 py-1.5 text-xs text-fd-secondary-foreground transition-colors hover:bg-fd-accent disabled:opacity-60"
+              title={opening ? m.actions_opening() : m.actions_open_mdx_file()}
+              className="inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden rounded-lg border bg-fd-secondary/50 px-2 text-center text-xs leading-none text-fd-secondary-foreground transition-colors hover:bg-fd-accent disabled:opacity-60"
             >
-              <FileText className="size-3.5 text-fd-muted-foreground" />
-              {opening ? m.actions_opening() : m.actions_open_mdx_file()}
+              <FileText className="size-3.5 shrink-0 text-fd-muted-foreground" />
+              <span className="truncate">{opening ? m.actions_opening() : m.actions_open_mdx_file()}</span>
             </button>
             <button
               type="button"
               onClick={onOpenFolder}
               disabled={opening}
-              className="inline-flex items-center justify-center gap-1.5 rounded-lg border bg-fd-secondary/50 px-2 py-1.5 text-xs text-fd-secondary-foreground transition-colors hover:bg-fd-accent disabled:opacity-60"
+              title={m.actions_open_folder()}
+              className="inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden rounded-lg border bg-fd-secondary/50 px-2 text-center text-xs leading-none text-fd-secondary-foreground transition-colors hover:bg-fd-accent disabled:opacity-60"
             >
-              <FolderOpen className="size-3.5 text-fd-muted-foreground" />
-              {m.actions_open_folder()}
+              <FolderOpen className="size-3.5 shrink-0 text-fd-muted-foreground" />
+              <span className="truncate">{m.actions_open_folder()}</span>
             </button>
           </div>
         </div>
@@ -289,7 +327,8 @@ function FileTreeNodeView({
   onRenamePath,
   renamingPath,
   onStartRename,
-  onStopRename
+  onStopRename,
+  onOpenContextMenu
 }: {
   node: FileTreeNode
   activePath: string
@@ -298,6 +337,7 @@ function FileTreeNodeView({
   renamingPath: string | null
   onStartRename: (path: string) => void
   onStopRename: () => void
+  onOpenContextMenu: (event: React.MouseEvent, path: string) => void
 }): React.JSX.Element {
   if (node.type === 'separator') {
     return (
@@ -331,6 +371,7 @@ function FileTreeNodeView({
         renamingPath={renamingPath}
         onStartRename={onStartRename}
         onStopRename={onStopRename}
+        onOpenContextMenu={onOpenContextMenu}
       />
     )
   }
@@ -344,6 +385,7 @@ function FileTreeNodeView({
       renamingPath={renamingPath}
       onStartRename={onStartRename}
       onStopRename={onStopRename}
+      onOpenContextMenu={onOpenContextMenu}
     />
   )
 }
@@ -355,7 +397,8 @@ function FileTreeFolder({
   onRenamePath,
   renamingPath,
   onStartRename,
-  onStopRename
+  onStopRename,
+  onOpenContextMenu
 }: {
   node: Extract<FileTreeNode, { type: 'folder' }>
   activePath: string
@@ -364,6 +407,7 @@ function FileTreeFolder({
   renamingPath: string | null
   onStartRename: (path: string) => void
   onStopRename: () => void
+  onOpenContextMenu: (event: React.MouseEvent, path: string) => void
 }): React.JSX.Element {
   const active = nodeContainsPath(node, activePath)
   const depth = useFolderDepth()
@@ -389,6 +433,7 @@ function FileTreeFolder({
           event.stopPropagation()
           onStartRename(node.absolutePath)
         }}
+        onContextMenu={(event) => openContextMenuForPath(event, node.absolutePath, onOpenContextMenu)}
         style={{ paddingInlineStart: getItemOffset(depth) }}
       >
         <FolderOpen className="size-4 shrink-0" />
@@ -413,6 +458,7 @@ function FileTreeFolder({
             renamingPath={renamingPath}
             onStartRename={onStartRename}
             onStopRename={onStopRename}
+            onOpenContextMenu={onOpenContextMenu}
           />
         ))}
       </SidebarFolderContent>
@@ -427,7 +473,8 @@ function FileTreeItem({
   onRenamePath,
   renamingPath,
   onStartRename,
-  onStopRename
+  onStopRename,
+  onOpenContextMenu
 }: {
   entry: MdxFolderEntry
   active: boolean
@@ -436,6 +483,7 @@ function FileTreeItem({
   renamingPath: string | null
   onStartRename: (path: string) => void
   onStopRename: () => void
+  onOpenContextMenu: (event: React.MouseEvent, path: string) => void
 }): React.JSX.Element {
   const depth = useFolderDepth()
 
@@ -461,6 +509,7 @@ function FileTreeItem({
         event.stopPropagation()
         onStartRename(entry.path)
       }}
+      onContextMenu={(event) => openContextMenuForPath(event, entry.path, onOpenContextMenu)}
       className="relative flex w-full flex-row items-center gap-2 rounded-lg p-2 text-start text-fd-muted-foreground transition-colors wrap-anywhere hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80 hover:transition-none data-[active=true]:bg-fd-primary/10 data-[active=true]:text-fd-primary data-[active=true]:hover:transition-colors data-[active=true]:before:absolute data-[active=true]:before:inset-y-2.5 data-[active=true]:before:inset-s-2.5 data-[active=true]:before:w-px data-[active=true]:before:bg-fd-primary data-[active=true]:before:content-[''] [&_svg]:size-4 [&_svg]:shrink-0"
       style={{ paddingInlineStart: getItemOffset(depth) }}
     >
@@ -475,6 +524,55 @@ function FileTreeItem({
       )}
     </SidebarItem>
   )
+}
+
+
+function FileTreeNodeContextMenu({
+  menu,
+  onCopyPath,
+  onRename
+}: {
+  menu: { x: number; y: number; path: string } | null
+  onCopyPath: (path: string) => void
+  onRename: (path: string) => void
+}): React.JSX.Element | null {
+  if (!menu) return null
+
+  return createPortal(
+    <div
+      className="fixed z-[9999] min-w-44 overflow-hidden rounded-lg border bg-fd-popover p-1 text-sm text-fd-popover-foreground shadow-lg"
+      style={{ left: menu.x, top: menu.y }}
+      onClick={(event) => event.stopPropagation()}
+      onContextMenu={(event) => event.preventDefault()}
+    >
+      <button
+        type="button"
+        className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start hover:bg-fd-accent hover:text-fd-accent-foreground"
+        onClick={() => onCopyPath(menu.path)}
+      >
+        <Copy className="size-4 text-fd-primary" />
+        {m.preview_copy_file_path()}
+      </button>
+      <button
+        type="button"
+        className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start hover:bg-fd-accent hover:text-fd-accent-foreground"
+        onClick={() => onRename(menu.path)}
+      >
+        <span className="size-4" />
+        {m.preview_rename_item()}
+      </button>
+    </div>,
+    document.body
+  )
+}
+
+function openContextMenuForPath(
+  event: React.MouseEvent,
+  path: string,
+  onOpenContextMenu: (event: React.MouseEvent, path: string) => void
+): void {
+  if (!path) return
+  onOpenContextMenu(event, path)
 }
 
 function RenameInput({
@@ -538,7 +636,11 @@ function getExtensionStart(fileName: string): number {
   return extensionStart
 }
 
-function buildFileTree(entries: MdxFolderEntry[], pageTree?: MdxFolderTreeNode[]): FileTreeNode[] {
+function buildFileTree(
+  entries: MdxFolderEntry[],
+  pageTree?: MdxFolderTreeNode[],
+  workspaceRoot?: string
+): FileTreeNode[] {
   if (pageTree && pageTree.length > 0) return buildFileTreeFromPageTree(entries, pageTree)
 
   const root: Array<FileTreeNode> = []
@@ -563,7 +665,13 @@ function buildFileTree(entries: MdxFolderEntry[], pageTree?: MdxFolderTreeNode[]
       )
 
       if (!folder) {
-        folder = { type: 'folder', name: part, path: currentPath, absolutePath: '', children: [] }
+        folder = {
+          type: 'folder',
+          name: part,
+          path: currentPath,
+          absolutePath: workspaceRoot ? joinWorkspacePath(workspaceRoot, currentPath) : '',
+          children: []
+        }
         current.push(folder)
       }
 
@@ -680,4 +788,9 @@ function getDisplayName(entry: MdxFolderEntry): string {
   if (name) return name
 
   return entry.name
+}
+
+function joinWorkspacePath(root: string, relativePath: string): string {
+  const separator = root.includes('\\') ? '\\' : '/'
+  return [root.replace(/[\\/]+$/, ''), ...relativePath.split('/')].join(separator)
 }
