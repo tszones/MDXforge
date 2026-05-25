@@ -1,5 +1,5 @@
-import { createPortal } from 'react-dom'
 import { Copy } from 'lucide-react'
+import { createPortal } from 'react-dom'
 import { m } from '../../paraglide/messages'
 
 export type FileTreeNodeContextMenuItem = {
@@ -27,11 +27,16 @@ export function FileTreeNodeContextMenu({
       style={{ left: menu.x, top: menu.y }}
       onClick={(event) => event.stopPropagation()}
       onContextMenu={(event) => event.preventDefault()}
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') event.preventDefault()
+      }}
+      role="menu"
     >
       {items?.map((item) => (
         <button
           key={item.label}
           type="button"
+          role="menuitem"
           className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start hover:bg-fd-accent hover:text-fd-accent-foreground"
           onClick={item.onSelect}
         >
@@ -42,6 +47,7 @@ export function FileTreeNodeContextMenu({
       {onCopyPath ? (
         <button
           type="button"
+          role="menuitem"
           className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start hover:bg-fd-accent hover:text-fd-accent-foreground"
           onClick={() => onCopyPath(menu.path)}
         >
@@ -52,6 +58,7 @@ export function FileTreeNodeContextMenu({
       {onRename ? (
         <button
           type="button"
+          role="menuitem"
           className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start hover:bg-fd-accent hover:text-fd-accent-foreground"
           onClick={() => onRename(menu.path)}
         >
