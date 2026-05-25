@@ -1,8 +1,8 @@
 import { useHotkeys } from '@tanstack/react-hotkeys'
 import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
-import { MdxPreview } from './components/MdxPreview'
 import { FindInPageBar } from './components/FindInPageBar'
+import { MdxPreview } from './components/MdxPreview'
 import { SearchOverlay } from './components/SearchOverlay'
 import { SettingsPage, type SettingsRoute } from './components/SettingsPage'
 import { WindowTitleBar } from './components/WindowTitleBar'
@@ -37,7 +37,9 @@ function App(): React.JSX.Element {
   const [language, setLanguageState] = useState<AppLanguage>(() =>
     normalizeStoredLanguage(initialSettings.language)
   )
-  const [font, setFontState] = useState<AppFontName>(() => normalizeStoredFont(initialSettings.font))
+  const [font, setFontState] = useState<AppFontName>(() =>
+    normalizeStoredFont(initialSettings.font)
+  )
   const [, rerenderForLocaleChange] = useState(0)
 
   useEffect(() => {
@@ -361,7 +363,10 @@ function AppContent({
         onOpenSettings={() => navigate('/settings/language')}
         onToggleColorMode={() => onColorModeChange(colorMode === 'dark' ? 'light' : 'dark')}
       />
-      <FindInPageBar enabled={Boolean(workspace && !inSettingsRoute)} sourceKey={workspace?.file.path ?? ''} />
+      <FindInPageBar
+        enabled={Boolean(workspace && !inSettingsRoute)}
+        sourceKey={workspace?.file.path ?? ''}
+      />
       <SearchOverlay workspace={workspace} onOpenPath={openPath} />
       <Routes>
         <Route path="/settings" element={<Navigate to="/settings/language" replace />} />

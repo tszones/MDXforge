@@ -1,4 +1,3 @@
-import { toast } from 'sonner'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { buttonVariants } from 'fumadocs-ui/components/ui/button'
 import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page'
@@ -6,10 +5,10 @@ import { Check, Copy, FileText, Link2 } from 'lucide-react'
 import type { MDXComponents } from 'mdx/types'
 import { Component, useEffect, useMemo, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
+import { toast } from 'sonner'
 import { m } from '../paraglide/messages'
 import type { MdxDocumentBacklink, MdxFolderEntry, MdxWorkspace } from '../types'
 import { MdxDocsLayout, MdxPageContainer } from './MdxDocsLayout'
-import { FileTreeNodeContextMenu } from './preview/FileTreeNodeContextMenu'
 import { getMDXComponents } from './mdx'
 import {
   buildDocumentLinkMap,
@@ -22,6 +21,7 @@ import {
   parseExtensionLoadPackages,
   serializeExtensionLoadPackages
 } from './preview/extensions'
+import { FileTreeNodeContextMenu } from './preview/FileTreeNodeContextMenu'
 import { PreviewSidebar } from './preview/WorkspaceSidebar'
 
 interface MdxPreviewProps {

@@ -9,7 +9,10 @@ interface FindInPageBarProps {
   sourceKey: string
 }
 
-export function FindInPageBar({ enabled, sourceKey }: FindInPageBarProps): React.JSX.Element | null {
+export function FindInPageBar({
+  enabled,
+  sourceKey
+}: FindInPageBarProps): React.JSX.Element | null {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [matchCount, setMatchCount] = useState(0)
@@ -63,6 +66,11 @@ export function FindInPageBar({ enabled, sourceKey }: FindInPageBarProps): React
 
   useEffect(() => () => clearFindMarks(), [])
 
+  useEffect(() => {
+    if (!open) return
+    window.setTimeout(() => inputRef.current?.select(), 0)
+  }, [open])
+
   if (!open) return null
 
   function close(): void {
@@ -95,7 +103,6 @@ export function FindInPageBar({ enabled, sourceKey }: FindInPageBarProps): React
           }}
           placeholder={m.find_in_page_placeholder()}
           className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-fd-muted-foreground"
-          autoFocus
         />
         <span className="shrink-0 text-xs tabular-nums text-fd-muted-foreground">
           {query.trim()
@@ -170,7 +177,8 @@ function markFindMatches(query: string): number {
       const mark = document.createElement('mark')
       mark.dataset.mdxforgeFindMark = 'true'
       mark.dataset.findIndex = String(count)
-      mark.className = 'rounded-sm bg-yellow-300 px-0.5 text-yellow-950 data-[active=true]:bg-fd-primary data-[active=true]:text-fd-primary-foreground'
+      mark.className =
+        'rounded-sm bg-yellow-300 px-0.5 text-yellow-950 data-[active=true]:bg-fd-primary data-[active=true]:text-fd-primary-foreground'
       mark.textContent = value
       fragment.append(mark)
       count += 1

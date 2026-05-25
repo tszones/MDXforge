@@ -1,5 +1,11 @@
-import type { FolderScan, MetaFile, MdxFolder, MdxFolderEntry, MdxFolderTreeNode } from './page-tree-types'
 import { orderItems } from './page-tree-order'
+import type {
+  FolderScan,
+  MdxFolder,
+  MdxFolderEntry,
+  MdxFolderTreeNode,
+  MetaFile
+} from './page-tree-types'
 import { isGroupFolder } from './page-tree-utils'
 
 export function buildFolderChildren(folder: FolderScan): MdxFolderTreeNode[] {

@@ -43,7 +43,9 @@ export function WindowTitleBar({
           <IconBrandGithub className="size-4" />
         </TitleBarButton>
         <TitleBarButton
-          label={colorMode === 'dark' ? m.title_bar_switch_to_light() : m.title_bar_switch_to_dark()}
+          label={
+            colorMode === 'dark' ? m.title_bar_switch_to_light() : m.title_bar_switch_to_dark()
+          }
           onClick={onToggleColorMode}
         >
           {colorMode === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}

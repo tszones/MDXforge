@@ -1,14 +1,14 @@
 import { useHotkeys } from '@tanstack/react-hotkeys'
-import { toast } from 'sonner'
 import { BookOpen, FileText, FolderOpen, PanelLeft, PanelLeftClose, Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { toast } from 'sonner'
+import { appHotkeys } from '../../lib/hotkeys'
+import { m } from '../../paraglide/messages'
+import type { MdxWorkspace, MdxWorkspaceSearchResult } from '../../types'
 import { FileTreeNodeContextMenu } from './FileTreeNodeContextMenu'
 import { FileTreeNodeView } from './FileTreeNodeView'
 import { WorkspaceSearchResultGroup } from './WorkspaceSearchResultGroup'
 import { buildFileTree, filterFileTree, getTreeNodeKey } from './workspace-tree'
-import { appHotkeys } from '../../lib/hotkeys'
-import { m } from '../../paraglide/messages'
-import type { MdxWorkspace, MdxWorkspaceSearchResult } from '../../types'
 
 type SidebarTab = 'files' | 'search'
 
@@ -43,11 +43,18 @@ export function PreviewSidebar({
   )
   const [workspaceSearchLoading, setWorkspaceSearchLoading] = useState(false)
   const [collapsedSearchFiles, setCollapsedSearchFiles] = useState<Set<string>>(new Set())
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; path: string } | null>(null)
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; path: string } | null>(
+    null
+  )
   const fileFilterInputRef = useRef<HTMLInputElement>(null)
   const workspaceSearchInputRef = useRef<HTMLInputElement>(null)
   const tree = useMemo(
-    () => buildFileTree(workspace.folder?.files ?? [], workspace.folder?.tree, workspace.folder?.rootPath),
+    () =>
+      buildFileTree(
+        workspace.folder?.files ?? [],
+        workspace.folder?.tree,
+        workspace.folder?.rootPath
+      ),
     [workspace.folder]
   )
   const filteredTree = useMemo(() => filterFileTree(tree, fileFilterQuery), [tree, fileFilterQuery])
@@ -324,7 +331,9 @@ export function PreviewSidebar({
                 </div>
               ) : workspace.folder ? (
                 <SidebarEmptyState>
-                  {fileFilterQuery.trim().length > 0 ? m.preview_no_file_matches() : m.preview_empty_files()}
+                  {fileFilterQuery.trim().length > 0
+                    ? m.preview_no_file_matches()
+                    : m.preview_empty_files()}
                 </SidebarEmptyState>
               ) : (
                 <div className="relative flex flex-row items-center gap-2 rounded-lg bg-fd-primary/10 p-2 text-start text-fd-primary wrap-anywhere">
@@ -346,7 +355,9 @@ export function PreviewSidebar({
               className="inline-flex h-8 items-center justify-center gap-1.5 overflow-hidden rounded-lg border bg-fd-secondary/50 px-2 text-center text-xs leading-none text-fd-secondary-foreground transition-colors hover:bg-fd-accent disabled:opacity-60"
             >
               <FileText className="size-3.5 shrink-0 text-fd-muted-foreground" />
-              <span className="truncate">{opening ? m.actions_opening() : m.actions_open_mdx_file()}</span>
+              <span className="truncate">
+                {opening ? m.actions_opening() : m.actions_open_mdx_file()}
+              </span>
             </button>
             <button
               type="button"

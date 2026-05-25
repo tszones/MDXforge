@@ -6,15 +6,15 @@ import {
   useFolderDepth
 } from 'fumadocs-ui/components/sidebar/base'
 import { ExternalLink, FileText, FolderOpen } from 'lucide-react'
+import type { MdxFolderEntry } from '../../types'
 import { RenameInput } from './RenameInput'
 import {
+  type FileTreeNode,
   getDisplayName,
   getItemOffset,
   getTreeNodeKey,
-  nodeContainsPath,
-  type FileTreeNode
+  nodeContainsPath
 } from './workspace-tree'
-import type { MdxFolderEntry } from '../../types'
 
 export function FileTreeNodeView({
   node,
@@ -129,7 +129,9 @@ function FileTreeFolder({
           event.stopPropagation()
           onStartRename(node.absolutePath)
         }}
-        onContextMenu={(event) => openContextMenuForPath(event, node.absolutePath, onOpenContextMenu)}
+        onContextMenu={(event) =>
+          openContextMenuForPath(event, node.absolutePath, onOpenContextMenu)
+        }
         style={{ paddingInlineStart: getItemOffset(depth) }}
       >
         <FolderOpen className="size-4 shrink-0" />

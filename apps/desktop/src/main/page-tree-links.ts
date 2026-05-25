@@ -75,7 +75,8 @@ function createDocumentIndex(entries: MdxFolderEntry[]): DocumentIndex {
     addUniqueIndexValue(index.byDisplayPath, normalizeDocumentLinkKey(entry.displayPath), entry)
     addUniqueIndexValue(index.byDisplayPath, normalizeDocumentLinkKey(entry.slug.join('/')), entry)
 
-    if (entry.title) addUniqueIndexValue(index.byTitle, normalizeDocumentLinkKey(entry.title), entry)
+    if (entry.title)
+      addUniqueIndexValue(index.byTitle, normalizeDocumentLinkKey(entry.title), entry)
   }
 
   return index

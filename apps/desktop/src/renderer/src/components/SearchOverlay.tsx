@@ -137,10 +137,14 @@ function QuickOpenResults({
             <div className="truncate text-sm font-medium">
               {entry.title ?? entry.displayPath ?? entry.name}
             </div>
-            <div className="mdxforge-quick-open-path truncate text-xs text-fd-muted-foreground">{entry.relativePath}</div>
+            <div className="mdxforge-quick-open-path truncate text-xs text-fd-muted-foreground">
+              {entry.relativePath}
+            </div>
           </div>
           {entry.path === activePath ? (
-            <span className="mdxforge-quick-open-current rounded-full bg-fd-primary/10 px-1.5 py-0.5 text-xs text-fd-primary">{m.search_current_file()}</span>
+            <span className="mdxforge-quick-open-current rounded-full bg-fd-primary/10 px-1.5 py-0.5 text-xs text-fd-primary">
+              {m.search_current_file()}
+            </span>
           ) : null}
         </CommandItem>
       ))}

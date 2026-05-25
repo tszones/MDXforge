@@ -77,7 +77,8 @@ export function filterFileTree(nodes: FileTreeNode[], query: string): FileTreeNo
         }
         return null
       }
-      if (node.type === 'link') return node.label.toLowerCase().includes(normalizedQuery) ? node : null
+      if (node.type === 'link')
+        return node.label.toLowerCase().includes(normalizedQuery) ? node : null
       if (node.type === 'separator') return null
       return null
     })
@@ -162,7 +163,10 @@ function fileNodeMatches(node: Extract<FileTreeNode, { type: 'file' }>, query: s
     .some((value) => value?.toLowerCase().includes(query))
 }
 
-function folderNodeMatches(node: Extract<FileTreeNode, { type: 'folder' }>, query: string): boolean {
+function folderNodeMatches(
+  node: Extract<FileTreeNode, { type: 'folder' }>,
+  query: string
+): boolean {
   return [node.name, node.path, node.description]
     .filter(Boolean)
     .some((value) => value?.toLowerCase().includes(query))

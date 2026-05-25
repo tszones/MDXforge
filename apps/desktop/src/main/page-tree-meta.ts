@@ -15,7 +15,9 @@ export function readMetaFile(folderPath: string): MetaFile {
   }
 }
 
-export function readMdxMetadata(filePath: string): Pick<PageFile, 'title' | 'description' | 'icon'> {
+export function readMdxMetadata(
+  filePath: string
+): Pick<PageFile, 'title' | 'description' | 'icon'> {
   try {
     const parsed = matter(readFileSync(filePath, 'utf-8'))
     return {

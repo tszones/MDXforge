@@ -1,6 +1,6 @@
 import { readdirSync } from 'fs'
 import { extname, join } from 'path'
-import { readMetaFile, readMdxMetadata } from './page-tree-meta'
+import { readMdxMetadata, readMetaFile } from './page-tree-meta'
 import type { FolderScan, PageFile } from './page-tree-types'
 import {
   cleanSegmentName,

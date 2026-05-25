@@ -25,6 +25,7 @@
     "test:page-tree": "node scripts/test-page-tree.cjs",
     "test:mdx-raw-source": "node scripts/test-mdx-raw-source.cjs",
     "test:search": "node scripts/test-search.cjs",
+    "test:skills": "node scripts/test-skills.cjs",
     "test:extensions": "node scripts/test-extensions.cjs",
     "test:fixtures": "node scripts/render-mdx-fixtures.cjs",
     "build:icons": "node scripts/generate-linux-icons.cjs",
