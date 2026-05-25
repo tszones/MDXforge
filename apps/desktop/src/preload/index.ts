@@ -1,5 +1,17 @@
 import { contextBridge, ipcRenderer } from 'electron'
 
+function getInitialSettings(): unknown {
+  const prefix = '--mdxforge-initial-settings='
+  const argument = process.argv.find((value) => value.startsWith(prefix))
+  if (!argument) return null
+
+  try {
+    return JSON.parse(decodeURIComponent(argument.slice(prefix.length)))
+  } catch {
+    return null
+  }
+}
+
 // Custom APIs for renderer
 const api = {
   minimizeWindow: () => ipcRenderer.invoke('window:minimize'),
@@ -7,6 +19,7 @@ const api = {
   closeWindow: () => ipcRenderer.invoke('window:close'),
   isWindowMaximized: () => ipcRenderer.invoke('window:is-maximized'),
   getVersions: () => process.versions,
+  getInitialSettings,
   openMdxFile: () => ipcRenderer.invoke('mdx:open-file'),
   openMdxFolder: () => ipcRenderer.invoke('mdx:open-folder'),
   openMdxPath: (filePath: string, workspaceRoot?: string) =>

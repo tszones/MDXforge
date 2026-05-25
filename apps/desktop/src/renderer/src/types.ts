@@ -4,6 +4,28 @@ export const APP_FONT_OPTIONS = ['system', 'bricolage', 'serif', 'mono'] as cons
 export type AppLanguage = (typeof APP_LANGUAGE_OPTIONS)[number]
 export type AppFontName = (typeof APP_FONT_OPTIONS)[number]
 
+export interface AppSettings {
+  theme: AppThemeName
+  colorMode: AppColorMode
+  language: AppLanguage
+  font: AppFontName
+}
+
+export type AppThemeName =
+  | 'neutral'
+  | 'black'
+  | 'vitepress'
+  | 'dusk'
+  | 'catppuccin'
+  | 'ocean'
+  | 'purple'
+  | 'solar'
+  | 'emerald'
+  | 'ruby'
+  | 'aspen'
+
+export type AppColorMode = 'light' | 'dark'
+
 export interface MdxFile {
   path: string
   name: string

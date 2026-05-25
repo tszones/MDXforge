@@ -15,13 +15,28 @@ import {
   isFumadocsThemeName
 } from './lib/theme'
 import { m } from './paraglide/messages'
-import type { AppFontName, AppLanguage, MdxWorkspace } from './types'
+import type { AppFontName, AppLanguage, AppSettings, MdxWorkspace } from './types'
+
+export function readInitialSettings(): Partial<AppSettings> {
+  const settings = window.api.getInitialSettings()
+  if (!settings || typeof settings !== 'object') return {}
+  return settings as Partial<AppSettings>
+}
 
 function App(): React.JSX.Element {
-  const [theme, setThemeState] = useState<FumadocsThemeName>('purple')
-  const [colorMode, setColorModeState] = useState<ColorMode>('dark')
-  const [language, setLanguageState] = useState<AppLanguage>('en-US')
-  const [font, setFontState] = useState<AppFontName>('system')
+  const initialSettings = readInitialSettings()
+  const [theme, setThemeState] = useState<FumadocsThemeName>(() =>
+    typeof initialSettings.theme === 'string' && isFumadocsThemeName(initialSettings.theme)
+      ? initialSettings.theme
+      : 'purple'
+  )
+  const [colorMode, setColorModeState] = useState<ColorMode>(() =>
+    initialSettings.colorMode === 'light' ? 'light' : 'dark'
+  )
+  const [language, setLanguageState] = useState<AppLanguage>(() =>
+    normalizeStoredLanguage(initialSettings.language)
+  )
+  const [font, setFontState] = useState<AppFontName>(() => normalizeStoredFont(initialSettings.font))
   const [, rerenderForLocaleChange] = useState(0)
 
   useEffect(() => {

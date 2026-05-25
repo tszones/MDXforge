@@ -14,6 +14,7 @@ import { registerAppIpc } from './ipc'
 import { registerLocalImageProtocol, registerLocalImageScheme } from './local-image-protocol'
 import { getLastOpenFile } from './mdx'
 import { checkForUpdatesOnStartup, registerUpdaterIpc } from './updater'
+import { getAppSettings } from './settings'
 
 let mainWindow: BrowserWindow | null = null
 const currentExtensionManifestRef: { current: WorkspaceExtensionManifest | null } = {
@@ -46,6 +47,10 @@ if (!gotLock) {
   app.quit()
 }
 
+function getInitialSettingsArgument(): string {
+  return `--mdxforge-initial-settings=${encodeURIComponent(JSON.stringify(getAppSettings()))}`
+}
+
 function createWindow(): void {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -59,7 +64,8 @@ function createWindow(): void {
     frame: false,
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: true
+      sandbox: true,
+      additionalArguments: [getInitialSettingsArgument()]
     }
   })
 

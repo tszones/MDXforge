@@ -198,6 +198,7 @@ export interface AppAPI {
   closeWindow: () => Promise<void>
   isWindowMaximized: () => Promise<boolean>
   getVersions: () => AppVersions
+  getInitialSettings: () => AppSettings | null
   openMdxFile: () => Promise<MdxWorkspace | null>
   openMdxFolder: () => Promise<MdxWorkspace | null>
   openMdxPath: (filePath: string, workspaceRoot?: string) => Promise<MdxWorkspace>
