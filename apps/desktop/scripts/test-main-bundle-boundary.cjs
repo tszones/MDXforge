@@ -16,6 +16,7 @@ const esmOnlyRuntimePackages = [
   'fumadocs-core',
   'fumadocs-twoslash',
   'rehype-katex',
+  'remark-gfm',
   'remark-math'
 ]
 

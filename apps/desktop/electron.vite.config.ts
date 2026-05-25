@@ -13,10 +13,12 @@ export default defineConfig({
     build: {
       externalizeDeps: {
         exclude: [
+          '@mdxforge/mdx',
           '@mdx-js/mdx',
           'fumadocs-core',
           'fumadocs-twoslash',
           'rehype-katex',
+          'remark-gfm',
           'remark-math'
         ]
       }
