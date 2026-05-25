@@ -180,5 +180,14 @@
   "skills_create_local": "创建 Skill",
   "skills_type_writing": "写作规则",
   "skills_type_component": "组件",
-  "skills_type_template": "模板"
+  "skills_type_template": "模板",
+  "skills_agents_title": "编码 Agent",
+  "skills_agents_description": "检测本机 Agent，预览托管规则文件差异，然后应用或禁用工作区规则。",
+  "skills_agent_detected": "已在 PATH 中检测到。",
+  "skills_agent_not_detected": "未在 PATH 中检测到。",
+  "skills_preview_diff": "预览差异",
+  "skills_preview_disable": "预览禁用",
+  "skills_diff_dialog_title": "差异预览",
+  "skills_apply_rules": "应用规则",
+  "skills_disable_rules": "禁用规则"
 }

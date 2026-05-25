@@ -1,6 +1,6 @@
 import { Languages } from 'lucide-react'
-import { APP_LANGUAGE_OPTIONS, type AppLanguage } from '../../types'
 import { m } from '../../paraglide/messages'
+import { APP_LANGUAGE_OPTIONS, type AppLanguage } from '../../types'
 import { OptionButton } from './OptionButton'
 
 export function LanguageSettingsPage({

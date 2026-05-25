@@ -180,5 +180,14 @@
   "skills_create_local": "Create skill",
   "skills_type_writing": "Writing",
   "skills_type_component": "Component",
-  "skills_type_template": "Template"
+  "skills_type_template": "Template",
+  "skills_agents_title": "Coding Agents",
+  "skills_agents_description": "Detect local agents, preview managed rule files, then apply or disable workspace rules.",
+  "skills_agent_detected": "Detected on PATH.",
+  "skills_agent_not_detected": "Not detected on PATH.",
+  "skills_preview_diff": "Preview diff",
+  "skills_preview_disable": "Preview disable",
+  "skills_diff_dialog_title": "Diff preview",
+  "skills_apply_rules": "Apply rules",
+  "skills_disable_rules": "Disable rules"
 }

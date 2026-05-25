@@ -13,8 +13,8 @@ import { getWorkspaceExtensionAssetPath, type WorkspaceExtensionManifest } from 
 import { registerAppIpc } from './ipc'
 import { registerLocalImageProtocol, registerLocalImageScheme } from './local-image-protocol'
 import { getLastOpenFile } from './mdx'
-import { checkForUpdatesOnStartup, registerUpdaterIpc } from './updater'
 import { getAppSettings } from './settings'
+import { checkForUpdatesOnStartup, registerUpdaterIpc } from './updater'
 
 let mainWindow: BrowserWindow | null = null
 const currentExtensionManifestRef: { current: WorkspaceExtensionManifest | null } = {
