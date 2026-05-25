@@ -1,0 +1,1826 @@
+---
+title: Coding Agent Skills 集成方案
+description: 面向 AI First 工作流，通过 MDXForge Skills 兼容本机 Coding Agents 的产品方案。
+---
+
+# Coding Agent Skills 集成方案
+
+MDXForge 的核心用户路径是：AI 生成结构化 MDX / Markdown，用户在本地安全预览、审阅、导航、分享。
+
+因此，MDXForge 不应该只做一个 MDX 渲染器。它还应该理解用户本机已经安装的 Coding Agents，并帮助这些 Agent 写出更符合 MDXForge 渲染规范的文档。
+
+推荐方向：通过 **Skills** 实现 Coding Agent 集成。
+
+<Callout title="产品判断" type="info">
+MDXForge 不需要变成另一个 Coding Agent。它应该成为本地文档协议层：检测本机 Agent、解释集成能力、安装写作规则、校验 AI 输出。
+</Callout>
+
+## 背景
+
+AI First 的文档工作流通常不是由单一工具完成的。用户本机可能已经安装了多个 Coding Agents：
+
+- Claude Code
+- Codex CLI
+- Gemini CLI
+- Cursor / Windsurf 内置 Agent
+- Continue
+- Aider
+- 公司内部自研 Agent
+
+问题是：每个 Agent 都有自己的规则系统、配置文件、提示词约定、技能目录或项目说明文件。
+
+这会导致几个问题：
+
+1. 用户需要手动复制 MDX 写作规则。
+2. 不同 Agent 生成的 MDX 风格不一致。
+3. Agent 可能使用 MDXForge 不支持的组件或语法。
+4. 用户不知道应该把规则放在哪里。
+5. 后续规则升级难以同步。
+
+MDXForge 可以解决这个问题：把 MDXForge 的文档规范作为一个稳定的本地协议，再把这个协议投射到不同 Coding Agents 的规则系统里。
+
+```txt
+MDXForge Skill
+-> 检测本机 Coding Agents
+-> 展示可集成能力
+-> 安装或更新 Agent 专用规则
+-> 让 Agent 按 MDXForge 规范写 MDX
+-> 用户在 MDXForge 本地预览结果
+```
+
+## 产品目标
+
+目标不是做通用 Agent 管理器，而是降低「让 AI 写出可被 MDXForge 正确渲染的 MDX 文档」这件事的成本。
+
+理想体验：
+
+1. 用户打开 MDXForge。
+2. MDXForge 检测本机已安装的 Coding Agents。
+3. 用户为某个 Agent 启用 MDXForge Skill。
+4. MDXForge 写入工作区级规则文件。
+5. 用户继续使用自己熟悉的 Agent 写文档。
+6. 生成的 `.mdx` 文件可以直接在 MDXForge 中正确预览。
+
+## 不做什么
+
+MDXForge 不应该扩展成完整 AI IDE 或 Agent 启动器。
+
+不做：
+
+- 不做 Coding Agent 聊天界面
+- 不管理模型 API Key
+- 不做云端模型路由
+- 不编排多个 Agent 自动执行任务
+- 不替代现有 Agent CLI
+- 不默认修改全局 Agent 配置
+- 不把用户提示词或本机检测结果上传到云端
+
+<Callout title="边界" type="warn">
+MDXForge 集成 Coding Agents 的唯一目的，是提升本地 MDX 文档生成、预览、校验、交付体验。
+</Callout>
+
+## 是否参考或发布到 skills.sh
+
+可以考虑参考 `https://www.skills.sh/`，也可以考虑把 MDXForge 官方 Skills 发布到它的生态里。但这里要分清两件事：
+
+```txt
+内部标准：MDXForge 自己的 Skill Manifest
+外部分发：发布到 skills.sh / Vercel Skills 生态
+```
+
+如果 `skills.sh` 确实是 Vercel 官方维护的 Skills 目录，那它很适合作为 **分发渠道**：让 Claude Code、Codex、Cursor 等用户更容易发现并安装 MDXForge 写作规则。
+
+但它不应该替代 MDXForge 内部的 Skill 模型。
+
+更合理的判断是：
+
+| 选择 | 判断 |
+| --- | --- |
+| 直接依赖 skills.sh | 不建议。外部规范、生态、可持续性、三端实现细节都不可控。 |
+| 发布到 skills.sh | 推荐考虑。把 MDXForge 官方 Skill 作为外部分发包发布出去。 |
+| 兼容 skills.sh | 可以考虑。把它作为可导入 / 可导出的 Skill 来源之一。 |
+| 学习它的结构 | 推荐。参考它如何组织 Skill 元数据、说明、安装、分发。 |
+| 自己定义 MDXForge Skill Manifest | 必须。MDXForge 需要服务本地 MDX 渲染、安全预览、Coding Agent 投射，这是自己的产品边界。 |
+
+<Callout title="建议" type="info">
+MDXForge 可以把官方写作 Skill 发布到 skills.sh，但产品内部仍应维护自己的 Skill Manifest 和 Agent Adapter 系统。
+</Callout>
+
+原因：
+
+1. skills.sh 更适合作为“让 Agent 学会 MDXForge 写法”的分发渠道。
+2. MDXForge 内部 Skill 不只是提示词，还包含 MDX 组件、渲染约束、权限、安全边界、三端路径、workspace 启用状态。
+3. Coding Agent 集成需要写本地文件，必须有更严格的 diff、managed block、回滚机制。
+4. Windows/macOS/Linux 的路径和命令检测需要产品内统一抽象。
+5. 如果 skills.sh 规范变化，MDXForge 不应被动破坏。
+
+因此，推荐策略是双轨：
+
+```txt
+对外：发布 MDXForge 官方 Skill 到 skills.sh
+-> 让用户在自己的 Coding Agent 生态里发现 MDXForge
+-> 提供 MDXForge MDX 写作规则
+-> 引导用户用 MDXForge 本地预览
+
+对内：MDXForge 使用自己的 Skill Manifest
+-> 管理组件、权限、三端检测、Agent Adapter、workspace 启用状态
+-> 把 Skill 投射到多个本机 Coding Agents
+```
+
+### 对外发布的 Skill 应该包含什么
+
+发布到 skills.sh 的版本应该轻量、Agent 友好，重点是“让 AI 写对 MDXForge 文档”。
+
+建议包含：
+
+- MDXForge 是什么
+- 什么时候使用这个 Skill
+- 输出 `.mdx` / `.md` 的规则
+- frontmatter 要求
+- 支持的 Markdown 语法
+- 支持的 MDXForge 组件
+- 禁止使用的 MDX 写法
+- 代码块、表格、Callout、Cards、Steps 的示例
+- 生成后建议用户用 MDXForge 本地预览
+
+不应该包含：
+
+- MDXForge 内部 IPC 细节
+- Electron 实现细节
+- 本机 Agent 检测逻辑
+- 自动写入用户文件的逻辑
+- 未稳定的组件 API
+
+### 对外 Skill 与内部 Skill 的关系
+
+两者应该来自同一个规则源，但输出格式不同。
+
+```txt
+Canonical MDXForge Authoring Rules
+-> skills.sh 发布版
+-> Claude Code 投射版
+-> Cursor rules 投射版
+-> AGENTS.md 投射版
+-> MDXForge 内置 AI Rules 页面
+```
+
+这样可以避免多处复制后规则漂移。
+
+### 需要验证的问题
+
+发布前需要确认：
+
+- skills.sh 是否确实接受第三方提交。
+- 是否有官方提交规范、审核流程、目录结构。
+- Skill 格式是否支持 MDX / Markdown。
+- 是否允许包含产品链接和本地应用使用说明。
+- 是否有版本号、更新机制、所有者标识。
+- Vercel 官方生态里是否已有类似 MDX / docs writing skill。
+
+如果确认可提交，MDXForge 应该准备一个官方包：
+
+```txt
+mdxforge-mdx-writing-skill
+```
+
+定位：
+
+```txt
+让 Coding Agents 生成可被 MDXForge 安全预览的本地 MDX 文档。
+```
+
+## 多 Agent 场景下的 Skill 设计
+
+如果用户同时安装多个 Coding Agents，不应该把所有 Agent 的规则都硬塞进一个 Skill 文档里。
+
+正确结构应该分三层：
+
+```txt
+Skill Core
+-> 描述“这项能力是什么”
+-> 例如：MDXForge MDX 写作规范、图表组件规则、API 文档模板
+
+Agent Adapter
+-> 描述“某个 Agent 怎么接收这项能力”
+-> 例如：Claude Code 写 CLAUDE.md，Cursor 写 .cursor/rules，Aider 写 CONVENTIONS.md
+
+Projection
+-> 把 Skill Core 转成某个 Agent 能理解的具体文件
+-> 例如：生成 claude 版规则、cursor 版规则、通用 AGENTS.md 版规则
+```
+
+也就是说：
+
+```txt
+一个 Skill Core
++ 多个 Agent Adapters
+= 多个 Agent-specific Projections
+```
+
+不要这样设计：
+
+```txt
+mdxforge skill 里面手写 Claude / Cursor / Codex / Aider 所有规则
+```
+
+应该这样设计：
+
+```txt
+mdxforge skill 只定义规范
+claude adapter 负责转成 CLAUDE.md
+cursor adapter 负责转成 .cursor/rules/mdxforge.mdc
+codex adapter 负责转成 Codex 规则文件或复制指南
+aider adapter 负责转成 CONVENTIONS.md
+```
+
+### 多 Agent 配置界面
+
+用户安装多个 Agent 时，界面应该是矩阵选择。
+
+```txt
+MDXForge MDX Skill
+
+选择要启用的 Coding Agents：
+
+[x] Claude Code     写入 CLAUDE.md
+[x] Cursor          写入 .cursor/rules/mdxforge.mdc
+[ ] Codex CLI       复制设置指南
+[ ] Aider           写入 CONVENTIONS.md
+
+[预览全部变更] [应用]
+```
+
+预览时按 Agent 分组展示 diff：
+
+```txt
+即将修改 2 个文件：
+
+Claude Code
+- CLAUDE.md
+
+Cursor
+- .cursor/rules/mdxforge.mdc
+```
+
+用户可以只启用一个 Agent，也可以同时启用多个。
+
+### 如何保证所有 Agent 都写进去
+
+不要靠人工把所有 Agent 写进一个巨大 Skill。要靠 Adapter Registry。
+
+```ts
+type SkillCore = {
+  id: string
+  title: string
+  rules: string
+  components?: string[]
+  templates?: string[]
+}
+
+type AgentAdapter = {
+  id: string
+  agentName: string
+  detect(): Promise<DetectionResult>
+  canProject(skill: SkillCore): boolean
+  project(skill: SkillCore, target: Workspace): Promise<ProjectedFile[]>
+}
+```
+
+流程：
+
+```txt
+读取 Skill Core
+-> 查询所有 Agent Adapters
+-> 检测本机已安装 Agent
+-> 过滤可投射的 Adapter
+-> 用户选择目标 Agent
+-> 每个 Adapter 生成自己的文件
+-> 展示统一 diff
+-> 用户确认后写入
+```
+
+这样新增 Agent 时，只需要新增 Adapter，不需要改每个 Skill。
+
+### 责任边界
+
+| 模块 | 负责什么 | 不负责什么 |
+| --- | --- | --- |
+| Skill Core | 定义能力、规则、组件、模板 | 不关心具体 Agent 文件路径 |
+| Agent Adapter | 检测 Agent、生成 Agent 专用文件 | 不定义业务规则本身 |
+| Projection Engine | 合并规则、生成 diff、写入 managed block | 不决定产品文案 |
+| UI | 展示检测、选择、预览、回滚 | 不直接拼路径或写文件 |
+
+这个结构可以保证：Skill 越来越多、Agent 越来越多时，不会变成 N × M 的手写维护灾难。
+
+## Skills 到底应该写什么
+
+Skill 的核心不是“安装包”，也不是“泛泛的提示词”。对 MDXForge 来说，Skill 应该是一套 **AI 可执行的写作说明**：告诉 Coding Agent 什么时候使用某个能力、允许输出什么、禁止输出什么、每个组件怎么写、常见错误怎么避免。
+
+你的判断是对的：如果 MDXForge 有多个组件，AI 不一定天然知道这些组件的 props、使用场景、组合方式。只写一个总说明会太粗；每个组件都散落在代码里，AI 又读不到稳定规则。
+
+更合理的结构是：
+
+```txt
+Skill 总入口
+-> 说明这个 Skill 是什么、什么时候用、整体输出约束
+
+组件文档
+-> 每个组件一份 AI 可读说明
+-> 讲清楚用途、props、示例、禁用写法
+
+模式文档
+-> 常见文档结构模板
+-> 例如教程、API 文档、决策记录、报告、发布说明
+
+校验清单
+-> AI 输出前自检
+-> 用户预览失败时也能定位问题
+```
+
+也就是说：**总文档负责调度，组件文档负责细节，模式文档负责组合，校验文档负责兜底。**
+
+### 推荐目录结构
+
+对外发布到 skills.sh 的轻量版本可以是：
+
+```txt
+mdxforge-mdx-writing-skill/
+  SKILL.md
+  components/
+    callout.md
+    cards.md
+    steps.md
+    tabs.md
+    accordions.md
+    file-tree.md
+    code-block.md
+  patterns/
+    tutorial.md
+    api-reference.md
+    decision-record.md
+    release-notes.md
+    ai-generated-report.md
+  checklists/
+    mdx-output-checklist.md
+```
+
+MDXForge 内部版本可以再多一个 manifest：
+
+```txt
+mdxforge-mdx/
+  manifest.json
+  SKILL.md
+  components/
+  patterns/
+  checklists/
+  adapters/
+    claude-code.md
+    cursor.md
+    codex.md
+    aider.md
+```
+
+### `SKILL.md` 写什么
+
+`SKILL.md` 是总入口，不应该塞满所有组件细节。它应该告诉 AI：
+
+1. 什么时候使用 MDXForge Skill。
+2. 输出必须是完整 `.mdx` 或 `.md`。
+3. 必须包含 frontmatter。
+4. 默认用 Markdown，必要时才用组件。
+5. 只能使用 MDXForge 白名单组件。
+6. 遇到不确定组件时退回普通 Markdown。
+7. 需要查组件细节时阅读 `components/*.md`。
+8. 输出前执行 checklist。
+
+示例结构：
+
+```md
+# MDXForge MDX Writing Skill
+
+Use this skill when writing local MDX/Markdown docs for MDXForge.
+
+## Output Contract
+- Output complete `.mdx` content.
+- Include frontmatter.
+- Use Markdown by default.
+- Use only documented MDXForge components.
+- Do not import React components.
+- Do not write arbitrary JSX.
+
+## Component References
+- Callout: ./components/callout.md
+- Cards: ./components/cards.md
+- Steps: ./components/steps.md
+
+## Final Checklist
+Read ./checklists/mdx-output-checklist.md before final output.
+```
+
+### 每个组件文档写什么
+
+每个组件一份文档是合理的，而且应该非常结构化。
+
+每个组件文档建议固定格式：
+
+```txt
+# ComponentName
+
+Purpose
+-> 这个组件解决什么阅读问题
+
+When to use
+-> 什么时候应该用
+
+When not to use
+-> 什么时候不要用
+
+Props
+-> 支持哪些 props，类型是什么，是否必填
+
+Good examples
+-> 推荐写法
+
+Bad examples
+-> 禁止写法
+
+Composition rules
+-> 能不能嵌套，能和哪些组件组合
+
+Fallback
+-> 如果不确定，退回什么 Markdown 写法
+```
+
+示例：
+
+```md
+# Callout
+
+## Purpose
+Use `Callout` for important notes, warnings, tips, and constraints.
+
+## Props
+| Prop | Type | Required | Notes |
+| --- | --- | --- | --- |
+| title | string | No | Short label. |
+| type | 'info' | 'warn' | 'error' | No | Default: info. |
+
+## Good
+<Callout title="安全提示" type="warn">
+不要在 MDX 中写任意 HTML 或脚本。
+</Callout>
+
+## Bad
+<Callout>
+  <script>alert('x')</script>
+</Callout>
+
+## Fallback
+If unsure, use a Markdown blockquote.
+```
+
+### 组件文档不只是 API 文档
+
+这里要批评一个常见误区：只给 AI props 表是不够的。
+
+AI 真正需要的是：
+
+- 什么时候用这个组件
+- 什么内容适合放进去
+- 什么时候不要用
+- 推荐组合方式
+- 坏例子
+- 降级方案
+
+因为 AI 的问题通常不是“不知道 prop 名”，而是“滥用组件、乱嵌套、写出看似合理但渲染不了的 JSX”。
+
+### Skill 内容分层
+
+| 层级 | 文件 | 作用 |
+| --- | --- | --- |
+| 总入口 | `SKILL.md` | 告诉 AI 何时使用、总体规则、引用其他文档。 |
+| 组件层 | `components/*.md` | 告诉 AI 每个组件怎么写。 |
+| 模式层 | `patterns/*.md` | 告诉 AI 如何组合组件写完整文档。 |
+| 校验层 | `checklists/*.md` | 输出前自检，减少渲染失败。 |
+| Adapter 层 | `adapters/*.md` | 面向 Claude/Cursor/Codex 的安装或投射差异。 |
+
+### 哪些内容不应该写进 Skill
+
+不要把 Skill 写成产品百科全书。
+
+不建议放：
+
+- Electron 主进程实现细节
+- 内部 IPC 名称
+- 未开放组件
+- 未来可能删除的实验组件
+- 过长的产品愿景
+- 与 MDX 写作无关的工程说明
+
+Skill 应该服务一个目标：**让 AI 稳定写出可被 MDXForge 渲染的文档。**
+
+### 总文档和组件文档的关系
+
+你的“一个总文档 + 每个组件一个文档”的想法是对的，但需要加两点：
+
+1. 总文档不要复制所有组件内容，只做索引和全局约束。
+2. 组件文档必须包含坏例子和 fallback，不只是好例子。
+
+最终结构：
+
+```txt
+SKILL.md：你是谁、什么时候用、总规则、组件索引
+components/*.md：每个组件怎么写
+patterns/*.md：多个组件如何组合成好文档
+checklists/*.md：最后检查什么
+adapters/*.md：如何给不同 Agent 安装/投射
+```
+
+## 核心概念：Agent Adapter Skill
+
+Skill 可以声明一个或多个 **Agent Adapter**。
+
+Agent Adapter 描述：MDXForge 如何检测某个 Agent、它支持什么集成方式、可以写入哪些规则文件、需要提示哪些安全边界。
+
+```ts
+type AgentAdapter = {
+  id: string
+  name: string
+  detection: AgentDetectionRule[]
+  capabilities: AgentIntegrationCapability[]
+  installTargets: AgentInstallTarget[]
+  safetyNotes: string[]
+}
+```
+
+示例：
+
+```ts
+const claudeCodeAdapter = {
+  id: 'claude-code',
+  name: 'Claude Code',
+  detection: [
+    { type: 'command', command: 'claude', args: ['--version'] },
+    { type: 'file', path: '~/.claude' }
+  ],
+  capabilities: ['project-rules', 'slash-command', 'skill-doc'],
+  installTargets: [
+    { type: 'project-file', path: 'CLAUDE.md' },
+    { type: 'local-skill-folder', path: '.claude/skills/mdxforge' }
+  ],
+  safetyNotes: ['只写入用户确认过的规则文件']
+}
+```
+
+## 用户界面
+
+在 Settings 的 Skills 页面增加一个入口：
+
+```txt
+Settings
+  General
+  Appearance
+  Language
+  Skills
+    Active
+    Browse
+    Local
+    Coding Agents
+    AI Rules
+```
+
+`Coding Agents` 页面展示本机检测结果。
+
+```txt
+Coding Agents
+
+已检测到
+- Claude Code       已安装     [配置]
+- Codex CLI         已安装     [配置]
+- Cursor            已安装     [配置]
+
+未检测到
+- Gemini CLI                   [查看设置指南]
+- Aider                        [查看设置指南]
+```
+
+用户应该能看到检测依据。
+
+```txt
+Claude Code 检测依据：
+- command: claude --version
+- folder: ~/.claude
+```
+
+这样可以避免“黑盒扫描”的不信任感。
+
+## 检测规则
+
+检测必须本地完成，并且默认只读。
+
+允许的检测方式：
+
+| 方式 | 示例 | 说明 |
+| --- | --- | --- |
+| 命令检测 | `claude --version` | 必须短超时。 |
+| 配置目录检测 | `~/.claude` | 默认只判断是否存在。 |
+| 项目文件检测 | `CLAUDE.md` | 仅限当前工作区。 |
+| 应用目录检测 | 系统应用路径 | 需要跨平台映射。 |
+
+不应该做：
+
+- 扫描整个磁盘
+- 未经同意读取私人提示词内容
+- 上传检测结果
+- 自动执行安装脚本
+- 静默修改全局配置
+
+<Callout title="隐私默认值" type="info">
+检测结果只保存在本机。MDXForge 只需要知道某个 Adapter 是否可用。
+</Callout>
+
+## 三端兼容要求
+
+Coding Agent 集成必须同时支持 Windows、macOS、Linux。不能只按某一个系统的路径、shell、权限模型设计。
+
+<Callout title="三端原则" type="info">
+所有 Agent 检测、规则写入、路径展示、回滚逻辑都必须走跨平台抽象。不要手拼 `/` 或 `\\`，不要依赖 Bash、PowerShell 或某个系统专属命令。
+</Callout>
+
+### 路径策略
+
+不同系统的 Agent 配置目录不一致。Adapter 不能只写一个路径字符串，而应该声明跨平台路径候选。
+
+```ts
+type PlatformPathMap = {
+  windows?: string[]
+  macos?: string[]
+  linux?: string[]
+}
+```
+
+示例：
+
+```ts
+const detectionPaths = {
+  windows: ['%USERPROFILE%\\.claude'],
+  macos: ['~/.claude'],
+  linux: ['~/.claude']
+}
+```
+
+实现要求：
+
+- 使用 Node `path` API 处理路径。
+- 使用 Electron `app.getPath('home')` 等能力获取系统目录。
+- 不在 UI 中暴露未经展开的内部路径作为唯一信息。
+- 文件写入前统一 normalize 和校验路径边界。
+- 工作区规则只能写入当前打开的 workspace 内。
+
+### 命令检测策略
+
+命令检测也要跨平台。
+
+```ts
+type CommandDetectionRule = {
+  command: string
+  args: string[]
+  timeoutMs: number
+  platforms: Array<'windows' | 'macos' | 'linux'>
+}
+```
+
+要求：
+
+- 使用短超时，避免 UI 卡死。
+- 不通过 shell 拼接字符串执行命令。
+- 使用参数数组，避免转义差异和注入风险。
+- Windows 下需要考虑 `.cmd` / `.exe` 解析。
+- 命令检测失败不能影响核心预览功能。
+
+### UI 文案策略
+
+三端差异要在 UI 中讲清楚。
+
+```txt
+未检测到 Claude Code。
+可能原因：
+- 当前系统没有安装 Claude Code
+- Claude Code 未加入 PATH
+- 此 Agent 在 Windows/macOS/Linux 上的配置路径不同
+```
+
+不要给所有系统展示同一条硬编码安装说明。设置指南需要按平台切换。
+
+### 测试要求
+
+每个官方 Adapter 都需要至少定义三类测试：
+
+| 测试 | 说明 |
+| --- | --- |
+| 路径解析测试 | Windows/macOS/Linux 路径候选能正确展开。 |
+| 命令检测测试 | 命令存在、缺失、超时都能返回稳定状态。 |
+| 写入边界测试 | 不能写出当前 workspace。 |
+
+没有跨平台测试覆盖的 Adapter 不应该默认开启自动写入，只能提供复制指南。
+
+## 集成等级
+
+不同 Agent 的规则系统不一样。MDXForge 不应该强行假设所有 Agent 都支持同一种 Skill 格式。
+
+建议把集成能力分级：
+
+| 等级 | 名称 | 含义 |
+| --- | --- | --- |
+| 0 | Detected | 检测到 Agent，但不写入配置。 |
+| 1 | Guide | 提供可复制的设置说明。 |
+| 2 | Project Rules | 写入工作区级规则文件。 |
+| 3 | Native Skill | 安装 Agent 原生 Skill / Command。 |
+| 4 | Validation Loop | 把 MDXForge 校验结果反馈给 Agent。 |
+
+第一版建议只做 Level 1 和 Level 2。
+
+## MVP 范围
+
+MVP 应该足够简单、安全、可解释。
+
+建议包含：
+
+1. 检测常见 Coding Agents。
+2. 展示已检测 / 未检测列表。
+3. 提供 MDXForge 写作规则复制按钮。
+4. 用户确认后，写入工作区级规则文件。
+5. 默认不修改全局 Agent 配置。
+
+### MVP 支持对象
+
+优先支持本地 AI 编码工作流里最常见、且具备项目规则能力的工具。
+
+| Agent | MVP 集成方式 | 原因 |
+| --- | --- | --- |
+| Claude Code | `CLAUDE.md` / Skill 文档 | 常见本地 Agent，项目规则清晰。 |
+| Codex CLI | 项目规则文件 / 复制指南 | Coding Agent 场景强。 |
+| Cursor | `.cursor/rules` | 项目级规则天然适配。 |
+| Windsurf | workspace rules | 与 Cursor 类似。 |
+| Aider | `CONVENTIONS.md` / 复制指南 | 文件约定简单。 |
+
+具体文件名和目录必须在实现前逐一查证。
+
+<Callout title="实现提醒" type="warn">
+不要把未经验证的 Agent 配置路径硬编码到生产逻辑里。每个 Adapter 都需要基于官方文档或实测验证。
+</Callout>
+
+## 配置流程
+
+用户配置某个 Agent 的流程：
+
+```txt
+打开 Settings -> Skills -> Coding Agents
+-> 看到 Claude Code 已检测到
+-> 点击配置
+-> 选择集成目标
+-> 预览即将写入的文件变更
+-> 确认
+-> MDXForge 写入工作区规则
+-> Agent 之后按 MDXForge 规则生成 MDX
+```
+
+推荐确认弹窗：
+
+```txt
+为当前工作区配置 Claude Code？
+
+MDXForge 将创建或更新：
+- CLAUDE.md
+
+将加入：
+- MDXForge MDX 写作规则
+- 支持的组件列表
+- 安全约束
+- 预览校验建议
+
+不会：
+- 读取 Claude 私人历史
+- 修改全局 Claude 设置
+- 执行 shell 命令
+
+[预览变更] [应用] [取消]
+```
+
+## 规则投射
+
+MDXForge 应该维护一份规范源，然后根据不同 Agent 生成不同格式的规则文件。
+
+规范源：
+
+```txt
+MDXForge MDX Skill
+- 输出约定
+- 支持的 Markdown 语法
+- 支持的 MDX 组件
+- 禁止使用的 MDX 模式
+- 校验清单
+```
+
+投射目标：
+
+| 目标 | 输出 |
+| --- | --- |
+| `CLAUDE.md` | 简洁项目说明 |
+| `.cursor/rules/mdxforge.mdc` | Cursor 规则，匹配 `*.mdx` / `*.md` |
+| `AGENTS.md` | 通用 Coding Agent 指令块 |
+| 可复制 Prompt | 手动设置兜底 |
+| 本地 Skill 目录 | 支持 Agent 原生 Skill 时使用 |
+
+## 冲突处理
+
+很多项目已经存在规则文件。MDXForge 不能直接覆盖。
+
+建议使用 managed block：
+
+```md
+<!-- mdxforge:start -->
+这里是 MDXForge 管理的内容。
+<!-- mdxforge:end -->
+```
+
+更新策略：
+
+| 当前状态 | 行为 |
+| --- | --- |
+| 文件不存在 | 创建文件。 |
+| 文件存在，无 managed block | 用户确认后追加。 |
+| managed block 已存在 | 只替换 block 内内容。 |
+| 发现冲突 | 展示 diff，要求用户确认。 |
+
+## 现有 Skills 的问题
+
+当前仓库里的 Skills 更像是早期原型：能表达“给 AI 的写作规则”，但还不够适合作为正式产品能力直接发布。
+
+主要问题：
+
+1. 形态偏文档，不像可安装、可启用、可回滚的产品模块。
+2. 缺少 manifest，无法声明版本、能力、权限、组件、Agent Adapter。
+3. 缺少三端检测与路径抽象。
+4. 缺少 workspace 级启用状态。
+5. 缺少 diff 预览、managed block、回滚机制。
+6. 与未来 Coding Agent 集成的边界还不清晰。
+7. “Skill” 和 “AI Rules” 的关系需要重新整理。
+
+因此，现有 Skills 不建议直接作为 v1 的正式方案。更合理的处理方式有两个：
+
+| 方案 | 说明 | 建议 |
+| --- | --- | --- |
+| 删除 | 如果只是实验内容，避免误导产品方向。 | 可以考虑。 |
+| 保留但重构 | 把它升级为 manifest 驱动、可检测、可安装、可回滚的正式 Skill。 | 更推荐。 |
+
+短期建议：
+
+- 保留 `mdxforge-mdx` 的核心写作规则内容。
+- 暂时不要把现有 Skills UI 当作最终交互。
+- 把现有 Skill 文件视为“规则草稿”，后续迁移到新的 Skill Manifest 结构。
+- 如果代码里已经有难维护的旧 Skill 安装逻辑，可以删除或隐藏，避免阻塞新的 Agent Adapter 设计。
+
+<Callout title="产品建议" type="warn">
+现有 Skills 可以留内容，不一定留形态。v1 应该重新定义 Skill：它不是一篇说明文档，而是一个可被 MDXForge 安全识别、启用、投射到 Coding Agent 的本地能力包。
+</Callout>
+
+## Skill Manifest 扩展
+
+Skill 可以在 manifest 中声明 Agent 集成能力。
+
+```json
+{
+  "name": "mdxforge-mdx",
+  "title": "MDXForge MDX",
+  "version": "0.1.0",
+  "types": ["writing"],
+  "platforms": ["windows", "macos", "linux"],
+  "agentAdapters": [
+    {
+      "id": "claude-code",
+      "displayName": "Claude Code",
+      "supports": ["project-rules", "skill-doc"],
+      "defaultTarget": "CLAUDE.md",
+      "detection": {
+        "commands": [
+          {
+            "command": "claude",
+            "args": ["--version"],
+            "platforms": ["windows", "macos", "linux"]
+          }
+        ],
+        "paths": {
+          "windows": ["%USERPROFILE%\\.claude"],
+          "macos": ["~/.claude"],
+          "linux": ["~/.claude"]
+        }
+      }
+    },
+    {
+      "id": "cursor",
+      "displayName": "Cursor",
+      "supports": ["project-rules"],
+      "defaultTarget": ".cursor/rules/mdxforge.mdc"
+    }
+  ]
+}
+```
+
+这样未来不只有官方 MDX 写作 Skill 可以集成 Agent，其他 Skill 也可以。
+
+例如：
+
+- 图表 Skill 可以告诉 Agent 如何写 `<LineChart />`。
+- API 文档 Skill 可以告诉 Agent 如何组织接口文档。
+- 决策记录 Skill 可以告诉 Agent 如何生成 ADR。
+- 报告 Skill 可以告诉 Agent 如何输出结构化周报。
+
+## 安全模型
+
+Coding Agent 集成会触碰本地文件，因此必须明确安全边界。
+
+规则：
+
+1. 检测默认只读。
+2. 写入必须用户确认。
+3. 默认只写当前工作区。
+4. 全局配置写入必须放在高级选项。
+5. 修改已有文件前必须展示 diff。
+6. 写入内容必须标记为 MDXForge managed。
+7. 配置过程不应默认执行 shell 命令。
+8. 回滚 / 禁用必须可见。
+9. 所有读写行为必须兼容 Windows、macOS、Linux。
+
+<Callout title="安全默认值" type="info">
+默认动作应该是“为当前工作区启用”，不是“全局安装”。
+</Callout>
+
+## 产品文案
+
+文案要强调“配置写作规则”，不要说“控制 Agent”。
+
+推荐文案：
+
+```txt
+让你的 Coding Agent 写出 MDXForge 兼容的文档。
+```
+
+```txt
+MDXForge 在本机检测到了 Claude Code。你可以为当前工作区添加规则，让 Claude 生成能在这里正确预览的 MDX。
+```
+
+避免文案：
+
+```txt
+自动连接所有 Agent。
+```
+
+```txt
+让 MDXForge 管理你的 AI 工具。
+```
+
+## 关键产品判断
+
+### 1. Skills 是正确抽象
+
+因为 Skills 本来就代表“AI 如何写、MDXForge 如何渲染、用户如何信任”。Coding Agent 集成正好属于这个范围。
+
+### 2. 先做规则，不做执行
+
+第一阶段只帮助 Agent 写对 MDX，不负责启动 Agent、调度 Agent、执行命令。
+
+### 3. 默认工作区级，不默认全局
+
+全局配置风险高，且容易污染用户其他项目。MDXForge 应该优先服务当前文档工作区。
+
+### 4. 检测要可解释
+
+用户必须知道 MDXForge 为什么判断某个 Agent 已安装。
+
+### 5. 规则要可升级
+
+MDXForge 的组件白名单和写作规范会变化。managed block 能让后续升级更安全。
+
+### 6. 三端兼容是基础要求
+
+MDXForge 是桌面应用，不是只服务开发者当前机器的脚本。Coding Agent 集成必须从第一天就把 Windows、macOS、Linux 放进设计，而不是后补适配。
+
+### 7. 现有 Skills 需要重构
+
+现有 Skills 可以作为内容资产保留，但不应直接定义最终产品形态。正式 Skill 应该有 manifest、权限、平台能力、Agent Adapter、启用状态、回滚机制。
+
+## 技术实施方案
+
+本节是给后续工程实现或 AI 接手开发用的执行说明。目标是：任何 AI 看到这里，都能知道要改哪些文件、加哪些模块、按什么顺序实现、怎么验证。
+
+### 当前代码现状
+
+当前仓库已经有一个早期 Skills 原型，主要代码在：
+
+| 文件 | 当前职责 |
+| --- | --- |
+| `apps/desktop/src/main/skills.ts` | 读取 workspace 本地 skill、创建 local skill、合并 rules。 |
+| `apps/desktop/src/main/ipc.ts` | 暴露 `skills:get-workspace`、`skills:add-local-folder`、`skills:create-local`、`skills:copy-rules` IPC。 |
+| `apps/desktop/src/preload/index.ts` | 向 renderer 暴露 skills API。 |
+| `apps/desktop/src/preload/index.d.ts` | `window.api` 类型定义。 |
+| `apps/desktop/src/renderer/src/components/SettingsPage.tsx` | 当前 Skills UI 入口。 |
+| `skills/mdxforge-mdx/SKILL.mdx` | 当前官方 MDXForge 写作规则草稿。 |
+| `docs/mdxforge-mdx-skill.mdx` | MDXForge MDX Skill 说明文档。 |
+
+现有实现能做的事：
+
+- 从 `mdxforge.config.json` 读取 workspace skills。
+- 支持 workspace-local skill。
+- 创建 `.mdxforge/skills/{slug}`。
+- 从 `package.json` 的 `mdxforge.rules` 读取规则文件。
+- 合并规则并复制到剪贴板。
+
+现有实现不够的地方：
+
+- 没有独立 `manifest.json`。
+- 没有组件文档目录结构。
+- 没有 Agent Adapter。
+- 没有检测本机 Agent。
+- 没有 projection engine。
+- 没有 diff preview。
+- 没有 managed block 写入。
+- 没有 disable / rollback。
+- 没有三端路径抽象。
+
+### 推荐模块拆分
+
+不要继续把所有逻辑塞进 `apps/desktop/src/main/skills.ts`。建议把 Skill 系统拆成多个主进程模块：
+
+```txt
+apps/desktop/src/main/skills/
+  index.ts
+  types.ts
+  manifest.ts
+  registry.ts
+  workspace.ts
+  rules.ts
+  agents.ts
+  adapters/
+    claude-code.ts
+    cursor.ts
+    codex.ts
+    aider.ts
+  projection.ts
+  managed-block.ts
+  diff.ts
+  paths.ts
+```
+
+模块职责：
+
+| 模块 | 职责 |
+| --- | --- |
+| `types.ts` | 定义 Skill、Manifest、AgentAdapter、Projection、Diff 类型。 |
+| `manifest.ts` | 读取、校验、规范化 `manifest.json` / `package.json#mdxforge`。 |
+| `registry.ts` | 注册官方 Skill、workspace Skill、未来 npm/git Skill。 |
+| `workspace.ts` | 读写 `mdxforge.config.json`，管理 workspace 启用状态。 |
+| `rules.ts` | 读取 `SKILL.md`、`components/*.md`、`patterns/*.md`、`checklists/*.md` 并生成 canonical rules。 |
+| `agents.ts` | 调用所有 adapter 检测本机 Agent。 |
+| `adapters/*` | 每个 Coding Agent 一个 adapter。 |
+| `projection.ts` | 把 Skill Core 转成 Agent 专用文件。 |
+| `managed-block.ts` | 插入、更新、删除 MDXForge managed block。 |
+| `diff.ts` | 生成 preview diff，不直接写文件。 |
+| `paths.ts` | 跨平台路径展开、normalize、workspace 边界校验。 |
+
+如果短期不想重构目录，也至少要把新逻辑拆成这些函数，避免 `skills.ts` 继续膨胀。
+
+### 数据模型
+
+#### Skill Manifest
+
+内部正式 manifest 建议命名为 `mdxforge.skill.json`。短期可以兼容旧的 `package.json#mdxforge`。
+
+```ts
+type SkillManifest = {
+  schema: 1
+  id: string
+  title: string
+  version: string
+  description?: string
+  types: SkillType[]
+  platforms: Platform[]
+  entry: string
+  rules: SkillRulesManifest
+  components?: SkillComponentManifest[]
+  patterns?: string[]
+  checklists?: string[]
+  agentAdapters?: string[]
+  permissions: SkillPermission[]
+}
+
+type SkillRulesManifest = {
+  root: string
+  components?: string
+  patterns?: string
+  checklists?: string
+}
+
+type SkillComponentManifest = {
+  name: string
+  doc: string
+  status: 'stable' | 'experimental' | 'deprecated'
+}
+
+type Platform = 'windows' | 'macos' | 'linux'
+type SkillType = 'writing' | 'component' | 'template' | 'transform'
+type SkillPermission =
+  | 'adds-writing-rules'
+  | 'registers-mdx-components'
+  | 'adds-templates'
+  | 'changes-mdx-compile'
+  | 'writes-agent-rules'
+```
+
+示例：
+
+```json
+{
+  "schema": 1,
+  "id": "mdxforge-mdx",
+  "title": "MDXForge MDX",
+  "version": "0.1.0",
+  "types": ["writing"],
+  "platforms": ["windows", "macos", "linux"],
+  "entry": "SKILL.md",
+  "rules": {
+    "root": "SKILL.md",
+    "components": "components",
+    "patterns": "patterns",
+    "checklists": "checklists"
+  },
+  "components": [
+    { "name": "Callout", "doc": "components/callout.md", "status": "stable" },
+    { "name": "Cards", "doc": "components/cards.md", "status": "stable" },
+    { "name": "Steps", "doc": "components/steps.md", "status": "stable" }
+  ],
+  "agentAdapters": ["claude-code", "cursor", "codex", "aider"],
+  "permissions": ["adds-writing-rules", "writes-agent-rules"]
+}
+```
+
+#### Skill Core
+
+读取 manifest 后，主进程应转换成运行时 Skill Core。
+
+```ts
+type SkillCore = {
+  id: string
+  title: string
+  version: string
+  rootPath: string
+  entry: RuleDocument
+  componentDocs: RuleDocument[]
+  patternDocs: RuleDocument[]
+  checklistDocs: RuleDocument[]
+  components: SkillComponentManifest[]
+  permissions: SkillPermission[]
+}
+
+type RuleDocument = {
+  path: string
+  relativePath: string
+  content: string
+}
+```
+
+#### Agent Adapter
+
+```ts
+type AgentAdapter = {
+  id: string
+  displayName: string
+  platforms: Platform[]
+  detect(ctx: AgentDetectionContext): Promise<AgentDetectionResult>
+  getTargets(ctx: AgentTargetContext): AgentInstallTarget[]
+  project(input: AgentProjectionInput): Promise<ProjectedFile[]>
+}
+
+type AgentDetectionResult = {
+  agentId: string
+  displayName: string
+  status: 'detected' | 'not-detected' | 'unsupported' | 'error'
+  evidence: DetectionEvidence[]
+  reason?: string
+}
+
+type DetectionEvidence = {
+  type: 'command' | 'path' | 'workspace-file'
+  label: string
+  value: string
+  ok: boolean
+}
+
+type AgentInstallTarget = {
+  id: string
+  label: string
+  path: string
+  scope: 'workspace' | 'global'
+  mode: 'managed-block' | 'create-file' | 'copy-only'
+  defaultEnabled: boolean
+}
+
+type AgentProjectionInput = {
+  skill: SkillCore
+  workspaceRoot: string
+  target: AgentInstallTarget
+}
+
+type ProjectedFile = {
+  agentId: string
+  targetId: string
+  path: string
+  content: string
+  mode: 'managed-block' | 'create-file' | 'copy-only'
+}
+```
+
+### 文件格式设计
+
+#### Skill 文件目录
+
+官方 Skill 应整理为：
+
+```txt
+skills/mdxforge-mdx/
+  mdxforge.skill.json
+  SKILL.md
+  components/
+    callout.md
+    cards.md
+    steps.md
+    tabs.md
+    accordions.md
+    file-tree.md
+    code-block.md
+  patterns/
+    tutorial.md
+    api-reference.md
+    decision-record.md
+    release-notes.md
+    ai-generated-report.md
+  checklists/
+    mdx-output-checklist.md
+```
+
+`SKILL.md` 只做总入口和索引，不复制所有组件细节。
+
+#### 组件文档模板
+
+每个 `components/{name}.md` 必须使用统一结构：
+
+```md
+# ComponentName
+
+## Purpose
+
+## When to use
+
+## When not to use
+
+## Props
+
+| Prop | Type | Required | Default | Notes |
+| --- | --- | --- | --- | --- |
+
+## Good examples
+
+## Bad examples
+
+## Composition rules
+
+## Fallback
+```
+
+#### Pattern 文档模板
+
+每个 `patterns/{name}.md`：
+
+```md
+# Pattern Name
+
+## Use when
+
+## Document structure
+
+## Recommended components
+
+## Example
+
+## Checklist
+```
+
+### Agent Adapter 实现细节
+
+#### Claude Code Adapter
+
+文件：`apps/desktop/src/main/skills/adapters/claude-code.ts`
+
+职责：
+
+- 检测 `claude --version`。
+- 检测 home 下 Claude 配置目录是否存在。
+- 支持 workspace target：`CLAUDE.md`。
+- 使用 managed block 写入。
+
+Projection 输出示例：
+
+```md
+<!-- mdxforge:start skill=mdxforge-mdx version=0.1.0 -->
+# MDXForge MDX Writing Rules
+
+Use these rules when writing `.mdx` or `.md` documents for this workspace.
+
+- Include frontmatter.
+- Prefer Markdown for prose.
+- Use only MDXForge documented components.
+- Do not write imports or exports.
+- Do not define custom React components.
+
+Component references:
+- Callout
+- Cards
+- Steps
+
+Before final output, verify the MDX can be previewed in MDXForge.
+<!-- mdxforge:end -->
+```
+
+#### Cursor Adapter
+
+文件：`apps/desktop/src/main/skills/adapters/cursor.ts`
+
+Target：`.cursor/rules/mdxforge.mdc`
+
+Cursor projection 应包含 frontmatter-like metadata：
+
+```md
+---
+description: Write MDXForge-compatible MDX documents
+globs: **/*.{md,mdx}
+alwaysApply: false
+---
+
+# MDXForge MDX Writing Rules
+
+...
+```
+
+写入策略：
+
+- 如果 `.cursor/rules` 不存在，创建目录。
+- 如果文件不存在，创建完整文件。
+- 如果文件存在，使用 managed block 或整文件 preview，用户确认后覆盖。
+
+#### Codex Adapter
+
+文件：`apps/desktop/src/main/skills/adapters/codex.ts`
+
+第一版不要假设 Codex 的具体项目规则路径。先做：
+
+- 命令检测：`codex --version`。
+- Target：copy-only。
+- UI 提供“复制 Codex 规则”。
+
+等官方路径确认后，再升级为 workspace 写入。
+
+#### Aider Adapter
+
+文件：`apps/desktop/src/main/skills/adapters/aider.ts`
+
+第一版 target：`CONVENTIONS.md` 或 copy-only，需实现前确认实际最佳实践。
+
+如果写 `CONVENTIONS.md`，必须 managed block，不能覆盖用户已有约定。
+
+### Managed Block 细节
+
+文件：`apps/desktop/src/main/skills/managed-block.ts`
+
+统一 marker：
+
+```txt
+<!-- mdxforge:start skill={skillId} target={agentId} version={version} -->
+...
+<!-- mdxforge:end -->
+```
+
+函数：
+
+```ts
+export function upsertManagedBlock(existing: string, block: ManagedBlock): string
+export function removeManagedBlock(existing: string, skillId: string, agentId: string): string
+export function hasManagedBlock(existing: string, skillId: string, agentId: string): boolean
+```
+
+规则：
+
+- 文件不存在：创建文件，内容就是 block。
+- 文件存在且有同 skill/agent block：只替换该 block。
+- 文件存在但无 block：追加到文件末尾，前面加空行。
+- marker 不完整：返回 conflict，不自动写。
+- 用户手写内容永不删除。
+
+### Diff Preview 细节
+
+文件：`apps/desktop/src/main/skills/diff.ts`
+
+主进程 IPC 只返回 preview，不直接写。
+
+```ts
+type SkillApplyPreview = {
+  previewId: string
+  workspaceRoot: string
+  changes: SkillFileChange[]
+}
+
+type SkillFileChange = {
+  path: string
+  exists: boolean
+  kind: 'create' | 'update' | 'copy-only' | 'conflict'
+  before: string
+  after: string
+  diffText: string
+}
+```
+
+流程：
+
+```txt
+renderer 请求 preview
+-> main 检测 targets
+-> projection 生成 ProjectedFile
+-> managed-block 生成 after
+-> diff 生成 diffText
+-> renderer 展示
+-> 用户点击 Apply
+-> main 根据 previewId 写入
+```
+
+注意：`previewId` 需要短期缓存，Apply 时必须重新校验 workspaceRoot 和目标路径仍安全。
+
+### IPC 设计
+
+在 `apps/desktop/src/main/ipc.ts` 新增：
+
+```ts
+ipcMain.handle('skills:list', (_, workspaceRoot: string) => listSkills(workspaceRoot))
+ipcMain.handle('skills:read', (_, workspaceRoot: string, skillId: string) => readSkill(workspaceRoot, skillId))
+ipcMain.handle('skills:detect-agents', (_, workspaceRoot: string) => detectCodingAgents(workspaceRoot))
+ipcMain.handle('skills:preview-agent-install', (_, request: PreviewAgentInstallRequest) => previewAgentInstall(request))
+ipcMain.handle('skills:apply-agent-install', (_, previewId: string) => applyAgentInstall(previewId))
+ipcMain.handle('skills:disable-agent-install', (_, request: DisableAgentInstallRequest) => disableAgentInstall(request))
+ipcMain.handle('skills:copy-agent-rules', (_, request: CopyAgentRulesRequest) => copyAgentRules(request))
+```
+
+在 `apps/desktop/src/preload/index.ts` 暴露同名安全 API。
+
+在 `apps/desktop/src/preload/index.d.ts` 增加类型。
+
+### Renderer UI 实现
+
+文件：`apps/desktop/src/renderer/src/components/SettingsPage.tsx`
+
+建议把 Skills UI 拆出来：
+
+```txt
+apps/desktop/src/renderer/src/components/skills/
+  SkillsSettings.tsx
+  SkillList.tsx
+  SkillDetail.tsx
+  CodingAgentsPanel.tsx
+  AgentDetectionList.tsx
+  AgentInstallMatrix.tsx
+  SkillDiffPreviewDialog.tsx
+```
+
+UI 状态：
+
+```txt
+SkillsSettings
+-> load skills:list
+-> load skills:detect-agents
+-> user selects skill
+-> user checks agents
+-> preview-agent-install
+-> show diff dialog
+-> apply-agent-install
+-> reload state
+```
+
+UI 必须展示：
+
+- Skill 名称、版本、类型。
+- 组件列表。
+- 规则来源文件。
+- Agent 检测状态和 evidence。
+- 每个 Agent 将写入哪个文件。
+- diff preview。
+- 禁用 / 回滚入口。
+
+### 路径安全实现
+
+文件：`apps/desktop/src/main/skills/paths.ts`
+
+必须提供：
+
+```ts
+export function resolveWorkspacePath(workspaceRoot: string, relativeTarget: string): string
+export function assertInsideWorkspace(workspaceRoot: string, targetPath: string): void
+export function expandHome(input: string): string
+export function getCurrentPlatform(): Platform
+```
+
+规则：
+
+- workspace target 必须在 workspaceRoot 内。
+- 禁止 `../` 写出 workspace。
+- 禁止绝对路径作为 workspace target。
+- global target 第一版不开放写入。
+- 所有目录创建用 `fs.mkdirSync(path.dirname(file), { recursive: true })`。
+
+### 三端命令检测实现
+
+使用 `child_process.execFile` 或 `spawn`，不要 `exec`。
+
+```ts
+import { execFile } from 'node:child_process'
+
+function runVersionCommand(command: string, args: string[], timeoutMs = 1500): Promise<CommandResult> {
+  return new Promise((resolve) => {
+    execFile(command, args, { timeout: timeoutMs, windowsHide: true }, (error, stdout, stderr) => {
+      resolve({
+        ok: !error,
+        stdout: stdout.trim(),
+        stderr: stderr.trim(),
+        error: error ? String(error.message) : undefined
+      })
+    })
+  })
+}
+```
+
+Windows 注意：如果裸命令失败，可以尝试 `{command}.cmd`，但必须固定候选，不允许 shell 拼接。
+
+### 规则生成策略
+
+`rules.ts` 应提供：
+
+```ts
+export function buildCanonicalRules(skill: SkillCore): string
+export function buildCompactAgentRules(skill: SkillCore, agentId: string): string
+export function buildCopyablePrompt(skill: SkillCore): string
+```
+
+`buildCanonicalRules` 包含完整组件文档。
+
+`buildCompactAgentRules` 用于写入 Agent 项目规则，应该更短：
+
+- 总规则
+- 组件索引
+- 关键禁令
+- 输出 checklist
+- 提醒如果需要细节，参考 MDXForge docs 或 Skill 文件
+
+不要把所有组件长文档塞进 `CLAUDE.md`，否则会污染项目规则。长文档用于外部 Skill 或 AI Rules 页面，项目规则只放压缩版。
+
+### 迁移现有 Skills
+
+执行顺序：
+
+1. 保留 `skills/mdxforge-mdx/SKILL.mdx` 内容。
+2. 新建 `skills/mdxforge-mdx/SKILL.md`，改为总入口。
+3. 新建 `skills/mdxforge-mdx/components/*.md`。
+4. 新建 `skills/mdxforge-mdx/patterns/*.md`。
+5. 新建 `skills/mdxforge-mdx/checklists/mdx-output-checklist.md`。
+6. 新建 `skills/mdxforge-mdx/mdxforge.skill.json`。
+7. 让新 parser 优先读 `mdxforge.skill.json`。
+8. 没有 `mdxforge.skill.json` 时，兼容旧 `package.json#mdxforge`。
+9. 标记旧 create-local 模板为 experimental 或更新它生成新目录结构。
+
+### 实施顺序
+
+#### Step 1：类型和 manifest parser
+
+改动：
+
+- 新建 `apps/desktop/src/main/skills/types.ts`。
+- 新建 `apps/desktop/src/main/skills/manifest.ts`。
+- 新建 `skills/mdxforge-mdx/mdxforge.skill.json`。
+
+验证：
+
+```bash
+pnpm run typecheck
+```
+
+#### Step 2：整理官方 Skill 文档结构
+
+改动：
+
+- 新建 `skills/mdxforge-mdx/SKILL.md`。
+- 新建 `components/`、`patterns/`、`checklists/`。
+- 从 `apps/desktop/src/renderer/src/components/mdx-components.tsx` 提取当前白名单组件。
+- 每个稳定组件写一份组件文档。
+
+验证：
+
+- `manifest.ts` 能读到所有声明的文件。
+- 不存在 manifest 指向缺失文件。
+
+#### Step 3：Agent detection
+
+改动：
+
+- 新建 `agents.ts`。
+- 新建 `adapters/claude-code.ts`、`cursor.ts`、`codex.ts`、`aider.ts`。
+- 新增 IPC：`skills:detect-agents`。
+- preload 暴露 API。
+
+验证：
+
+- 未安装 Agent 时显示 `not-detected`，不报错。
+- 命令超时时返回 `error` 或 `not-detected`，UI 不崩。
+- Windows/macOS/Linux 路径逻辑有单元测试或最小函数测试。
+
+#### Step 4：Projection + diff preview
+
+改动：
+
+- 新建 `projection.ts`。
+- 新建 `managed-block.ts`。
+- 新建 `diff.ts`。
+- 新增 IPC：`skills:preview-agent-install`。
+
+验证：
+
+- 给空 workspace 生成 `CLAUDE.md` create change。
+- 给已有 `CLAUDE.md` 生成 update change。
+- 已有 managed block 时只替换 block。
+- marker 损坏时返回 conflict。
+
+#### Step 5：Apply / disable
+
+改动：
+
+- 新增 IPC：`skills:apply-agent-install`。
+- 新增 IPC：`skills:disable-agent-install`。
+- 写入前重新执行路径边界校验。
+
+验证：
+
+- Apply 后文件内容符合 preview。
+- Disable 后只删除 managed block。
+- 用户原内容保留。
+
+#### Step 6：Renderer UI
+
+改动：
+
+- 拆分 Skills UI 组件。
+- 增加 Coding Agents tab。
+- 增加 Agent matrix。
+- 增加 diff preview dialog。
+- 增加 disable / rollback 按钮。
+- 新增文案同步到 `apps/desktop/messages/en-US.json` 和 `apps/desktop/messages/zh-CN.json`。
+
+验证：
+
+```bash
+pnpm run paraglide:compile
+pnpm run typecheck
+```
+
+#### Step 7：质量收口
+
+验证：
+
+```bash
+pnpm run typecheck
+pnpm run lint
+```
+
+人工验证：
+
+1. 打开一个 folder workspace。
+2. 进入 Settings -> Skills -> Coding Agents。
+3. 检测 Agent。
+4. 选择 MDXForge MDX Skill。
+5. 勾选 Claude Code / Cursor。
+6. 预览 diff。
+7. Apply。
+8. 检查目标文件。
+9. Disable。
+10. 检查 managed block 被移除且用户原内容保留。
+
+### 验收标准
+
+第一版完成标准：
+
+- `skills/mdxforge-mdx` 有正式 manifest 和分层文档。
+- Settings 里能看到 MDXForge MDX Skill。
+- 能检测至少 2 个 Agent：Claude Code、Cursor。
+- 未检测到 Agent 时 UI 给出可理解原因。
+- 能为 workspace 生成至少 2 种 projection：`CLAUDE.md`、`.cursor/rules/mdxforge.mdc`。
+- 所有写入前都有 diff preview。
+- 所有写入都使用 managed block 或明确 create-file。
+- 能禁用并移除 managed block。
+- 不支持的 Agent 走 copy-only。
+- Windows/macOS/Linux 路径逻辑不硬编码单平台分隔符。
+- `pnpm run typecheck` 通过。
+
+### TODO Checklist
+
+- [ ] 重构 `apps/desktop/src/main/skills.ts`，拆出 `skills/` 子模块。
+- [ ] 定义 `SkillManifest`、`SkillCore`、`AgentAdapter`、`ProjectedFile` 类型。
+- [ ] 新增 `mdxforge.skill.json` parser，兼容旧 `package.json#mdxforge`。
+- [ ] 整理 `skills/mdxforge-mdx` 为 `SKILL.md + components + patterns + checklists`。
+- [ ] 从 `mdx-components.tsx` 提取稳定组件清单并补齐组件文档。
+- [ ] 实现 `claude-code` adapter。
+- [ ] 实现 `cursor` adapter。
+- [ ] Codex / Aider 先做 copy-only adapter。
+- [ ] 实现跨平台路径工具和 workspace 边界校验。
+- [ ] 实现 managed block upsert/remove/conflict。
+- [ ] 实现 preview diff。
+- [ ] 新增 detect / preview / apply / disable IPC。
+- [ ] preload 暴露安全 API 和类型。
+- [ ] 拆分 Settings Skills UI。
+- [ ] 增加中英文 i18n 文案。
+- [ ] 跑 `pnpm run paraglide:compile`。
+- [ ] 跑 `pnpm run typecheck`。
+- [ ] 跑 `pnpm run lint`。
+
+## 开放问题
+
+- v1 官方支持哪些 Agent？
+- `AGENTS.md` 是否应该作为通用 fallback？
+- 同一个项目里，应该写一个共享规则文件，还是每个 Agent 写自己的规则文件？
+- 用户禁用集成时，应该删除 managed block，还是只标记 inactive？
+- MDX 校验错误是否应该生成可复制的 Agent 修复提示？
+- 如果某个 Agent 有原生 Skill 格式，MDXForge 是否应该生成完整 Skill 包？
+- 现有 `skills/` 目录要删除、隐藏，还是迁移为新 manifest 格式？
+- 是否需要把旧 Skills 标记为 experimental？
+
+## 路线图
+
+### Phase 0：梳理现有 Skills
+
+- 盘点当前 `skills/` 目录和相关 UI。
+- 判断哪些内容保留为写作规则资产。
+- 删除或隐藏不适合 v1 的旧 Skill 安装逻辑。
+- 设计新的 Skill Manifest 草案。
+
+### Phase 1：手动 AI Rules
+
+- 增加 AI Rules 页面。
+- 展示 MDXForge 官方写作规则。
+- 提供面向不同 Agent 的复制按钮。
+- 暂不自动写文件。
+
+### Phase 2：本机 Agent 检测
+
+- 本地检测常见 Agent。
+- 展示检测依据。
+- 未检测到时提供设置指南。
+- 仍不自动配置。
+
+### Phase 3：工作区规则安装
+
+- 用户确认后写入工作区规则文件。
+- 使用 managed block。
+- 展示 diff 预览。
+- 支持禁用 / 回滚。
+
+### Phase 4：Skill Agent Adapters
+
+- 扩展 Skill manifest，支持 `agentAdapters`。
+- 每个 Skill 可以声明如何投射到不同 Agent。
+- 用户可以为某个工作区和某些 Agents 启用 Skill。
+
+### Phase 5：校验反馈闭环
+
+- MDXForge 校验 AI 生成的 MDX。
+- 生成可复制的 Agent 修复建议。
+- 可选写入本地校验报告。
+
+## 最终建议
+
+用 Skills 实现 Coding Agent 兼容，但第一版要克制，并且必须从一开始兼容 Windows、macOS、Linux。
+
+现有 Skills 不应原样进入正式产品。可以保留其写作规则内容，但产品形态要重做：从“说明文档”升级为“可安装、可启用、可回滚、可投射到 Coding Agent 的本地能力包”。
+
+产品感觉应该是：
+
+```txt
+MDXForge 掌握 MDX 写作规范。
+用户继续使用自己喜欢的 Coding Agent。
+MDXForge 帮用户把规则安全写入本地工作区。
+Agent 写文档。
+MDXForge 预览和校验文档。
+```
+
+这样既符合 AI First，也不破坏 MDXForge 的产品边界：本地优先、安全可控、面向 AI 生成文档的 MDX 阅读与预览工具。
