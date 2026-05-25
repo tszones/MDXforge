@@ -1,6 +1,6 @@
 {
   "name": "@mdxforge/ui",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "private": true,
   "description": "Shared React UI primitives for MDXForge apps",
   "license": "MIT",
