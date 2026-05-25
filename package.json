@@ -25,6 +25,7 @@
     "format": "turbo run format",
     "test": "turbo run test",
     "test:boundaries": "node scripts/check-boundaries.cjs",
+    "test:file-lines": "node scripts/check-file-lines.cjs",
     "test:main-bundle-boundary": "turbo run test:main-bundle-boundary --filter=@mdxforge/desktop",
     "test:renderer-boundary": "turbo run test:renderer-boundary --filter=@mdxforge/desktop",
     "test:local-images": "turbo run test:local-images --filter=@mdxforge/desktop",
