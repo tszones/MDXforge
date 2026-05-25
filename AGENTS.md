@@ -95,6 +95,7 @@ Electron Builder 配置在 `apps/desktop/electron-builder.yml`：
 - 文件选择使用 Electron `dialog`。
 - 外部链接用 `shell.openExternal`。
 - 不要写只适用于某一端的 UI/文件系统假设。
+- 写任何脚本时都必须考虑 Windows、macOS、Linux 三端通用；优先使用 Node 脚本和跨平台 API，避免依赖 Bash、PowerShell、GNU-only 命令或平台专属路径/环境变量。
 
 ## AI 编码上下文
 
