@@ -1,7 +1,10 @@
+import { IconBrandGithub } from '@tabler/icons-react'
 import { ArrowLeft, Maximize2, Minus, Moon, Settings, Square, Sun, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import appIcon from '../../../../resources/icon.png'
 import { m } from '../paraglide/messages'
+
+const GITHUB_REPOSITORY_URL = 'https://github.com/tszones/MDXforge'
 
 export function WindowTitleBar({
   inSettings,
@@ -33,6 +36,12 @@ export function WindowTitleBar({
         <span className="truncate">MDXForge</span>
       </div>
       <div className="flex h-full [-webkit-app-region:no-drag]">
+        <TitleBarButton
+          label={m.title_bar_open_github()}
+          onClick={() => window.open(GITHUB_REPOSITORY_URL, '_blank', 'noopener,noreferrer')}
+        >
+          <IconBrandGithub className="size-4" />
+        </TitleBarButton>
         <TitleBarButton
           label={colorMode === 'dark' ? m.title_bar_switch_to_light() : m.title_bar_switch_to_dark()}
           onClick={onToggleColorMode}
