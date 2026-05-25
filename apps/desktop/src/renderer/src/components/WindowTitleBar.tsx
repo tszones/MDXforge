@@ -1,16 +1,20 @@
-import { ArrowLeft, Maximize2, Minus, Settings, Square, X } from 'lucide-react'
+import { ArrowLeft, Maximize2, Minus, Moon, Settings, Square, Sun, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import appIcon from '../../../../resources/icon.png'
 import { m } from '../paraglide/messages'
 
 export function WindowTitleBar({
   inSettings,
+  colorMode,
   onBackToPreview,
-  onOpenSettings
+  onOpenSettings,
+  onToggleColorMode
 }: {
   inSettings: boolean
+  colorMode: 'light' | 'dark'
   onBackToPreview: () => void
   onOpenSettings: () => void
+  onToggleColorMode: () => void
 }): React.JSX.Element {
   const [maximized, setMaximized] = useState(false)
 
@@ -29,6 +33,12 @@ export function WindowTitleBar({
         <span className="truncate">MDXForge</span>
       </div>
       <div className="flex h-full [-webkit-app-region:no-drag]">
+        <TitleBarButton
+          label={colorMode === 'dark' ? m.title_bar_switch_to_light() : m.title_bar_switch_to_dark()}
+          onClick={onToggleColorMode}
+        >
+          {colorMode === 'dark' ? <Sun className="size-4" /> : <Moon className="size-4" />}
+        </TitleBarButton>
         <TitleBarButton
           label={inSettings ? m.title_bar_back_to_preview() : m.title_bar_settings()}
           onClick={inSettings ? onBackToPreview : onOpenSettings}

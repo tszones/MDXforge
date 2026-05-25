@@ -356,8 +356,10 @@ function AppContent({
     <main className="flex h-screen flex-col overflow-hidden bg-fd-background pt-10 text-fd-foreground">
       <WindowTitleBar
         inSettings={inSettingsRoute}
+        colorMode={colorMode}
         onBackToPreview={() => navigate('/')}
         onOpenSettings={() => navigate('/settings/language')}
+        onToggleColorMode={() => onColorModeChange(colorMode === 'dark' ? 'light' : 'dark')}
       />
       <FindInPageBar enabled={Boolean(workspace && !inSettingsRoute)} sourceKey={workspace?.file.path ?? ''} />
       <SearchOverlay workspace={workspace} onOpenPath={openPath} />

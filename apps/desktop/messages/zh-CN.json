@@ -32,6 +32,8 @@
   "title_bar_restore": "还原",
   "title_bar_maximize": "最大化",
   "title_bar_close": "关闭",
+  "title_bar_switch_to_dark": "切换到深色模式",
+  "title_bar_switch_to_light": "切换到浅色模式",
   "settings_back_home": "返回首页",
   "settings_label": "设置",
   "settings_appearance_title": "外观主题",
