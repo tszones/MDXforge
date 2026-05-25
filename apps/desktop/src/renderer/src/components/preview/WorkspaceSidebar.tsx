@@ -272,6 +272,7 @@ export function PreviewSidebar({
                           })
                         }}
                         onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
+                        onOpenContextMenu={openContextMenu}
                       />
                     ))}
                   </div>
@@ -281,6 +282,10 @@ export function PreviewSidebar({
               ) : (
                 <SidebarEmptyState>{m.preview_search_empty()}</SidebarEmptyState>
               )}
+              <FileTreeNodeContextMenu
+                menu={contextMenu}
+                onCopyPath={(path) => void copyPath(path)}
+              />
             </>
           ) : (
             <>

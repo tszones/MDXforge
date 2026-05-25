@@ -7,13 +7,15 @@ export function WorkspaceSearchResultGroup({
   active,
   collapsed,
   onToggle,
-  onOpenPath
+  onOpenPath,
+  onOpenContextMenu
 }: {
   result: MdxWorkspaceSearchResult
   active: boolean
   collapsed: boolean
   onToggle: () => void
   onOpenPath: (filePath: string) => void
+  onOpenContextMenu: (event: React.MouseEvent, path: string) => void
 }): React.JSX.Element {
   return (
     <div
@@ -24,6 +26,7 @@ export function WorkspaceSearchResultGroup({
         type="button"
         title={result.relativePath}
         onClick={onToggle}
+        onContextMenu={(event) => onOpenContextMenu(event, result.path)}
         className="flex w-full items-center gap-2 rounded-lg p-2 text-start transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80"
       >
         {collapsed ? (
@@ -47,6 +50,7 @@ export function WorkspaceSearchResultGroup({
               result={result}
               match={match}
               onOpenPath={onOpenPath}
+              onOpenContextMenu={onOpenContextMenu}
             />
           ))}
         </div>
@@ -58,17 +62,20 @@ export function WorkspaceSearchResultGroup({
 function WorkspaceSearchMatchItem({
   result,
   match,
-  onOpenPath
+  onOpenPath,
+  onOpenContextMenu
 }: {
   result: MdxWorkspaceSearchResult
   match: MdxWorkspaceSearchResult['matches'][number]
   onOpenPath: (filePath: string) => void
+  onOpenContextMenu: (event: React.MouseEvent, path: string) => void
 }): React.JSX.Element {
   return (
     <button
       type="button"
       title={`${result.relativePath}:${match.line}:${match.column}`}
       onClick={() => onOpenPath(result.path)}
+      onContextMenu={(event) => onOpenContextMenu(event, result.path)}
       className="flex w-full flex-col rounded-md px-2 py-1.5 text-start text-fd-muted-foreground transition-colors hover:bg-fd-accent/50 hover:text-fd-accent-foreground/80"
     >
       <span className="truncate text-xs opacity-80">

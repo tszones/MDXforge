@@ -9,7 +9,7 @@ export function FileTreeNodeContextMenu({
 }: {
   menu: { x: number; y: number; path: string } | null
   onCopyPath: (path: string) => void
-  onRename: (path: string) => void
+  onRename?: (path: string) => void
 }): React.JSX.Element | null {
   if (!menu) return null
 
@@ -28,14 +28,16 @@ export function FileTreeNodeContextMenu({
         <Copy className="size-4 text-fd-primary" />
         {m.preview_copy_file_path()}
       </button>
-      <button
-        type="button"
-        className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start hover:bg-fd-accent hover:text-fd-accent-foreground"
-        onClick={() => onRename(menu.path)}
-      >
-        <span className="size-4" />
-        {m.preview_rename_item()}
-      </button>
+      {onRename ? (
+        <button
+          type="button"
+          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start hover:bg-fd-accent hover:text-fd-accent-foreground"
+          onClick={() => onRename(menu.path)}
+        >
+          <span className="size-4" />
+          {m.preview_rename_item()}
+        </button>
+      ) : null}
     </div>,
     document.body
   )
