@@ -99,11 +99,15 @@ function MdxSidebarSlot({ children }: { children: ReactNode }): React.JSX.Elemen
   )
 }
 
-export function MdxPageContainer({ children }: { children: ReactNode }): React.JSX.Element {
+export function MdxPageContainer({
+  children,
+  ...props
+}: React.ComponentPropsWithoutRef<'article'>): React.JSX.Element {
   return (
     <article
       id="nd-page"
       className="mx-auto flex min-h-0 w-full max-w-[900px] flex-col gap-4 overflow-auto px-4 py-6 md:px-6 md:pt-8 xl:px-8 xl:pt-14 [grid-area:main]"
+      {...props}
     >
       {children}
     </article>

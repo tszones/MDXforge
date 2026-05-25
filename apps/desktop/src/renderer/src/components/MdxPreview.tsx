@@ -1,13 +1,15 @@
+import { toast } from 'sonner'
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { buttonVariants } from 'fumadocs-ui/components/ui/button'
 import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page'
-import { Check, Copy, Link2 } from 'lucide-react'
+import { Check, Copy, FileText, Link2 } from 'lucide-react'
 import type { MDXComponents } from 'mdx/types'
 import { Component, useEffect, useMemo, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
 import { m } from '../paraglide/messages'
 import type { MdxDocumentBacklink, MdxFolderEntry, MdxWorkspace } from '../types'
 import { MdxDocsLayout, MdxPageContainer } from './MdxDocsLayout'
+import { FileTreeNodeContextMenu } from './preview/FileTreeNodeContextMenu'
 import { getMDXComponents } from './mdx'
 import {
   buildDocumentLinkMap,
@@ -98,6 +100,11 @@ export function MdxPreview({
   const [extensionError, setExtensionError] = useState<string | null>(null)
   const [module, setModule] = useState<MdxModule | null>(null)
   const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const [documentContextMenu, setDocumentContextMenu] = useState<{
+    x: number
+    y: number
+    path: string
+  } | null>(null)
   const [copiedFilePath, setCopiedFilePath] = useState(file.path)
   const [compileError, setCompileError] = useState<string | null>(null)
   const [renderError, setRenderError] = useState<string | null>(null)
@@ -229,13 +236,43 @@ export function MdxPreview({
     return () => window.clearTimeout(timer)
   }, [copyState])
 
+  useEffect(() => {
+    if (!documentContextMenu) return
+    const close = (): void => setDocumentContextMenu(null)
+    window.addEventListener('click', close)
+    window.addEventListener('keydown', close)
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('click', close)
+      window.removeEventListener('keydown', close)
+      window.removeEventListener('resize', close)
+    }
+  }, [documentContextMenu])
+
   async function copyRawSource(): Promise<void> {
     try {
       await window.api.copyMdxRawSource(file.path)
       setCopyState('copied')
+      toast.success(m.actions_copied_raw_source())
     } catch {
       setCopyState('error')
+      toast.error(m.actions_copy_raw_source_failed())
     }
+  }
+
+  async function copyDocumentPath(): Promise<void> {
+    setDocumentContextMenu(null)
+    try {
+      await window.api.copyPath(file.path)
+      toast.success(m.preview_file_path_copied())
+    } catch {
+      toast.error(m.preview_file_path_copy_failed())
+    }
+  }
+
+  function openDocumentContextMenu(event: React.MouseEvent): void {
+    event.preventDefault()
+    setDocumentContextMenu({ x: event.clientX, y: event.clientY, path: file.path })
   }
 
   const Mdx = module?.default
@@ -258,7 +295,7 @@ export function MdxPreview({
         />
       )}
     >
-      <MdxPageContainer>
+      <MdxPageContainer onContextMenu={openDocumentContextMenu}>
         <DocsTitle>{title}</DocsTitle>
         <DocsDescription>{description}</DocsDescription>
         <PageActions copyState={copyState} onCopyRawSource={() => void copyRawSource()} />
@@ -294,6 +331,24 @@ export function MdxPreview({
             onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
           />
         ) : null}
+        <FileTreeNodeContextMenu
+          menu={documentContextMenu}
+          items={[
+            {
+              label: m.actions_copy_raw_source(),
+              icon: <FileText className="size-4 text-fd-primary" />,
+              onSelect: () => {
+                setDocumentContextMenu(null)
+                void copyRawSource()
+              }
+            },
+            {
+              label: m.preview_copy_file_path(),
+              icon: <Copy className="size-4 text-fd-primary" />,
+              onSelect: () => void copyDocumentPath()
+            }
+          ]}
+        />
       </MdxPageContainer>
     </MdxDocsLayout>
   )
