@@ -79,7 +79,7 @@ function MdxSidebarSlot({ children }: { children: ReactNode }): React.JSX.Elemen
               ref={ref}
               data-collapsed={collapsed}
               data-hovered={collapsed && hovered}
-              className="absolute inset-y-0 inset-s-0 flex w-full flex-col items-end border-e bg-fd-card text-sm duration-250 *:w-(--fd-sidebar-width) data-[collapsed=true]:inset-y-2 data-[collapsed=true]:w-(--fd-sidebar-width) data-[collapsed=true]:rounded-xl data-[collapsed=true]:border data-[collapsed=true]:transition-transform data-[collapsed=true]:-translate-x-(--fd-sidebar-width) data-[hovered=true]:translate-x-2 data-[hovered=true]:shadow-lg rtl:data-[collapsed=true]:translate-x-full rtl:data-[hovered=true]:-translate-x-2"
+              className="absolute inset-y-0 inset-s-0 flex w-full flex-col items-end overflow-hidden border-e bg-fd-card text-sm duration-250 *:w-(--fd-sidebar-width) data-[collapsed=true]:inset-y-2 data-[collapsed=true]:w-(--fd-sidebar-width) data-[collapsed=true]:rounded-xl data-[collapsed=true]:border data-[collapsed=true]:transition-transform data-[collapsed=true]:-translate-x-(--fd-sidebar-width) data-[hovered=true]:translate-x-2 data-[hovered=true]:shadow-lg rtl:data-[collapsed=true]:translate-x-full rtl:data-[hovered=true]:-translate-x-2"
               {...events}
             >
               {children}
