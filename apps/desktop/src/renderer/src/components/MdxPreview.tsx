@@ -99,7 +99,8 @@ export function MdxPreview({
   const [extensionComponents, setExtensionComponents] = useState<MDXComponents>({})
   const [extensionError, setExtensionError] = useState<string | null>(null)
   const [module, setModule] = useState<MdxModule | null>(null)
-  const [copyState, setCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const [sourceCopyState, setSourceCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
+  const [pathCopyState, setPathCopyState] = useState<'idle' | 'copied' | 'error'>('idle')
   const [documentContextMenu, setDocumentContextMenu] = useState<{
     x: number
     y: number
@@ -114,7 +115,7 @@ export function MdxPreview({
   const renderSourceKey = `${file.compiledSource}\n${extensionsEnabled ? extensionComponentsKey : 'safe'}`
   const title = typeof file.frontmatter.title === 'string' ? file.frontmatter.title : file.name
   const description =
-    typeof file.frontmatter.description === 'string' ? file.frontmatter.description : file.path
+    typeof file.frontmatter.description === 'string' ? file.frontmatter.description : null
   const currentEntry = useMemo(
     () => workspace.folder?.files.find((entry) => entry.path === file.path),
     [file.path, workspace.folder]
@@ -223,18 +224,20 @@ export function MdxPreview({
 
   if (copiedFilePath !== file.path) {
     setCopiedFilePath(file.path)
-    setCopyState('idle')
+    setSourceCopyState('idle')
+    setPathCopyState('idle')
   }
 
   useEffect(() => {
-    if (copyState === 'idle') return
+    if (sourceCopyState === 'idle' && pathCopyState === 'idle') return
 
     const timer = window.setTimeout(() => {
-      setCopyState('idle')
+      setSourceCopyState('idle')
+      setPathCopyState('idle')
     }, 1800)
 
     return () => window.clearTimeout(timer)
-  }, [copyState])
+  }, [sourceCopyState, pathCopyState])
 
   useEffect(() => {
     if (!documentContextMenu) return
@@ -252,10 +255,10 @@ export function MdxPreview({
   async function copyRawSource(): Promise<void> {
     try {
       await window.api.copyMdxRawSource(file.path)
-      setCopyState('copied')
+      setSourceCopyState('copied')
       toast.success(m.actions_copied_raw_source())
     } catch {
-      setCopyState('error')
+      setSourceCopyState('error')
       toast.error(m.actions_copy_raw_source_failed())
     }
   }
@@ -264,8 +267,10 @@ export function MdxPreview({
     setDocumentContextMenu(null)
     try {
       await window.api.copyPath(file.path)
+      setPathCopyState('copied')
       toast.success(m.preview_file_path_copied())
     } catch {
+      setPathCopyState('error')
       toast.error(m.preview_file_path_copy_failed())
     }
   }
@@ -301,8 +306,13 @@ export function MdxPreview({
     >
       <MdxPageContainer onContextMenu={openDocumentContextMenu}>
         <DocsTitle>{title}</DocsTitle>
-        <DocsDescription>{description}</DocsDescription>
-        <PageActions copyState={copyState} onCopyRawSource={() => void copyRawSource()} />
+        {description ? <DocsDescription>{description}</DocsDescription> : null}
+        <PageActions
+          sourceCopyState={sourceCopyState}
+          pathCopyState={pathCopyState}
+          onCopyRawSource={() => void copyRawSource()}
+          onCopyDocumentPath={() => void copyDocumentPath()}
+        />
 
         {hasExtensionPackages || extensionWarnings.length > 0 ? (
           <ExtensionSafetyNotice
@@ -434,14 +444,18 @@ function Backlinks({
 }
 
 function PageActions({
-  copyState,
-  onCopyRawSource
+  sourceCopyState,
+  pathCopyState,
+  onCopyRawSource,
+  onCopyDocumentPath
 }: {
-  copyState: 'idle' | 'copied' | 'error'
+  sourceCopyState: 'idle' | 'copied' | 'error'
+  pathCopyState: 'idle' | 'copied' | 'error'
   onCopyRawSource: () => void
+  onCopyDocumentPath: () => void
 }): React.JSX.Element {
   return (
-    <div className="flex flex-row items-center gap-2 border-b pb-6 pt-2">
+    <div className="flex flex-row items-center gap-2 border-b pb-5 pt-0">
       <button
         type="button"
         onClick={onCopyRawSource}
@@ -452,14 +466,33 @@ function PageActions({
           className:
             'gap-2 data-[state=copied]:border-fd-primary/40 data-[state=copied]:bg-fd-primary/10 data-[state=copied]:text-fd-primary data-[state=error]:border-fd-error/40 data-[state=error]:bg-fd-error/10 data-[state=error]:text-fd-error [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground'
         })}
-        data-state={copyState}
+        data-state={sourceCopyState}
       >
-        {copyState === 'copied' ? <Check /> : <Copy />}
-        {copyState === 'copied'
+        {sourceCopyState === 'copied' ? <Check /> : <Copy />}
+        {sourceCopyState === 'copied'
           ? m.actions_copied_raw_source()
-          : copyState === 'error'
+          : sourceCopyState === 'error'
             ? m.actions_copy_raw_source_failed()
             : m.actions_copy_raw_source()}
+      </button>
+      <button
+        type="button"
+        onClick={onCopyDocumentPath}
+        aria-label={m.preview_copy_file_path()}
+        className={buttonVariants({
+          color: 'secondary',
+          size: 'sm',
+          className:
+            'gap-2 data-[state=copied]:border-fd-primary/40 data-[state=copied]:bg-fd-primary/10 data-[state=copied]:text-fd-primary data-[state=error]:border-fd-error/40 data-[state=error]:bg-fd-error/10 data-[state=error]:text-fd-error [&_svg]:size-3.5 [&_svg]:text-fd-muted-foreground'
+        })}
+        data-state={pathCopyState}
+      >
+        {pathCopyState === 'copied' ? <Check /> : <Copy />}
+        {pathCopyState === 'copied'
+          ? m.preview_file_path_copied()
+          : pathCopyState === 'error'
+            ? m.preview_file_path_copy_failed()
+            : m.preview_copy_file_path()}
       </button>
     </div>
   )
