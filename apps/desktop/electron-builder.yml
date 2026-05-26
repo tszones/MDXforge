@@ -59,7 +59,6 @@ linux:
   executableName: mdxforge
   target:
     - AppImage
-    - snap
     - deb
   maintainer: mdxforge
   icon: build/icons
