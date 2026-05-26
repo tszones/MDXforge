@@ -239,7 +239,7 @@ async function compileMdxSource(
 
 function getWorkspaceRoot(
   inputPath: string,
-  filePath: string,
+  _filePath: string,
   workspaceRoot?: string
 ): string | null {
   if (workspaceRoot) {
@@ -249,10 +249,7 @@ function getWorkspaceRoot(
 
   if (!existsSync(inputPath)) return null
   const stat = statSync(inputPath)
-  if (stat.isDirectory()) return inputPath
-
-  const parent = dirname(filePath)
-  return parent && existsSync(parent) ? parent : null
+  return stat.isDirectory() ? inputPath : null
 }
 
 export function resolveMdxTarget(inputPath: string): string | null {
