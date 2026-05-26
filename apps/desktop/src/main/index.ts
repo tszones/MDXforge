@@ -13,7 +13,7 @@ import { getWorkspaceExtensionAssetPath, type WorkspaceExtensionManifest } from 
 import { registerAppIpc } from './ipc'
 import { registerLocalImageProtocol, registerLocalImageScheme } from './local-image-protocol'
 import { getLastOpenFile } from './mdx'
-import { getAppSettings } from './settings'
+import { getAppSettings, getWindowState, setWindowState } from './settings'
 import { checkForUpdatesOnStartup, registerUpdaterIpc } from './updater'
 
 let mainWindow: BrowserWindow | null = null
@@ -52,10 +52,15 @@ function getInitialSettingsArgument(): string {
 }
 
 function createWindow(): void {
+  const savedWindowState = getWindowState()
+
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: savedWindowState.width,
+    height: savedWindowState.height,
+    ...(typeof savedWindowState.x === 'number' && typeof savedWindowState.y === 'number'
+      ? { x: savedWindowState.x, y: savedWindowState.y }
+      : {}),
     show: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
@@ -69,10 +74,18 @@ function createWindow(): void {
     }
   })
 
+  if (savedWindowState.isMaximized) mainWindow.maximize()
+
   mainWindow.on('ready-to-show', () => {
     mainWindow?.show()
     const initialPath = pendingOpenPath ?? getLastOpenFile()
     if (initialPath) void openMdxPath(initialPath, mainWindow, setCurrentExtensionManifest)
+  })
+
+  mainWindow.on('close', () => {
+    if (!mainWindow) return
+    const bounds = mainWindow.isMaximized() ? mainWindow.getNormalBounds() : mainWindow.getBounds()
+    setWindowState({ ...bounds, isMaximized: mainWindow.isMaximized() })
   })
 
   mainWindow.webContents.setWindowOpenHandler((details) => {

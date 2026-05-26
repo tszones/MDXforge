@@ -1,5 +1,13 @@
 import electronStoreModule from 'electron-store'
 
+export interface AppWindowState {
+  x?: number
+  y?: number
+  width: number
+  height: number
+  isMaximized?: boolean
+}
+
 export type AppThemeName =
   | 'neutral'
   | 'black'
@@ -22,6 +30,7 @@ export interface AppSettings {
   colorMode: AppColorMode
   language: AppLanguage
   font: AppFontName
+  windowState: AppWindowState
 }
 
 type StoreConstructor = new <T extends object>(options: {
@@ -40,7 +49,11 @@ const store = new ElectronStore<AppSettings>({
     theme: 'purple',
     colorMode: 'dark',
     language: 'en-US',
-    font: 'system'
+    font: 'system',
+    windowState: {
+      width: 900,
+      height: 670
+    }
   }
 })
 
@@ -49,7 +62,8 @@ export function getAppSettings(): AppSettings {
     theme: store.get('theme'),
     colorMode: store.get('colorMode'),
     language: store.get('language'),
-    font: store.get('font')
+    font: store.get('font'),
+    windowState: store.get('windowState')
   }
 }
 
@@ -58,5 +72,14 @@ export function setAppSettings(settings: Partial<AppSettings>): AppSettings {
   if (settings.colorMode) store.set('colorMode', settings.colorMode)
   if (settings.language) store.set('language', settings.language)
   if (settings.font) store.set('font', settings.font)
+  if (settings.windowState) store.set('windowState', settings.windowState)
   return getAppSettings()
+}
+
+export function getWindowState(): AppWindowState {
+  return store.get('windowState')
+}
+
+export function setWindowState(windowState: AppWindowState): void {
+  store.set('windowState', windowState)
 }
