@@ -144,13 +144,22 @@ function AppContent({
       setError(null)
       navigate('/', { replace: true })
     })
+    const removeChangedListener = window.api.onMdxFileChanged((changedWorkspace) => {
+      setWorkspace(changedWorkspace)
+      setError(null)
+    })
     const removeErrorListener = window.api.onMdxFileOpenError((message) => {
+      setError(message)
+    })
+    const removeChangeErrorListener = window.api.onMdxFileChangeError((message) => {
       setError(message)
     })
 
     return () => {
       removeOpenedListener()
+      removeChangedListener()
       removeErrorListener()
+      removeChangeErrorListener()
     }
   }, [navigate])
 
