@@ -1,0 +1,32 @@
+{
+  "name": "mdxforge",
+  "version": "0.1.0",
+  "description": "MDXForge authoring rules and components for AI-generated MDX docs",
+  "author": {
+    "name": "MDXForge"
+  },
+  "homepage": "https://github.com/mdxforge/mdxforge",
+  "license": "MIT",
+  "keywords": [
+    "mdx",
+    "docs",
+    "skills",
+    "writing"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "MDXForge",
+    "shortDescription": "Author MDXForge-compatible MDX docs",
+    "longDescription": "Use MDXForge rules to write safe, component-compatible MDX documentation without imports, exports, or unsupported runtime code.",
+    "developerName": "MDXForge",
+    "category": "Writing",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Write an MDXForge document.",
+      "Convert this content into MDXForge-compatible MDX."
+    ],
+    "websiteURL": "https://github.com/mdxforge/mdxforge",
+    "brandColor": "#7C3AED",
+    "screenshots": []
+  }
+}

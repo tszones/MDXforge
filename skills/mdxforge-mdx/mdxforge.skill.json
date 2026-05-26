@@ -56,5 +56,5 @@
     "TodoList",
     "TypeTable"
   ],
-  "agentAdapters": ["claude-code", "cursor", "codex", "aider"]
+  "agentAdapters": ["claude-code", "cursor", "codex", "aider", "gemini", "opencode", "openclaw", "cline", "kimi"]
 }

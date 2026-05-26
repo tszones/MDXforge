@@ -1,4 +1,4 @@
-import { app, type BrowserWindow, clipboard, ipcMain } from 'electron'
+import { app, type BrowserWindow, clipboard, ipcMain, shell } from 'electron'
 import { type SetExtensionManifest, watchMdxWorkspace } from './app-open'
 import { getWorkspaceExtensionTrustKey, type WorkspaceExtensionManifest } from './extensions'
 import { openMdxFile, openMdxFolder, readMdxWorkspace, renameMdxPath } from './mdx'
@@ -143,6 +143,11 @@ export function registerAppIpc(options: {
     clipboard.writeText(rules)
   })
   ipcMain.handle('skills:detect-agents', () => detectAgents())
+  ipcMain.handle('skills:open-agent-path', async (_, targetPath: string) => {
+    if (!targetPath) return false
+    await shell.openPath(targetPath)
+    return true
+  })
   ipcMain.handle('skills:preview-agent-install', (_, workspaceRoot: string, agentId: AgentId) =>
     previewAgentInstall(workspaceRoot, agentId)
   )

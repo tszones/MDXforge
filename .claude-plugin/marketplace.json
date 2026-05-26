@@ -1,0 +1,15 @@
+{
+  "name": "mdxforge",
+  "metadata": {
+    "description": "Local MDXForge Claude Code plugin marketplace"
+  },
+  "owner": {
+    "name": "MDXForge"
+  },
+  "plugins": [
+    {
+      "name": "mdxforge",
+      "source": "."
+    }
+  ]
+}

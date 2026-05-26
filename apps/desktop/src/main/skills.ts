@@ -228,7 +228,7 @@ function createSkillManifestJson(slug: string, type: SkillType): Record<string, 
     types: [type],
     rules: ['./SKILL.md'],
     components: type === 'component' ? ['ExampleCard'] : [],
-    agentAdapters: ['claude-code', 'cursor', 'codex', 'aider']
+    agentAdapters: ['claude-code', 'cursor', 'codex']
   }
 }
 

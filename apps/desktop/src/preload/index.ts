@@ -40,6 +40,7 @@ const api = {
     ipcRenderer.invoke('skills:create-local', workspaceRoot, name, type),
   copySkillRules: (rules: string) => ipcRenderer.invoke('skills:copy-rules', rules),
   detectAgents: () => ipcRenderer.invoke('skills:detect-agents'),
+  openAgentPath: (targetPath: string) => ipcRenderer.invoke('skills:open-agent-path', targetPath),
   previewAgentInstall: (workspaceRoot: string, agentId: string) =>
     ipcRenderer.invoke('skills:preview-agent-install', workspaceRoot, agentId),
   applyAgentInstall: (workspaceRoot: string, agentId: string) =>

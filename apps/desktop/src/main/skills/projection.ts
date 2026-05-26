@@ -3,17 +3,25 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
-  rmSync,
   statSync,
   writeFileSync
 } from 'fs'
 import { dirname, join, resolve } from 'path'
-import { readWorkspaceSkills } from '../skills'
 import { agentAdapters } from './agents'
 import { createTextDiff } from './diff'
 import { removeManagedBlock, upsertManagedBlock } from './managed-block'
 import { isPathInside, toPosixRelativePath } from './path-utils'
 import { buildCompactAgentRules } from './rules'
+import { getInstalledSkillPath, getSkillPlatformTarget } from './platform-targets'
+import {
+  applyManagedAgentDisable,
+  applyManagedAgentInstall,
+  installPlatformSkillLink,
+  isManagedAgentInstall,
+  previewManagedAgentDisable,
+  previewManagedAgentInstall,
+  uninstallPlatformSkillLink
+} from './managed-agents'
 import type { AgentAdapter, AgentId, ProjectedDirectory, WorkspaceSkill } from './types'
 
 export interface AgentInstallPreview {
@@ -29,7 +37,9 @@ export interface AgentInstallPreview {
 }
 
 export function previewAgentInstall(workspaceRoot: string, agentId: AgentId): AgentInstallPreview {
-  const projection = getAgentProjection(workspaceRoot, agentId)
+  if (isManagedAgentInstall(agentId)) return previewManagedAgentInstall(resolveAppRoot(workspaceRoot), agentId)
+
+  const projection = getAgentProjection(resolveAppRoot(workspaceRoot), agentId)
   if ('content' in projection && projection.action === 'copy') {
     return {
       agentId,
@@ -45,15 +55,12 @@ export function previewAgentInstall(workspaceRoot: string, agentId: AgentId): Ag
 
   if ('files' in projection) return previewDirectoryInstall(workspaceRoot, projection)
 
-  const root = resolve(workspaceRoot)
-  const targetPath = resolve(projection.path)
-  if (!isPathInside(root, targetPath))
-    throw new Error('Projected file must stay inside the workspace.')
+  const targetPath = resolveProjectionTarget(projection.agentId, projection.path)
 
   const before = existsSync(targetPath) ? readFileSync(targetPath, 'utf-8') : ''
   const block = upsertManagedBlock(before, projection.content)
   const action = before ? 'update' : 'create'
-  const relativePath = toPosixRelativePath(root, targetPath)
+  const relativePath = displayPath(targetPath)
 
   return {
     agentId,
@@ -69,24 +76,16 @@ export function previewAgentInstall(workspaceRoot: string, agentId: AgentId): Ag
 }
 
 export function applyAgentInstall(workspaceRoot: string, agentId: AgentId): AgentInstallPreview {
+  if (isManagedAgentInstall(agentId)) return applyManagedAgentInstall(resolveAppRoot(workspaceRoot), agentId)
+
   const preview = previewAgentInstall(workspaceRoot, agentId)
   if (preview.action === 'copy') return preview
   if (preview.action === 'conflict') throw new Error(preview.reason ?? 'Projection conflict.')
 
-  const root = resolve(workspaceRoot)
-  const targetPath = resolve(root, preview.relativePath)
-  if (!isPathInside(root, targetPath)) throw new Error('Target must stay inside workspace.')
+  const targetPath = resolveProjectionTarget(agentId, preview.relativePath)
 
   if (preview.kind === 'directory') {
-    const projection = getAgentProjection(workspaceRoot, agentId)
-    if (!('files' in projection)) throw new Error('Directory projection expected.')
-    for (const file of projection.files) {
-      const filePath = resolve(targetPath, file.relativePath)
-      if (!isPathInside(targetPath, filePath))
-        throw new Error('Skill file must stay inside target.')
-      mkdirSync(dirname(filePath), { recursive: true })
-      writeFileSync(filePath, file.content, 'utf-8')
-    }
+    installPlatformSkillLink(agentId, resolveAppRoot(workspaceRoot))
     return preview
   }
 
@@ -96,7 +95,9 @@ export function applyAgentInstall(workspaceRoot: string, agentId: AgentId): Agen
 }
 
 export function previewAgentDisable(workspaceRoot: string, agentId: AgentId): AgentInstallPreview {
-  const projection = getAgentProjection(workspaceRoot, agentId)
+  if (isManagedAgentInstall(agentId)) return previewManagedAgentDisable(resolveAppRoot(workspaceRoot), agentId)
+
+  const projection = getAgentProjection(resolveAppRoot(workspaceRoot), agentId)
   if ('content' in projection && projection.action === 'copy') {
     return {
       agentId,
@@ -113,13 +114,11 @@ export function previewAgentDisable(workspaceRoot: string, agentId: AgentId): Ag
 
   if ('files' in projection) return previewDirectoryDisable(workspaceRoot, projection)
 
-  const root = resolve(workspaceRoot)
-  const targetPath = resolve(projection.path)
-  if (!isPathInside(root, targetPath)) throw new Error('Target file must stay inside workspace.')
+  const targetPath = resolveProjectionTarget(projection.agentId, projection.path)
 
   const before = existsSync(targetPath) ? readFileSync(targetPath, 'utf-8') : ''
   const block = removeManagedBlock(before)
-  const relativePath = toPosixRelativePath(root, targetPath)
+  const relativePath = displayPath(targetPath)
 
   return {
     agentId,
@@ -135,16 +134,16 @@ export function previewAgentDisable(workspaceRoot: string, agentId: AgentId): Ag
 }
 
 export function applyAgentDisable(workspaceRoot: string, agentId: AgentId): AgentInstallPreview {
+  if (isManagedAgentInstall(agentId)) return applyManagedAgentDisable(resolveAppRoot(workspaceRoot), agentId)
+
   const preview = previewAgentDisable(workspaceRoot, agentId)
   if (preview.action === 'copy') return preview
   if (preview.action === 'conflict') throw new Error(preview.reason ?? 'Managed block conflict.')
 
-  const root = resolve(workspaceRoot)
-  const targetPath = resolve(root, preview.relativePath)
-  if (!isPathInside(root, targetPath)) throw new Error('Target must stay inside workspace.')
+  const targetPath = resolveProjectionTarget(agentId, preview.relativePath)
 
   if (preview.kind === 'directory') {
-    if (existsSync(targetPath)) rmSync(targetPath, { recursive: true, force: true })
+    uninstallPlatformSkillLink(agentId)
     return preview
   }
 
@@ -153,20 +152,17 @@ export function applyAgentDisable(workspaceRoot: string, agentId: AgentId): Agen
 }
 
 function previewDirectoryInstall(
-  workspaceRoot: string,
+  _workspaceRoot: string,
   projection: ProjectedDirectory
 ): AgentInstallPreview {
-  const root = resolve(workspaceRoot)
-  const targetPath = resolve(projection.path)
-  if (!isPathInside(root, targetPath))
-    throw new Error('Target directory must stay inside workspace.')
+  const targetPath = resolveProjectionTarget(projection.agentId, projection.path)
 
   const before = existsSync(targetPath) ? listDirectoryFiles(targetPath).join('\n') : ''
   const after = projection.files
     .map((file) => file.relativePath)
     .sort()
     .join('\n')
-  const relativePath = toPosixRelativePath(root, targetPath)
+  const relativePath = displayPath(targetPath)
   return {
     agentId: projection.agentId,
     operation: 'install',
@@ -180,16 +176,13 @@ function previewDirectoryInstall(
 }
 
 function previewDirectoryDisable(
-  workspaceRoot: string,
+  _workspaceRoot: string,
   projection: ProjectedDirectory
 ): AgentInstallPreview {
-  const root = resolve(workspaceRoot)
-  const targetPath = resolve(projection.path)
-  if (!isPathInside(root, targetPath))
-    throw new Error('Target directory must stay inside workspace.')
+  const targetPath = resolveProjectionTarget(projection.agentId, projection.path)
 
   const before = existsSync(targetPath) ? listDirectoryFiles(targetPath).join('\n') : ''
-  const relativePath = toPosixRelativePath(root, targetPath)
+  const relativePath = displayPath(targetPath)
   return {
     agentId: projection.agentId,
     operation: 'disable',
@@ -206,12 +199,8 @@ function getAgentProjection(workspaceRoot: string, agentId: AgentId) {
   const adapter = agentAdapters.find((item) => item.id === agentId)
   if (!adapter) throw new Error(`Unknown agent adapter: ${agentId}`)
 
-  const root = resolve(workspaceRoot)
-  const skillsState = readWorkspaceSkills(root)
-  const skill =
-    skillsState.skills.find((item) => item.name === 'mdxforge-mdx' && item.status === 'active') ??
-    skillsState.skills.find((item) => item.status === 'active')
-  if (!skill) throw new Error('No active skill is available for projection.')
+  const root = resolveAppRoot(workspaceRoot)
+  const skill = createBuiltinMdxForgeSkill(root)
 
   if (adapter.projectDirectory) return projectSkillDirectory(root, adapter, skill, agentId)
 
@@ -292,6 +281,48 @@ function collectExistingFiles(root: string, current: string, files: string[]): v
   }
 }
 
+function resolveProjectionTarget(agentId: AgentId, targetPath: string): string {
+  const target = getSkillPlatformTarget(agentId)
+  if (!target) throw new Error(`Unknown agent target: ${agentId}`)
+
+  const resolvedTarget = resolve(targetPath)
+  const allowedRoot = resolve(getInstalledSkillPath(target))
+  if (!isPathInside(allowedRoot, resolvedTarget)) {
+    throw new Error('Target must stay inside the agent skills directory.')
+  }
+  return resolvedTarget
+}
+
+function resolveAppRoot(workspaceRoot: string): string {
+  if (workspaceRoot) return resolve(workspaceRoot)
+  const candidates = [
+    resolve(process.cwd()),
+    resolve(process.cwd(), '..', '..'),
+    resolve(__dirname, '..', '..', '..', '..'),
+    resolve(__dirname, '..', '..', '..', '..', '..')
+  ]
+  return candidates.find((candidate) => existsSync(join(candidate, 'skills', 'mdxforge-mdx'))) ?? candidates[0]
+}
+
+function createBuiltinMdxForgeSkill(root: string): WorkspaceSkill {
+  return {
+    name: 'mdxforge-mdx',
+    title: 'MDXForge MDX',
+    version: '0.1.0',
+    source: 'builtin:mdxforge-mdx',
+    kind: 'builtin',
+    status: 'active',
+    rootPath: join(root, 'skills', 'mdxforge-mdx'),
+    types: ['writing'],
+    rules: [{ path: join(root, 'skills', 'mdxforge-mdx', 'SKILL.md'), content: '' }],
+    components: [],
+    permissions: ['Adds AI writing rules']
+  }
+}
+
+function displayPath(targetPath: string): string {
+  return targetPath.replace(/\\/g, '/')
+}
 export function ensurePreviewTargetDirectory(workspaceRoot: string, relativePath: string): string {
   const targetPath = resolve(workspaceRoot, relativePath)
   if (!isPathInside(workspaceRoot, targetPath))

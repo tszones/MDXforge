@@ -4,6 +4,9 @@ const { tmpdir } = require('node:os')
 const { join } = require('node:path')
 const jiti = require('jiti')
 
+const root = mkdtempSync(join(tmpdir(), 'mdxforge-skills-'))
+process.env.MDXFORGE_SKILLS_HOME = root
+
 const requireTs = jiti(__filename, { interopDefault: true })
 const { readWorkspaceSkills, createLocalSkill } = requireTs('../src/main/skills.ts')
 const { upsertManagedBlock, removeManagedBlock } = requireTs('../src/main/skills/managed-block.ts')
@@ -13,7 +16,6 @@ const { buildCanonicalRules, buildCompactAgentRules, buildCopyablePrompt } = req
   '../src/main/skills/rules.ts'
 )
 
-const root = mkdtempSync(join(tmpdir(), 'mdxforge-skills-'))
 const skillRoot = join(root, 'skills', 'demo')
 mkdirSync(skillRoot, { recursive: true })
 writeFileSync(join(root, 'mdxforge.config.json'), JSON.stringify({ skills: ['./skills/demo'] }))
@@ -62,7 +64,7 @@ assert.equal(upsertManagedBlock('<!-- mdxforge:managed:start -->', 'Rules').conf
 
 const claudePreview = previewAgentInstall(root, 'claude-code')
 assert.equal(claudePreview.kind, 'directory')
-assert.equal(claudePreview.relativePath, '.claude/skills/mdxforge-mdx')
+assert.equal(claudePreview.relativePath.replaceAll('\\\\', '/').endsWith('/.claude/skills/mdxforge-mdx'), true)
 assert.equal(claudePreview.action, 'create')
 assert.match(claudePreview.after, /SKILL\.md/)
 applyAgentInstall(root, 'claude-code')
@@ -84,7 +86,7 @@ applyAgentDisable(root, 'claude-code')
 assert.equal(existsSync(join(root, '.claude', 'skills', 'mdxforge-mdx', 'SKILL.md')), false)
 
 const cursorPreview = previewAgentInstall(root, 'cursor')
-assert.equal(cursorPreview.relativePath, '.cursor/skills/mdxforge-mdx')
+assert.equal(cursorPreview.relativePath.replaceAll('\\\\', '/').endsWith('/.cursor/skills/mdxforge-mdx'), true)
 assert.equal(cursorPreview.kind, 'directory')
 assert.equal(cursorPreview.action, 'create')
 applyAgentInstall(root, 'cursor')
@@ -94,19 +96,19 @@ assert.match(
 )
 
 const codexPreview = previewAgentInstall(root, 'codex')
-assert.equal(codexPreview.relativePath, '.codex/skills/mdxforge-mdx')
+assert.equal(codexPreview.relativePath.replaceAll('\\\\', '/').endsWith('/.agents/skills/mdxforge-mdx'), true)
 assert.equal(codexPreview.kind, 'directory')
 assert.equal(codexPreview.action, 'create')
 applyAgentInstall(root, 'codex')
 assert.match(
-  readFileSync(join(root, '.codex', 'skills', 'mdxforge-mdx', 'SKILL.md'), 'utf-8'),
+  readFileSync(join(root, '.agents', 'skills', 'mdxforge-mdx', 'SKILL.md'), 'utf-8'),
   /MDXForge MDX Skill/
 )
-assert.equal(existsSync(join(root, '.codex', 'skills', 'mdxforge-mdx', 'patterns')), true)
+assert.equal(existsSync(join(root, '.agents', 'skills', 'mdxforge-mdx', 'patterns')), true)
 
-const aiderPreview = previewAgentInstall(root, 'aider')
-assert.equal(aiderPreview.relativePath, '.aider/skills/mdxforge-mdx')
-assert.equal(aiderPreview.kind, 'directory')
-assert.equal(aiderPreview.action, 'create')
+const openclawPreview = previewAgentInstall(root, 'openclaw')
+assert.equal(openclawPreview.relativePath.replaceAll('\\\\', '/').endsWith('/.openclaw/skills/mdxforge/mdxforge-mdx'), true)
+assert.equal(openclawPreview.kind, 'directory')
+assert.equal(openclawPreview.action, 'create')
 
 console.log('skills tests passed')

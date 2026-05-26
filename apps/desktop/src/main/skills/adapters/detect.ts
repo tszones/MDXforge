@@ -1,16 +1,5 @@
-import { execFileSync } from 'child_process'
 import type { AgentDetectionResult, AgentId, AgentIntegrationMode } from '../types'
-
-export function commandExists(command: string): boolean {
-  const bin = process.platform === 'win32' ? 'where.exe' : 'command'
-  const args = process.platform === 'win32' ? [command] : ['-v', command]
-  try {
-    execFileSync(bin, args, { stdio: 'ignore', timeout: 1500 })
-    return true
-  } catch {
-    return false
-  }
-}
+import { commandExists } from './commands'
 
 export function detectCommandAgent(
   id: AgentId,
@@ -32,4 +21,17 @@ export function detectCommandAgent(
   }
 
   return { id, name, status: 'detected', integrationMode, command, targetPath: targetRelativePath }
+}
+
+export function detectOptionalCommandAgent(
+  id: AgentId,
+  name: string,
+  command: string | undefined,
+  integrationMode: AgentIntegrationMode,
+  targetRelativePath?: string
+): AgentDetectionResult {
+  if (!command) {
+    return { id, name, status: 'detected', integrationMode, targetPath: targetRelativePath }
+  }
+  return detectCommandAgent(id, name, command, integrationMode, targetRelativePath)
 }

@@ -141,13 +141,19 @@ export interface WorkspaceSkill {
   reason?: string
 }
 
-export type AgentId = 'claude-code' | 'cursor' | 'codex' | 'aider'
+export type AgentId = 'claude-code' | 'cursor' | 'codex'
+
+export type AgentIntegrationMode =
+  | 'managed-file'
+  | 'managed-directory'
+  | 'native-plugin'
+  | 'copy-only'
 
 export interface AgentDetectionResult {
   id: AgentId
   name: string
-  status: 'detected' | 'not-detected' | 'error'
-  integrationMode: 'managed-file' | 'copy-only'
+  status: 'detected' | 'not-detected' | 'installed' | 'error'
+  integrationMode: AgentIntegrationMode
   targetPath?: string
   command?: string
   reason?: string
@@ -155,9 +161,10 @@ export interface AgentDetectionResult {
 
 export interface AgentInstallPreview {
   agentId: AgentId
-  operation?: 'install' | 'disable'
+  operation: 'install' | 'disable'
   relativePath: string
-  action: 'create' | 'update' | 'copy' | 'conflict'
+  kind: 'file' | 'directory'
+  action: 'create' | 'update' | 'copy' | 'delete' | 'conflict'
   before: string
   after: string
   diff: string
@@ -243,6 +250,7 @@ export interface AppAPI {
   ) => Promise<WorkspaceSkillsState>
   copySkillRules: (rules: string) => Promise<void>
   detectAgents: () => Promise<AgentDetectionResult[]>
+  openAgentPath: (targetPath: string) => Promise<boolean>
   previewAgentInstall: (workspaceRoot: string, agentId: AgentId) => Promise<AgentInstallPreview>
   applyAgentInstall: (workspaceRoot: string, agentId: AgentId) => Promise<AgentInstallPreview>
   previewAgentDisable: (workspaceRoot: string, agentId: AgentId) => Promise<AgentInstallPreview>

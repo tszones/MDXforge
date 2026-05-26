@@ -1,0 +1,18 @@
+{
+  "name": "mdxforge",
+  "displayName": "MDXForge",
+  "description": "MDXForge authoring rules and components for AI-generated MDX docs",
+  "version": "0.1.0",
+  "author": {
+    "name": "MDXForge"
+  },
+  "homepage": "https://github.com/mdxforge/mdxforge",
+  "license": "MIT",
+  "keywords": [
+    "mdx",
+    "docs",
+    "skills",
+    "writing"
+  ],
+  "skills": "./skills/"
+}
