@@ -35,6 +35,7 @@ export function MdxDocsLayout(props: MdxDocsLayoutProps): React.JSX.Element {
 function MdxDocsLayoutInner({ toc, sidebar, children }: MdxDocsLayoutProps): React.JSX.Element {
   const { collapsed, setCollapsed } = useSidebar()
   const hasSidebar = Boolean(sidebar)
+  const hasToc = toc.length > 0
 
   return (
     <TOCProvider toc={toc}>
@@ -42,7 +43,8 @@ function MdxDocsLayoutInner({ toc, sidebar, children }: MdxDocsLayoutProps): Rea
         id="nd-docs-layout"
         data-sidebar-collapsed={collapsed}
         data-sidebar-visible={hasSidebar}
-        className="grid min-h-0 flex-1 overflow-x-clip overflow-y-hidden [--fd-docs-height:calc(100dvh-40px)] [--fd-docs-row-1:0px] [--fd-docs-row-2:0px] [--fd-docs-row-3:var(--fd-toc-popover-height)] [--fd-layout-width:97rem] [--fd-sidebar-width:0px] [--fd-toc-popover-height:0px] [--fd-toc-width:0px] data-[sidebar-visible=true]:md:[--fd-sidebar-width:268px] xl:[--fd-toc-width:268px] data-[column-changed=true]:transition-[grid-template-columns]"
+        data-toc-visible={hasToc}
+        className="grid min-h-0 flex-1 overflow-x-clip overflow-y-hidden [--fd-docs-height:calc(100dvh-40px)] [--fd-docs-row-1:0px] [--fd-docs-row-2:0px] [--fd-docs-row-3:var(--fd-toc-popover-height)] [--fd-layout-width:97rem] [--fd-sidebar-width:0px] [--fd-toc-popover-height:0px] [--fd-toc-width:0px] data-[sidebar-visible=true]:md:[--fd-sidebar-width:268px] data-[toc-visible=true]:xl:[--fd-toc-width:268px] data-[column-changed=true]:transition-[grid-template-columns]"
         style={
           {
             gridTemplate: `"sidebar sidebar header toc toc"
@@ -63,9 +65,9 @@ function MdxDocsLayoutInner({ toc, sidebar, children }: MdxDocsLayoutProps): Rea
               : sidebar}
           </MdxSidebarSlot>
         ) : null}
-        {toc.length > 0 ? <MdxTocPopover /> : null}
+        {hasToc ? <MdxTocPopover /> : null}
         {children}
-        {toc.length > 0 ? <MdxToc /> : null}
+        {hasToc ? <MdxToc /> : null}
       </div>
     </TOCProvider>
   )
