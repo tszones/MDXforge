@@ -281,19 +281,23 @@ export function MdxPreview({
   return (
     <MdxDocsLayout
       toc={toc}
-      sidebar={({ collapsed, collapseSidebar, expandSidebar }) => (
-        <PreviewSidebar
-          workspace={workspace}
-          onOpenFile={onOpenFile}
-          onOpenFolder={onOpenFolder}
-          onOpenPath={onOpenPath}
-          onRenamePath={onRenamePath}
-          opening={opening}
-          collapsed={collapsed}
-          onCollapseSidebar={collapseSidebar}
-          onExpandSidebar={expandSidebar}
-        />
-      )}
+      sidebar={
+        workspace.folder
+          ? ({ collapsed, collapseSidebar, expandSidebar }) => (
+              <PreviewSidebar
+                workspace={workspace}
+                onOpenFile={onOpenFile}
+                onOpenFolder={onOpenFolder}
+                onOpenPath={onOpenPath}
+                onRenamePath={onRenamePath}
+                opening={opening}
+                collapsed={collapsed}
+                onCollapseSidebar={collapseSidebar}
+                onExpandSidebar={expandSidebar}
+              />
+            )
+          : undefined
+      }
     >
       <MdxPageContainer onContextMenu={openDocumentContextMenu}>
         <DocsTitle>{title}</DocsTitle>

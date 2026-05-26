@@ -14,7 +14,7 @@ import { m } from '../paraglide/messages'
 
 interface MdxDocsLayoutProps {
   toc: TOCItemType[]
-  sidebar:
+  sidebar?:
     | ReactNode
     | ((state: {
         collapsed: boolean
@@ -34,31 +34,35 @@ export function MdxDocsLayout(props: MdxDocsLayoutProps): React.JSX.Element {
 
 function MdxDocsLayoutInner({ toc, sidebar, children }: MdxDocsLayoutProps): React.JSX.Element {
   const { collapsed, setCollapsed } = useSidebar()
+  const hasSidebar = Boolean(sidebar)
 
   return (
     <TOCProvider toc={toc}>
       <div
         id="nd-docs-layout"
         data-sidebar-collapsed={collapsed}
-        className="grid min-h-0 flex-1 overflow-x-clip overflow-y-hidden [--fd-docs-height:calc(100dvh-40px)] [--fd-docs-row-1:0px] [--fd-docs-row-2:0px] [--fd-docs-row-3:var(--fd-toc-popover-height)] [--fd-layout-width:97rem] [--fd-sidebar-width:0px] [--fd-toc-popover-height:0px] [--fd-toc-width:0px] md:[--fd-sidebar-width:268px] xl:[--fd-toc-width:268px] data-[column-changed=true]:transition-[grid-template-columns]"
+        data-sidebar-visible={hasSidebar}
+        className="grid min-h-0 flex-1 overflow-x-clip overflow-y-hidden [--fd-docs-height:calc(100dvh-40px)] [--fd-docs-row-1:0px] [--fd-docs-row-2:0px] [--fd-docs-row-3:var(--fd-toc-popover-height)] [--fd-layout-width:97rem] [--fd-sidebar-width:0px] [--fd-toc-popover-height:0px] [--fd-toc-width:0px] data-[sidebar-visible=true]:md:[--fd-sidebar-width:268px] xl:[--fd-toc-width:268px] data-[column-changed=true]:transition-[grid-template-columns]"
         style={
           {
             gridTemplate: `"sidebar sidebar header toc toc"
 "sidebar sidebar toc-popover toc toc"
 "sidebar sidebar main toc toc" 1fr / minmax(min-content, 1fr) var(--fd-sidebar-col) minmax(0, calc(var(--fd-layout-width) - var(--fd-sidebar-width) - var(--fd-toc-width))) var(--fd-toc-width) minmax(min-content, 1fr)`,
-            '--fd-sidebar-col': collapsed ? '0px' : 'var(--fd-sidebar-width)'
+            '--fd-sidebar-col': hasSidebar && collapsed ? '0px' : 'var(--fd-sidebar-width)'
           } as CSSProperties
         }
       >
-        <MdxSidebarSlot>
-          {typeof sidebar === 'function'
-            ? sidebar({
-                collapsed,
-                collapseSidebar: () => setCollapsed(true),
-                expandSidebar: () => setCollapsed(false)
-              })
-            : sidebar}
-        </MdxSidebarSlot>
+        {hasSidebar ? (
+          <MdxSidebarSlot>
+            {typeof sidebar === 'function'
+              ? sidebar({
+                  collapsed,
+                  collapseSidebar: () => setCollapsed(true),
+                  expandSidebar: () => setCollapsed(false)
+                })
+              : sidebar}
+          </MdxSidebarSlot>
+        ) : null}
         {toc.length > 0 ? <MdxTocPopover /> : null}
         {children}
         {toc.length > 0 ? <MdxToc /> : null}

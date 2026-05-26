@@ -26,6 +26,7 @@
   "extensions_trusted_mode_description": "Local workspace extension code is running in the document preview renderer.",
   "extensions_enable_workspace": "Enable workspace extensions",
   "extensions_disable": "Disable extensions",
+  "title_bar_file_menu": "File",
   "title_bar_back_to_preview": "Back to preview",
   "title_bar_settings": "Settings",
   "title_bar_minimize": "Minimize",

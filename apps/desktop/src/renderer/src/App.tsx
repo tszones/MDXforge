@@ -359,7 +359,10 @@ function AppContent({
       <WindowTitleBar
         inSettings={inSettingsRoute}
         colorMode={colorMode}
+        opening={loading}
         onBackToPreview={() => navigate('/')}
+        onOpenFile={() => void openFile()}
+        onOpenFolder={() => void openFolder()}
         onOpenSettings={() => navigate('/settings/language')}
         onToggleColorMode={() => onColorModeChange(colorMode === 'dark' ? 'light' : 'dark')}
       />

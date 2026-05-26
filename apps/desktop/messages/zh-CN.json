@@ -26,6 +26,7 @@
   "extensions_trusted_mode_description": "本地工作区扩展代码正在文档预览渲染进程中运行。",
   "extensions_enable_workspace": "启用工作区扩展",
   "extensions_disable": "停用扩展",
+  "title_bar_file_menu": "文件",
   "title_bar_back_to_preview": "返回预览",
   "title_bar_settings": "设置",
   "title_bar_minimize": "最小化",

@@ -1,5 +1,5 @@
 import { IconBrandGithub } from '@tabler/icons-react'
-import { ArrowLeft, Maximize2, Minus, Moon, Settings, Square, Sun, X } from 'lucide-react'
+import { ArrowLeft, ChevronDown, Maximize2, Minus, Moon, Settings, Square, Sun, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import appIcon from '../../../../resources/icon.png'
 import { m } from '../paraglide/messages'
@@ -9,21 +9,41 @@ const GITHUB_REPOSITORY_URL = 'https://github.com/tszones/MDXforge'
 export function WindowTitleBar({
   inSettings,
   colorMode,
+  opening,
   onBackToPreview,
+  onOpenFile,
+  onOpenFolder,
   onOpenSettings,
   onToggleColorMode
 }: {
   inSettings: boolean
   colorMode: 'light' | 'dark'
+  opening: boolean
   onBackToPreview: () => void
+  onOpenFile: () => void
+  onOpenFolder: () => void
   onOpenSettings: () => void
   onToggleColorMode: () => void
 }): React.JSX.Element {
   const [maximized, setMaximized] = useState(false)
+  const [fileMenuOpen, setFileMenuOpen] = useState(false)
 
   useEffect(() => {
     void window.api.isWindowMaximized().then(setMaximized)
   }, [])
+
+  useEffect(() => {
+    if (!fileMenuOpen) return
+    const close = (): void => setFileMenuOpen(false)
+    window.addEventListener('click', close)
+    window.addEventListener('keydown', close)
+    window.addEventListener('resize', close)
+    return () => {
+      window.removeEventListener('click', close)
+      window.removeEventListener('keydown', close)
+      window.removeEventListener('resize', close)
+    }
+  }, [fileMenuOpen])
 
   async function toggleMaximize(): Promise<void> {
     setMaximized(await window.api.maximizeWindow())
@@ -34,6 +54,42 @@ export function WindowTitleBar({
       <div className="flex min-w-0 flex-1 items-center gap-2 px-3 text-sm font-medium text-fd-muted-foreground">
         <img src={appIcon} alt="" className="size-4 shrink-0 rounded-sm" />
         <span className="truncate">MDXForge</span>
+        <div className="relative ml-2 [-webkit-app-region:no-drag]">
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation()
+              setFileMenuOpen((open) => !open)
+            }}
+            className="flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
+            aria-expanded={fileMenuOpen}
+          >
+            {m.title_bar_file_menu()}
+            <ChevronDown className="size-3.5" />
+          </button>
+          {fileMenuOpen ? (
+            <div className="absolute left-0 top-8 z-50 min-w-44 rounded-lg border bg-fd-popover p-1 text-sm text-fd-popover-foreground shadow-lg">
+              <FileMenuItem
+                disabled={opening}
+                onClick={() => {
+                  setFileMenuOpen(false)
+                  onOpenFile()
+                }}
+              >
+                {opening ? m.actions_opening() : m.actions_open_mdx_file()}
+              </FileMenuItem>
+              <FileMenuItem
+                disabled={opening}
+                onClick={() => {
+                  setFileMenuOpen(false)
+                  onOpenFolder()
+                }}
+              >
+                {m.actions_open_folder()}
+              </FileMenuItem>
+            </div>
+          ) : null}
+        </div>
       </div>
       <div className="flex h-full [-webkit-app-region:no-drag]">
         <TitleBarButton
@@ -77,6 +133,27 @@ export function WindowTitleBar({
         </TitleBarButton>
       </div>
     </header>
+  )
+}
+
+function FileMenuItem({
+  disabled,
+  onClick,
+  children
+}: {
+  disabled: boolean
+  onClick: () => void
+  children: React.ReactNode
+}): React.JSX.Element {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      className="block w-full rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground disabled:opacity-60"
+    >
+      {children}
+    </button>
   )
 }
 
