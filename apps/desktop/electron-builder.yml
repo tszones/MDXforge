@@ -75,5 +75,6 @@ publish:
   provider: github
   owner: tszones
   repo: MDXforge
+  releaseType: release
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
