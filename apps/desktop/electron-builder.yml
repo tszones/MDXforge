@@ -68,8 +68,7 @@ appImage:
   artifactName: mdxforge-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: github
-  owner: tszones
-  repo: MDXforge
+  provider: generic
+  url: https://github.com/tszones/MDXforge/releases/latest/download/
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
