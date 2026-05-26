@@ -35,7 +35,7 @@ jobs:
 
       - name: Install Linux deps
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libarchive-tools rpm
+        run: sudo apt-get update && sudo apt-get install -y libarchive-tools rpm python3-pil
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
