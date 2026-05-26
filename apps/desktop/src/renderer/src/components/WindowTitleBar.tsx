@@ -1,8 +1,21 @@
 import { IconBrandGithub } from '@tabler/icons-react'
-import { ArrowLeft, ChevronDown, Maximize2, Minus, Moon, Settings, Square, Sun, X } from 'lucide-react'
+import {
+  ArrowLeft,
+  ChevronDown,
+  Download,
+  Maximize2,
+  Minus,
+  Moon,
+  RefreshCw,
+  Settings,
+  Square,
+  Sun,
+  X
+} from 'lucide-react'
 import { useEffect, useState } from 'react'
 import appIcon from '../../../../resources/icon.png'
 import { m } from '../paraglide/messages'
+import type { UpdateState } from '../types'
 
 const GITHUB_REPOSITORY_URL = 'https://github.com/tszones/MDXforge'
 
@@ -27,9 +40,12 @@ export function WindowTitleBar({
 }): React.JSX.Element {
   const [maximized, setMaximized] = useState(false)
   const [fileMenuOpen, setFileMenuOpen] = useState(false)
+  const [updateState, setUpdateState] = useState<UpdateState>({ status: 'idle', version: '' })
 
   useEffect(() => {
     void window.api.isWindowMaximized().then(setMaximized)
+    void window.api.getUpdateState().then(setUpdateState)
+    return window.api.onUpdateState(setUpdateState)
   }, [])
 
   useEffect(() => {
@@ -48,6 +64,18 @@ export function WindowTitleBar({
   async function toggleMaximize(): Promise<void> {
     setMaximized(await window.api.maximizeWindow())
   }
+
+  async function handleUpdateClick(): Promise<void> {
+    if (updateState.status === 'downloaded') {
+      await window.api.quitAndInstallUpdate()
+      return
+    }
+
+    setUpdateState(await window.api.checkForUpdates())
+  }
+
+  const updateBusy = updateState.status === 'checking' || updateState.status === 'downloading'
+  const updateReady = updateState.status === 'downloaded'
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 flex h-10 select-none items-center border-b bg-fd-background/95 backdrop-blur supports-[backdrop-filter]:bg-fd-background/80 [-webkit-app-region:drag]">
@@ -93,6 +121,18 @@ export function WindowTitleBar({
       </div>
       <div className="flex h-full [-webkit-app-region:no-drag]">
         <TitleBarButton
+          label={getUpdateButtonLabel(updateState)}
+          active={updateReady}
+          onClick={() => void handleUpdateClick()}
+          disabled={updateBusy}
+        >
+          {updateReady ? (
+            <Download className="size-4" />
+          ) : (
+            <RefreshCw className={`size-4 ${updateBusy ? 'animate-spin' : ''}`} />
+          )}
+        </TitleBarButton>
+        <TitleBarButton
           label={m.title_bar_open_github()}
           onClick={() => window.open(GITHUB_REPOSITORY_URL, '_blank', 'noopener,noreferrer')}
         >
@@ -136,6 +176,15 @@ export function WindowTitleBar({
   )
 }
 
+function getUpdateButtonLabel(state: UpdateState): string {
+  if (state.status === 'checking') return m.settings_updates_checking()
+  if (state.status === 'downloading') {
+    return m.settings_updates_downloading({ percent: state.percent ?? 0 })
+  }
+  if (state.status === 'downloaded') return m.settings_updates_restart()
+  return m.settings_updates_check()
+}
+
 function FileMenuItem({
   disabled,
   onClick,
@@ -160,11 +209,15 @@ function FileMenuItem({
 function TitleBarButton({
   label,
   danger,
+  active,
+  disabled,
   onClick,
   children
 }: {
   label: string
   danger?: boolean
+  active?: boolean
+  disabled?: boolean
   onClick: () => void
   children: React.ReactNode
 }): React.JSX.Element {
@@ -174,8 +227,10 @@ function TitleBarButton({
       aria-label={label}
       title={label}
       onClick={onClick}
-      className="flex h-full w-11 items-center justify-center text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground data-[danger=true]:hover:bg-red-500 data-[danger=true]:hover:text-white"
+      disabled={disabled}
+      className="flex h-full w-11 items-center justify-center text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground disabled:opacity-60 data-[active=true]:text-fd-primary data-[danger=true]:hover:bg-red-500 data-[danger=true]:hover:text-white"
       data-danger={danger}
+      data-active={active}
     >
       {children}
     </button>
