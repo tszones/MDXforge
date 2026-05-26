@@ -66,9 +66,14 @@ linux:
   category: Utility
 appImage:
   artifactName: mdxforge-${version}.${ext}
+snap:
+  artifactName: mdxforge-${version}.${ext}
+deb:
+  artifactName: mdxforge-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://github.com/tszones/MDXforge/releases/latest/download/
+  provider: github
+  owner: tszones
+  repo: MDXforge
 electronDownload:
   mirror: https://npmmirror.com/mirrors/electron/
