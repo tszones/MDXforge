@@ -1,17 +1,18 @@
 name: deploy web
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'apps/web/**'
-      - 'packages/ui/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - 'pnpm-workspace.yaml'
-      - 'turbo.json'
-      - '.github/workflows/deploy-web.yml'
+  # Disabled temporarily. Re-enable to auto-deploy web on main pushes.
+  # push:
+  #   branches:
+  #     - main
+  #   paths:
+  #     - 'apps/web/**'
+  #     - 'packages/ui/**'
+  #     - 'package.json'
+  #     - 'pnpm-lock.yaml'
+  #     - 'pnpm-workspace.yaml'
+  #     - 'turbo.json'
+  #     - '.github/workflows/deploy-web.yml'
   workflow_dispatch:
 
 concurrency:
