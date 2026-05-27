@@ -15,6 +15,7 @@
 | `/release-tag [version\|vX.Y.Z]` | `auto-release-tag.ts` | 基于指定版本或根 `package.json` 版本创建并推送 Git tag |
 | `/release-bump [patch\|minor\|major]` | `auto-release-tag.ts` | 升级 workspace package 版本、commit、tag、推送 branch + tag；默认 `patch` |
 | `/line-check` | `file-line-guard.ts` | 手动检查源码是否超过 500 行限制 |
+| `/memory-status` | `project-memory.ts` | 查看项目记忆文件状态 |
 
 ## 自动行为
 
@@ -22,6 +23,7 @@
 | --- | --- | --- |
 | `biome-lint.ts` | AI 当前 turn 使用 `write` / `edit` 修改文件后 | 执行 `biome check --write .`；仍有问题时弹出警告 |
 | `file-line-guard.ts` | 每条 assistant 消息完成后 | 执行 `node scripts/check-file-lines.cjs`；存在超 500 行源码时弹出警告 |
+| `project-memory.ts` | 每次 AI 回复完成后 | 从本轮对话提取值得长期保留的信息，追加到 `.pi/memory/project-memory.md`；下轮自动注入上下文 |
 
 ---
 
@@ -233,6 +235,34 @@ node_modules/.bin/biome check --write .
 - 仍无法修复的问题会通过 Pi warning 提醒。
 
 注意：AI 修改后，文件可能因自动格式化产生额外 diff。
+
+---
+
+## 项目 Memory 自动提取
+
+文件：`project-memory.ts`
+
+每次 AI 处理完一条用户消息后，会调用当前模型抽取长期有价值的信息，并写入：
+
+```txt
+.pi/memory/project-memory.md
+```
+
+抽取范围：用户偏好、项目决策、约定、约束、踩坑、后续 TODO。会跳过临时输出、闲聊、重复内容、密钥/Token。
+
+后续每轮开始前，会把该 memory 文件尾部自动注入 system prompt，作为项目级长期上下文。
+
+手动状态检查：
+
+```txt
+/memory-status
+```
+
+修改 extension 后执行：
+
+```txt
+/reload
+```
 
 ---
 
