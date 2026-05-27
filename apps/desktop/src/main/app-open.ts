@@ -1,6 +1,7 @@
 import type { BrowserWindow } from 'electron'
 import { type FSWatcher, watch } from 'fs'
 import { resolve } from 'path'
+import { IpcChannels } from '../shared/ipc'
 import type { WorkspaceExtensionManifest } from './extensions'
 import { readMdxWorkspace, resolveMdxTarget, setLastOpenPath } from './mdx'
 
@@ -35,10 +36,10 @@ export async function openMdxPath(
     setManifest(workspace.extensions ?? null)
     setLastOpenPath(workspace.file.path)
     watchMdxWorkspace(filePath, workspace.folder?.rootPath, window, setManifest)
-    window.webContents.send('mdx:file-opened', workspace)
+    window.webContents.send(IpcChannels.mdx.fileOpened, workspace)
   } catch (cause) {
     window.webContents.send(
-      'mdx:file-open-error',
+      IpcChannels.mdx.fileOpenError,
       cause instanceof Error ? cause.message : String(cause)
     )
   }
@@ -91,10 +92,10 @@ async function reloadWatchedMdxWorkspace(): Promise<void> {
   try {
     const workspace = await readMdxWorkspace(watchedOpenedPath, watchedWorkspaceRoot)
     setCurrentExtensionManifest(workspace.extensions ?? null)
-    notifyWindow.webContents.send('mdx:file-changed', workspace)
+    notifyWindow.webContents.send(IpcChannels.mdx.fileChanged, workspace)
   } catch (cause) {
     notifyWindow.webContents.send(
-      'mdx:file-change-error',
+      IpcChannels.mdx.fileChangeError,
       cause instanceof Error ? cause.message : String(cause)
     )
   }

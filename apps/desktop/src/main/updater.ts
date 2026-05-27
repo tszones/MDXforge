@@ -1,5 +1,6 @@
 import { app, type BrowserWindow, ipcMain } from 'electron'
 import { autoUpdater, type UpdateInfo } from 'electron-updater'
+import { IpcChannels } from '../shared/ipc'
 import { mainMessage } from './i18n'
 
 export type UpdateStatus =
@@ -34,7 +35,7 @@ function publish(next: Partial<UpdateState>, window: BrowserWindow | null): Upda
     ...next,
     version: app.getVersion()
   }
-  window?.webContents.send('update:state', state)
+  window?.webContents.send(IpcChannels.update.state, state)
   return state
 }
 
@@ -101,8 +102,8 @@ export function registerUpdaterIpc(getWindow: () => BrowserWindow | null): void 
     publish({ status: 'error', message: toMessage(error), percent: undefined }, getWindow())
   })
 
-  ipcMain.handle('update:get-state', () => state)
-  ipcMain.handle('update:check', async () => {
+  ipcMain.handle(IpcChannels.update.getState, () => state)
+  ipcMain.handle(IpcChannels.update.check, async () => {
     if (!app.isPackaged) {
       return publish(
         {
@@ -123,7 +124,7 @@ export function registerUpdaterIpc(getWindow: () => BrowserWindow | null): void 
 
     return state
   })
-  ipcMain.handle('update:quit-and-install', () => {
+  ipcMain.handle(IpcChannels.update.quitAndInstall, () => {
     autoUpdater.quitAndInstall(false, true)
   })
 }

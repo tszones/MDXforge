@@ -1,4 +1,5 @@
 import { app, type BrowserWindow, clipboard, dialog, ipcMain, shell } from 'electron'
+import { IpcChannels } from '../shared/ipc'
 import { type SetExtensionManifest, watchMdxWorkspace } from './app-open'
 import { getWorkspaceExtensionTrustKey, type WorkspaceExtensionManifest } from './extensions'
 import { mainMessage } from './i18n'
@@ -33,16 +34,16 @@ export function registerAppIpc(options: {
   const getCurrentExtensionManifest = options.getCurrentExtensionManifest
   let workspaceExtensionsEnabled = false
   ipcMain.on('ping', () => console.log('pong'))
-  ipcMain.handle('window:minimize', () => getMainWindow()?.minimize())
-  ipcMain.handle('window:maximize', () => {
+  ipcMain.handle(IpcChannels.window.minimize, () => getMainWindow()?.minimize())
+  ipcMain.handle(IpcChannels.window.maximize, () => {
     if (!getMainWindow()) return false
     if (getMainWindow()?.isMaximized()) getMainWindow()?.unmaximize()
     else getMainWindow()?.maximize()
     return getMainWindow()?.isMaximized() ?? false
   })
-  ipcMain.handle('window:close', () => getMainWindow()?.close())
-  ipcMain.handle('window:is-maximized', () => getMainWindow()?.isMaximized() ?? false)
-  ipcMain.handle('mdx:open-file', async () => {
+  ipcMain.handle(IpcChannels.window.close, () => getMainWindow()?.close())
+  ipcMain.handle(IpcChannels.window.isMaximized, () => getMainWindow()?.isMaximized() ?? false)
+  ipcMain.handle(IpcChannels.mdx.openFile, async () => {
     const workspace = await openMdxFile()
     if (workspace) {
       const mainWindow = getMainWindow()
@@ -57,7 +58,7 @@ export function registerAppIpc(options: {
     }
     return workspace
   })
-  ipcMain.handle('mdx:open-folder', async () => {
+  ipcMain.handle(IpcChannels.mdx.openFolder, async () => {
     const workspace = await openMdxFolder()
     if (workspace) {
       const mainWindow = getMainWindow()
@@ -72,7 +73,7 @@ export function registerAppIpc(options: {
     }
     return workspace
   })
-  ipcMain.handle('mdx:open-path', async (_, filePath: string, workspaceRoot?: string) => {
+  ipcMain.handle(IpcChannels.mdx.openPath, async (_, filePath: string, workspaceRoot?: string) => {
     const workspace = await readMdxWorkspace(filePath, workspaceRoot)
     setCurrentExtensionManifest(workspace.extensions ?? null)
     const mainWindow = getMainWindow()
@@ -87,7 +88,7 @@ export function registerAppIpc(options: {
     return workspace
   })
   ipcMain.handle(
-    'mdx:rename-path',
+    IpcChannels.mdx.renamePath,
     async (_, targetPath: string, nextName: string, workspaceRoot?: string) => {
       const workspace = await renameMdxPath(targetPath, nextName, workspaceRoot)
       setCurrentExtensionManifest(workspace.extensions ?? null)
@@ -103,23 +104,26 @@ export function registerAppIpc(options: {
       return workspace
     }
   )
-  ipcMain.handle('mdx:delete-path', async (_, targetPath: string, workspaceRoot?: string) => {
-    const result = await dialog.showMessageBox({
-      type: 'warning',
-      buttons: [mainMessage('dialog_delete_confirm'), mainMessage('dialog_delete_cancel')],
-      defaultId: 1,
-      cancelId: 1,
-      title: mainMessage('dialog_delete_title'),
-      message: mainMessage('dialog_delete_message', { filePath: targetPath })
-    })
-    if (result.response !== 0) return null
-
-    const workspace = await deleteMdxPath(targetPath, workspaceRoot)
-    setCurrentExtensionManifest(workspace?.extensions ?? null)
-    return workspace
-  })
   ipcMain.handle(
-    'mdx:set-workspace-extensions-enabled',
+    IpcChannels.mdx.deletePath,
+    async (_, targetPath: string, workspaceRoot?: string) => {
+      const result = await dialog.showMessageBox({
+        type: 'warning',
+        buttons: [mainMessage('dialog_delete_confirm'), mainMessage('dialog_delete_cancel')],
+        defaultId: 1,
+        cancelId: 1,
+        title: mainMessage('dialog_delete_title'),
+        message: mainMessage('dialog_delete_message', { filePath: targetPath })
+      })
+      if (result.response !== 0) return null
+
+      const workspace = await deleteMdxPath(targetPath, workspaceRoot)
+      setCurrentExtensionManifest(workspace?.extensions ?? null)
+      return workspace
+    }
+  )
+  ipcMain.handle(
+    IpcChannels.mdx.setWorkspaceExtensionsEnabled,
     (_, enabled: boolean, trustKey?: string) => {
       const currentExtensionManifest = getCurrentExtensionManifest()
       const currentTrustKey = currentExtensionManifest
@@ -130,63 +134,75 @@ export function registerAppIpc(options: {
       return workspaceExtensionsEnabled
     }
   )
-  ipcMain.handle('mdx:copy-raw-source', (_, filePath: string) => {
+  ipcMain.handle(IpcChannels.mdx.copyRawSource, (_, filePath: string) => {
     clipboard.writeText(readMdxRawSource(filePath))
   })
-  ipcMain.handle('mdx:copy-path', (_, filePath: string) => {
+  ipcMain.handle(IpcChannels.mdx.copyPath, (_, filePath: string) => {
     clipboard.writeText(filePath)
   })
-  ipcMain.handle('mdx:show-in-folder', (_, filePath: string) => {
+  ipcMain.handle(IpcChannels.mdx.showInFolder, (_, filePath: string) => {
     if (!filePath) return false
     shell.showItemInFolder(filePath)
     return true
   })
-  ipcMain.handle('mdx:open-in-vscode', async (_, filePath: string) => {
+  ipcMain.handle(IpcChannels.mdx.openInVsCode, async (_, filePath: string) => {
     if (!filePath) return false
     await shell.openExternal(`vscode://file/${toVsCodeFilePath(filePath)}`)
     return true
   })
-  ipcMain.handle('mdx:search-workspace', async (_, workspaceRoot: string, query: string) => {
-    const folder = readMdxFolder(workspaceRoot)
-    return searchMdxWorkspaceFiles(folder.files, query)
-  })
-  ipcMain.handle('skills:get-workspace', (_, workspaceRoot: string) =>
+  ipcMain.handle(
+    IpcChannels.mdx.searchWorkspace,
+    async (_, workspaceRoot: string, query: string) => {
+      const folder = readMdxFolder(workspaceRoot)
+      return searchMdxWorkspaceFiles(folder.files, query)
+    }
+  )
+  ipcMain.handle(IpcChannels.skills.getWorkspace, (_, workspaceRoot: string) =>
     readWorkspaceSkills(workspaceRoot)
   )
-  ipcMain.handle('skills:add-local-folder', async (_, workspaceRoot: string) =>
+  ipcMain.handle(IpcChannels.skills.addLocalFolder, async (_, workspaceRoot: string) =>
     addLocalSkillFolder(workspaceRoot)
   )
-  ipcMain.handle('skills:create-local', (_, workspaceRoot: string, name: string, type: SkillType) =>
-    createLocalSkill(workspaceRoot, name, type)
+  ipcMain.handle(
+    IpcChannels.skills.createLocal,
+    (_, workspaceRoot: string, name: string, type: SkillType) =>
+      createLocalSkill(workspaceRoot, name, type)
   )
-  ipcMain.handle('skills:copy-rules', (_, rules: string) => {
+  ipcMain.handle(IpcChannels.skills.copyRules, (_, rules: string) => {
     clipboard.writeText(rules)
   })
-  ipcMain.handle('skills:detect-agents', () => detectAgents())
-  ipcMain.handle('skills:open-agent-path', async (_, targetPath: string) => {
+  ipcMain.handle(IpcChannels.skills.detectAgents, () => detectAgents())
+  ipcMain.handle(IpcChannels.skills.openAgentPath, async (_, targetPath: string) => {
     if (!targetPath) return false
     await shell.openPath(targetPath)
     return true
   })
-  ipcMain.handle('skills:preview-agent-install', (_, workspaceRoot: string, agentId: AgentId) =>
-    previewAgentInstall(workspaceRoot, agentId)
+  ipcMain.handle(
+    IpcChannels.skills.previewAgentInstall,
+    (_, workspaceRoot: string, agentId: AgentId) => previewAgentInstall(workspaceRoot, agentId)
   )
-  ipcMain.handle('skills:apply-agent-install', (_, workspaceRoot: string, agentId: AgentId) =>
-    applyAgentInstall(workspaceRoot, agentId)
+  ipcMain.handle(
+    IpcChannels.skills.applyAgentInstall,
+    (_, workspaceRoot: string, agentId: AgentId) => applyAgentInstall(workspaceRoot, agentId)
   )
-  ipcMain.handle('skills:preview-agent-disable', (_, workspaceRoot: string, agentId: AgentId) =>
-    previewAgentDisable(workspaceRoot, agentId)
+  ipcMain.handle(
+    IpcChannels.skills.previewAgentDisable,
+    (_, workspaceRoot: string, agentId: AgentId) => previewAgentDisable(workspaceRoot, agentId)
   )
-  ipcMain.handle('skills:apply-agent-disable', (_, workspaceRoot: string, agentId: AgentId) =>
-    applyAgentDisable(workspaceRoot, agentId)
+  ipcMain.handle(
+    IpcChannels.skills.applyAgentDisable,
+    (_, workspaceRoot: string, agentId: AgentId) => applyAgentDisable(workspaceRoot, agentId)
   )
-  ipcMain.handle('skills:disable-agent-install', (_, workspaceRoot: string, agentId: AgentId) =>
-    applyAgentDisable(workspaceRoot, agentId)
+  ipcMain.handle(
+    IpcChannels.skills.disableAgentInstall,
+    (_, workspaceRoot: string, agentId: AgentId) => applyAgentDisable(workspaceRoot, agentId)
   )
-  ipcMain.handle('mdx:register-default-app', () => app.setAsDefaultProtocolClient('mdx'))
-  ipcMain.handle('mdx:is-default-app', () => app.isDefaultProtocolClient('mdx'))
-  ipcMain.handle('settings:get', () => getAppSettings())
-  ipcMain.handle('settings:set', (_, settings: Partial<AppSettings>) => setAppSettings(settings))
+  ipcMain.handle(IpcChannels.mdx.registerDefaultApp, () => app.setAsDefaultProtocolClient('mdx'))
+  ipcMain.handle(IpcChannels.mdx.isDefaultApp, () => app.isDefaultProtocolClient('mdx'))
+  ipcMain.handle(IpcChannels.settings.get, () => getAppSettings())
+  ipcMain.handle(IpcChannels.settings.set, (_, settings: Partial<AppSettings>) =>
+    setAppSettings(settings)
+  )
 }
 
 function toVsCodeFilePath(filePath: string): string {

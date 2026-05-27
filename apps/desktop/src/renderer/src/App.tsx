@@ -5,11 +5,11 @@ import { MdxPreview } from './components/MdxPreview'
 import { SearchOverlay } from './components/SearchOverlay'
 import { SettingsPage, type SettingsRoute } from './components/SettingsPage'
 import { WindowTitleBar } from './components/WindowTitleBar'
+import { useAppSettings } from './hooks/useAppSettings'
+import { useWorkspaceActions } from './hooks/useWorkspaceActions'
 import { appHotkeys } from './lib/hotkeys'
 import type { ColorMode, FumadocsThemeName } from './lib/theme'
 import { m } from './paraglide/messages'
-import { useAppSettings } from './hooks/useAppSettings'
-import { useWorkspaceActions } from './hooks/useWorkspaceActions'
 import type { AppFontName, AppLanguage } from './types'
 
 function App(): React.JSX.Element {
