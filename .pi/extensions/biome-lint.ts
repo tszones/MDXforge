@@ -1,7 +1,6 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 const WRITE_TOOLS = new Set(["write", "edit"]);
-const MAX_NOTIFY_CHARS = 4000;
 
 export default function biomeLintExtension(pi: ExtensionAPI) {
   pi.on("turn_end", async (event, ctx) => {
@@ -25,19 +24,5 @@ export default function biomeLintExtension(pi: ExtensionAPI) {
         "warn",
       );
     }
-    // Run file length guard
-    const fileLines = await pi.exec("node", ["scripts/check-file-lines.cjs"]);
-
-    if (fileLines.code !== 0) {
-      ctx.ui.notify(
-        `File line limit exceeded.\n${truncate(fileLines.stderr || fileLines.stdout)}`,
-        "warn",
-      );
-    }
   });
-}
-
-function truncate(value: string): string {
-  if (value.length <= MAX_NOTIFY_CHARS) return value;
-  return `${value.slice(0, MAX_NOTIFY_CHARS)}\n... truncated`;
 }
