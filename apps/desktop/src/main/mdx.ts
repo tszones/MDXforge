@@ -15,6 +15,7 @@ import { readWorkspaceExtensionManifest, type WorkspaceExtensionManifest } from 
 import { mainMessage } from './i18n'
 import { remarkLocalImages } from './local-images'
 import { getMDXForgeRehypePlugins, getMDXForgeRemarkPlugins } from './mdx-options'
+import { findMdxCompileDiagnostic } from './mdx-diagnostics'
 import { readMdxRawSource } from './mdx-raw-source'
 import {
   type MdxFolder,
@@ -214,7 +215,7 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
       frontmatter: {},
       content: raw,
       compiledSource: '',
-      compileError: formatMdxError(cause),
+      compileError: formatMdxError(cause, raw),
       raw
     }
   }
@@ -238,15 +239,28 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
       frontmatter: parsed.data,
       content: parsed.content,
       compiledSource: '',
-      compileError: formatMdxError(cause),
+      compileError: formatMdxError(cause, parsed.content),
       raw
     }
   }
 }
 
-function formatMdxError(cause: unknown): string {
+function formatMdxError(cause: unknown, source?: string): string {
   const message = cause instanceof Error ? cause.message : String(cause)
-  return mainMessage('error_mdx_compile', { message })
+  const diagnostic = source ? findMdxCompileDiagnostic(source) : null
+  const suggestion = diagnostic
+    ? `\n\n${mainMessage('error_mdx_compile_location', {
+        line: diagnostic.line,
+        column: diagnostic.column,
+        snippet: diagnostic.snippet
+      })}\n${mainMessage(
+        diagnostic.kind === 'html-comment'
+          ? 'error_mdx_compile_html_comment_hint'
+          : 'error_mdx_compile_html_declaration_hint'
+      )}`
+    : ''
+
+  return mainMessage('error_mdx_compile', { message: `${message}${suggestion}` })
 }
 
 async function compileMdxSource(
