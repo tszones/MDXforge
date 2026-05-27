@@ -10,7 +10,7 @@ import {
   writeFileSync
 } from 'fs'
 import matter from 'gray-matter'
-import { dirname, isAbsolute, join, relative, resolve } from 'path'
+import { dirname, extname, isAbsolute, join, relative, resolve } from 'path'
 import { readWorkspaceExtensionManifest, type WorkspaceExtensionManifest } from './extensions'
 import { mainMessage } from './i18n'
 import { remarkLocalImages } from './local-images'
@@ -66,12 +66,16 @@ export function setLastOpenPath(filePath: string): void {
 export interface MdxFile {
   path: string
   name: string
+  kind: MdxFileKind
   frontmatter: Record<string, unknown>
   content: string
   compiledSource: string
   compileError?: string
   raw: string
 }
+
+export type MdxFolderKind = 'markdown' | 'html' | 'pdf' | 'unsupported'
+export type MdxFileKind = MdxFolderKind
 
 export type { MdxFolder, MdxFolderEntry, MdxFolderTreeNode }
 
@@ -87,7 +91,7 @@ export async function openMdxFile(): Promise<MdxWorkspace | null> {
     defaultPath: getLastOpenPath(),
     properties: ['openFile'],
     filters: [
-      { name: mainMessage('dialog_filter_mdx_markdown'), extensions: ['mdx', 'md'] },
+      { name: mainMessage('dialog_filter_mdx_markdown'), extensions: ['mdx', 'md', 'html', 'htm', 'pdf'] },
       { name: mainMessage('dialog_filter_all_files'), extensions: ['*'] }
     ]
   })
@@ -212,7 +216,21 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
   const resolvedPath = resolveMdxTarget(filePath)
   if (!resolvedPath) throw new Error(mainMessage('error_no_mdx_found', { filePath }))
 
+  const fileKind = getMdxFileKind(resolvedPath)
   const raw = readMdxRawSource(resolvedPath)
+
+  if (fileKind !== 'markdown') {
+    return {
+      path: resolvedPath,
+      name: resolvedPath.split(/[\\/]/).pop() ?? resolvedPath,
+      kind: fileKind,
+      frontmatter: {},
+      content: raw,
+      compiledSource: '',
+      raw
+    }
+  }
+
   let parsed: matter.GrayMatterFile<string>
 
   try {
@@ -221,6 +239,7 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
     return {
       path: resolvedPath,
       name: resolvedPath.split(/[\\/]/).pop() ?? resolvedPath,
+      kind: fileKind,
       frontmatter: {},
       content: raw,
       compiledSource: '',
@@ -233,6 +252,7 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
     return {
       path: resolvedPath,
       name: resolvedPath.split(/[\\/]/).pop() ?? resolvedPath,
+      kind: fileKind,
       frontmatter: parsed.data,
       content: parsed.content,
       compiledSource: await compileMdxSource(parsed.content, {
@@ -245,6 +265,7 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
     return {
       path: resolvedPath,
       name: resolvedPath.split(/[\\/]/).pop() ?? resolvedPath,
+      kind: fileKind,
       frontmatter: parsed.data,
       content: parsed.content,
       compiledSource: '',
@@ -252,6 +273,14 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
       raw
     }
   }
+}
+
+function getMdxFileKind(filePath: string): MdxFileKind {
+  const extension = extname(filePath).toLowerCase()
+  if (extension === '.md' || extension === '.mdx') return 'markdown'
+  if (extension === '.html' || extension === '.htm') return 'html'
+  if (extension === '.pdf') return 'pdf'
+  return 'unsupported'
 }
 
 function formatMdxError(cause: unknown, source?: string): string {

@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, statSync } from 'fs'
 import matter from 'gray-matter'
-import { join } from 'path'
+import { extname, join } from 'path'
 import type { MetaFile, PageFile } from './page-tree-types'
 
 export function readMetaFile(folderPath: string): MetaFile {
@@ -18,6 +18,8 @@ export function readMetaFile(folderPath: string): MetaFile {
 export function readMdxMetadata(
   filePath: string
 ): Pick<PageFile, 'title' | 'description' | 'icon'> {
+  if (!['.md', '.mdx'].includes(extname(filePath).toLowerCase())) return {}
+
   try {
     const parsed = matter(readFileSync(filePath, 'utf-8'))
     return {

@@ -7,7 +7,7 @@ import { Component, useEffect, useMemo, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
 import { toast } from 'sonner'
 import { m } from '../paraglide/messages'
-import type { MdxDocumentBacklink, MdxFolderEntry, MdxWorkspace } from '../types'
+import type { MdxDocumentBacklink, MdxFileKind, MdxFolderEntry, MdxWorkspace } from '../types'
 import { MdxDocsLayout, MdxPageContainer } from './MdxDocsLayout'
 import { getMDXComponents } from './mdx'
 import {
@@ -92,6 +92,7 @@ export function MdxPreview({
   opening
 }: MdxPreviewProps): React.JSX.Element {
   const file = workspace.file
+  const isMarkdownDocument = file.kind === 'markdown'
   const extensionPackages = workspace.extensions?.packages ?? []
   const extensionWarnings = workspace.extensions?.warnings ?? []
   const extensionPackageSnapshot = serializeExtensionLoadPackages(extensionPackages)
@@ -205,7 +206,7 @@ export function MdxPreview({
       setCompileError(file.compileError ?? null)
       setRenderError(null)
 
-      if (file.compileError) return
+      if (file.compileError || !isMarkdownDocument) return
 
       try {
         const fn = new Function(file.compiledSource)
@@ -222,7 +223,7 @@ export function MdxPreview({
     return () => {
       canceled = true
     }
-  }, [file.compiledSource, file.compileError])
+  }, [file.compiledSource, file.compileError, isMarkdownDocument])
 
   if (copiedFilePath !== file.path) {
     setCopiedFilePath(file.path)
@@ -327,7 +328,7 @@ export function MdxPreview({
           onCopyDocumentPath={() => void copyDocumentPath()}
         />
 
-        {hasExtensionPackages || extensionWarnings.length > 0 ? (
+        {isMarkdownDocument && (hasExtensionPackages || extensionWarnings.length > 0) ? (
           <ExtensionSafetyNotice
             enabled={extensionsEnabled}
             packages={extensionPackages}
@@ -338,19 +339,21 @@ export function MdxPreview({
           />
         ) : null}
 
-        {compileError || renderError ? (
+        {isMarkdownDocument && (compileError || renderError) ? (
           <pre className="overflow-auto rounded-md border bg-fd-error/10 p-4 text-sm text-fd-error">
             {compileError ?? renderError}
           </pre>
         ) : null}
 
-        {Mdx && !compileError ? (
+        {isMarkdownDocument && Mdx && !compileError ? (
           <MdxRenderBoundary sourceKey={renderSourceKey} onError={setRenderError}>
             <DocsBody className="mdxforge-mdx max-w-none text-fd-foreground/90 dark:prose-invert">
               <Mdx components={mdxComponents} />
             </DocsBody>
           </MdxRenderBoundary>
         ) : null}
+
+        {!isMarkdownDocument ? <UnsupportedDocumentPlaceholder kind={file.kind} /> : null}
 
         {currentEntry && currentEntry.backlinks.length > 0 ? (
           <Backlinks
@@ -389,6 +392,34 @@ export function MdxPreview({
       </MdxPageContainer>
     </MdxDocsLayout>
   )
+}
+
+function UnsupportedDocumentPlaceholder({ kind }: { kind: MdxFileKind }): React.JSX.Element {
+  return (
+    <section className="rounded-xl border bg-fd-card p-6 text-sm">
+      <div className="flex items-start gap-3">
+        <FileText className="mt-0.5 size-5 shrink-0 text-fd-primary" />
+        <div className="min-w-0">
+          <h2 className="font-medium text-fd-foreground">
+            {m.preview_unsupported_document_title()}
+          </h2>
+          <p className="mt-1 text-fd-muted-foreground">
+            {m.preview_unsupported_document_description({ kind: kindLabel(kind) })}
+          </p>
+          <p className="mt-3 text-xs text-fd-muted-foreground">
+            {m.preview_unsupported_document_hint()}
+          </p>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function kindLabel(kind: MdxFileKind): string {
+  if (kind === 'html') return 'HTML'
+  if (kind === 'pdf') return 'PDF'
+  if (kind === 'markdown') return 'MDX/Markdown'
+  return kind
 }
 
 function DocumentLink({

@@ -29,9 +29,12 @@ export type AppColorMode = 'light' | 'dark'
 
 export { defaultViewableDocumentExtensions, normalizeDocumentExtension } from '../../shared/viewable-documents'
 
+export type MdxFileKind = 'markdown' | 'html' | 'pdf' | 'unsupported'
+
 export interface MdxFile {
   path: string
   name: string
+  kind: MdxFileKind
   frontmatter: Record<string, unknown>
   content: string
   compiledSource: string

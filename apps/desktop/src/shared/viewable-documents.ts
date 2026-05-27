@@ -1,6 +1,6 @@
 import { extname } from 'path'
 
-export const defaultViewableDocumentExtensions = ['.md', '.mdx'] as const
+export const defaultViewableDocumentExtensions = ['.md', '.mdx', '.html', '.htm', '.pdf'] as const
 
 export function normalizeDocumentExtension(value: string): string | null {
   const trimmed = value.trim().toLowerCase()

@@ -1,6 +1,9 @@
+export type MdxFileKind = 'markdown' | 'html' | 'pdf' | 'unsupported'
+
 export interface MdxFile {
   path: string
   name: string
+  kind: MdxFileKind
   frontmatter: Record<string, unknown>
   content: string
   compiledSource: string
