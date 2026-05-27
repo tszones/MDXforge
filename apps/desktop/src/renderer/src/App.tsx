@@ -1,112 +1,30 @@
 import { useHotkeys } from '@tanstack/react-hotkeys'
-import { useEffect, useState } from 'react'
 import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router'
 import { FindInPageBar } from './components/FindInPageBar'
 import { MdxPreview } from './components/MdxPreview'
 import { SearchOverlay } from './components/SearchOverlay'
 import { SettingsPage, type SettingsRoute } from './components/SettingsPage'
 import { WindowTitleBar } from './components/WindowTitleBar'
-import { applyAppFont, normalizeStoredFont } from './lib/font'
 import { appHotkeys } from './lib/hotkeys'
-import { applyLanguage, normalizeStoredLanguage } from './lib/language'
-import {
-  applyFumadocsTheme,
-  type ColorMode,
-  type FumadocsThemeName,
-  isFumadocsThemeName
-} from './lib/theme'
+import type { ColorMode, FumadocsThemeName } from './lib/theme'
 import { m } from './paraglide/messages'
-import type { AppFontName, AppLanguage, AppSettings, MdxWorkspace } from './types'
-import { defaultViewableDocumentExtensions } from './types'
-
-export function readInitialSettings(): Partial<AppSettings> {
-  const settings = window.api.getInitialSettings()
-  if (!settings || typeof settings !== 'object') return {}
-  return settings as Partial<AppSettings>
-}
+import { useAppSettings } from './hooks/useAppSettings'
+import { useWorkspaceActions } from './hooks/useWorkspaceActions'
+import type { AppFontName, AppLanguage } from './types'
 
 function App(): React.JSX.Element {
-  const initialSettings = readInitialSettings()
-  const [theme, setThemeState] = useState<FumadocsThemeName>(() =>
-    typeof initialSettings.theme === 'string' && isFumadocsThemeName(initialSettings.theme)
-      ? initialSettings.theme
-      : 'purple'
-  )
-  const [colorMode, setColorModeState] = useState<ColorMode>(() =>
-    initialSettings.colorMode === 'light' ? 'light' : 'dark'
-  )
-  const [language, setLanguageState] = useState<AppLanguage>(() =>
-    normalizeStoredLanguage(initialSettings.language)
-  )
-  const [font, setFontState] = useState<AppFontName>(() =>
-    normalizeStoredFont(initialSettings.font)
-  )
-  const [viewableDocumentExtensions, setViewableDocumentExtensionsState] = useState<string[]>(() =>
-    Array.isArray(initialSettings.viewableDocumentExtensions)
-      ? initialSettings.viewableDocumentExtensions
-      : [...defaultViewableDocumentExtensions]
-  )
-  const [, rerenderForLocaleChange] = useState(0)
-
-  useEffect(() => {
-    void window.api.getSettings().then((settings) => {
-      const nextTheme = isFumadocsThemeName(settings.theme) ? settings.theme : 'purple'
-      const nextColorMode = settings.colorMode === 'light' ? 'light' : 'dark'
-      const nextLanguage = normalizeStoredLanguage(settings.language)
-      const nextFont = normalizeStoredFont(settings.font)
-      setThemeState(nextTheme)
-      setColorModeState(nextColorMode)
-      setLanguageState(nextLanguage)
-      setFontState(nextFont)
-      setViewableDocumentExtensionsState(settings.viewableDocumentExtensions)
-      applyFumadocsTheme(nextTheme, nextColorMode)
-      applyLanguage(nextLanguage)
-      applyAppFont(nextFont)
-      rerenderForLocaleChange((version) => version + 1)
-    })
-  }, [])
-
-  useEffect(() => {
-    applyFumadocsTheme(theme, colorMode)
-  }, [theme, colorMode])
-
-  async function setTheme(themeName: FumadocsThemeName): Promise<void> {
-    setThemeState(themeName)
-    const settings = await window.api.setSettings({ theme: themeName })
-    if (isFumadocsThemeName(settings.theme)) setThemeState(settings.theme)
-  }
-
-  async function setColorMode(mode: ColorMode): Promise<void> {
-    setColorModeState(mode)
-    const settings = await window.api.setSettings({ colorMode: mode })
-    setColorModeState(settings.colorMode === 'dark' ? 'dark' : 'light')
-  }
-
-  async function setLanguage(languageName: AppLanguage): Promise<void> {
-    setLanguageState(languageName)
-    applyLanguage(languageName)
-    rerenderForLocaleChange((version) => version + 1)
-    const settings = await window.api.setSettings({ language: languageName })
-    const storedLanguage = normalizeStoredLanguage(settings.language)
-    setLanguageState(storedLanguage)
-    applyLanguage(storedLanguage)
-    rerenderForLocaleChange((version) => version + 1)
-  }
-
-  async function setFont(fontName: AppFontName): Promise<void> {
-    setFontState(fontName)
-    applyAppFont(fontName)
-    const settings = await window.api.setSettings({ font: fontName })
-    const storedFont = normalizeStoredFont(settings.font)
-    setFontState(storedFont)
-    applyAppFont(storedFont)
-  }
-
-  async function setViewableDocumentExtensions(extensions: string[]): Promise<void> {
-    setViewableDocumentExtensionsState(extensions)
-    const settings = await window.api.setSettings({ viewableDocumentExtensions: extensions })
-    setViewableDocumentExtensionsState(settings.viewableDocumentExtensions)
-  }
+  const {
+    theme,
+    colorMode,
+    language,
+    font,
+    viewableDocumentExtensions,
+    setTheme,
+    setColorMode,
+    setLanguage,
+    setFont,
+    setViewableDocumentExtensions
+  } = useAppSettings()
 
   return (
     <AppContent
@@ -151,119 +69,10 @@ function AppContent({
 }): React.JSX.Element {
   const location = useLocation()
   const navigate = useNavigate()
-  const [workspace, setWorkspace] = useState<MdxWorkspace | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const { workspace, error, loading, openFile, openFolder, openPath, renamePath, deletePath } =
+    useWorkspaceActions()
   const inSettingsRoute =
     location.pathname === '/settings' || location.pathname.startsWith('/settings/')
-
-  useEffect(() => {
-    void window.api.registerDefaultMdxApp()
-
-    const removeOpenedListener = window.api.onMdxFileOpened((openedWorkspace) => {
-      setWorkspace(openedWorkspace)
-      setError(null)
-      navigate('/', { replace: true })
-    })
-    const removeChangedListener = window.api.onMdxFileChanged((changedWorkspace) => {
-      setWorkspace(changedWorkspace)
-      setError(null)
-    })
-    const removeErrorListener = window.api.onMdxFileOpenError((message) => {
-      setError(message)
-    })
-    const removeChangeErrorListener = window.api.onMdxFileChangeError((message) => {
-      setError(message)
-    })
-
-    return () => {
-      removeOpenedListener()
-      removeChangedListener()
-      removeErrorListener()
-      removeChangeErrorListener()
-    }
-  }, [navigate])
-
-  async function openFile(): Promise<void> {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const result = await window.api.openMdxFile()
-      if (result) {
-        setWorkspace(result)
-        navigate('/')
-      }
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function openFolder(): Promise<void> {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const result = await window.api.openMdxFolder()
-      if (result) {
-        setWorkspace(result)
-        navigate('/')
-      }
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function openPath(filePath: string, workspaceRoot?: string): Promise<void> {
-    setLoading(true)
-    setError(null)
-
-    try {
-      setWorkspace(await window.api.openMdxPath(filePath, workspaceRoot))
-      navigate('/')
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function renamePath(
-    targetPath: string,
-    nextName: string,
-    workspaceRoot?: string
-  ): Promise<void> {
-    setLoading(true)
-    setError(null)
-
-    try {
-      setWorkspace(await window.api.renameMdxPath(targetPath, nextName, workspaceRoot))
-      navigate('/')
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function deletePath(targetPath: string, workspaceRoot?: string): Promise<void> {
-    setLoading(true)
-    setError(null)
-
-    try {
-      const nextWorkspace = await window.api.deleteMdxPath(targetPath, workspaceRoot)
-      setWorkspace(nextWorkspace)
-      navigate('/')
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : String(cause))
-    } finally {
-      setLoading(false)
-    }
-  }
 
   useHotkeys(
     [
