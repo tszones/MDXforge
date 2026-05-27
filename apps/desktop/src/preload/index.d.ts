@@ -182,6 +182,7 @@ export interface AppSettings {
   colorMode: AppColorMode
   language: AppLanguage
   font: AppFontName
+  viewableDocumentExtensions: string[]
 }
 
 export type AppThemeName =

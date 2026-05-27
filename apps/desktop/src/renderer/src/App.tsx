@@ -17,6 +17,7 @@ import {
 } from './lib/theme'
 import { m } from './paraglide/messages'
 import type { AppFontName, AppLanguage, AppSettings, MdxWorkspace } from './types'
+import { defaultViewableDocumentExtensions } from './types'
 
 export function readInitialSettings(): Partial<AppSettings> {
   const settings = window.api.getInitialSettings()
@@ -40,6 +41,11 @@ function App(): React.JSX.Element {
   const [font, setFontState] = useState<AppFontName>(() =>
     normalizeStoredFont(initialSettings.font)
   )
+  const [viewableDocumentExtensions, setViewableDocumentExtensionsState] = useState<string[]>(() =>
+    Array.isArray(initialSettings.viewableDocumentExtensions)
+      ? initialSettings.viewableDocumentExtensions
+      : [...defaultViewableDocumentExtensions]
+  )
   const [, rerenderForLocaleChange] = useState(0)
 
   useEffect(() => {
@@ -52,6 +58,7 @@ function App(): React.JSX.Element {
       setColorModeState(nextColorMode)
       setLanguageState(nextLanguage)
       setFontState(nextFont)
+      setViewableDocumentExtensionsState(settings.viewableDocumentExtensions)
       applyFumadocsTheme(nextTheme, nextColorMode)
       applyLanguage(nextLanguage)
       applyAppFont(nextFont)
@@ -95,16 +102,26 @@ function App(): React.JSX.Element {
     applyAppFont(storedFont)
   }
 
+  async function setViewableDocumentExtensions(extensions: string[]): Promise<void> {
+    setViewableDocumentExtensionsState(extensions)
+    const settings = await window.api.setSettings({ viewableDocumentExtensions: extensions })
+    setViewableDocumentExtensionsState(settings.viewableDocumentExtensions)
+  }
+
   return (
     <AppContent
       theme={theme}
       colorMode={colorMode}
       language={language}
       font={font}
+      viewableDocumentExtensions={viewableDocumentExtensions}
       onThemeChange={(nextTheme) => void setTheme(nextTheme)}
       onColorModeChange={(nextMode) => void setColorMode(nextMode)}
       onLanguageChange={(nextLanguage) => void setLanguage(nextLanguage)}
       onFontChange={(nextFont) => void setFont(nextFont)}
+      onViewableDocumentExtensionsChange={(nextExtensions) =>
+        void setViewableDocumentExtensions(nextExtensions)
+      }
     />
   )
 }
@@ -114,19 +131,23 @@ function AppContent({
   colorMode,
   language,
   font,
+  viewableDocumentExtensions,
   onThemeChange,
   onColorModeChange,
   onLanguageChange,
-  onFontChange
+  onFontChange,
+  onViewableDocumentExtensionsChange
 }: {
   theme: FumadocsThemeName
   colorMode: ColorMode
   language: AppLanguage
   font: AppFontName
+  viewableDocumentExtensions: string[]
   onThemeChange: (theme: FumadocsThemeName) => void
   onColorModeChange: (mode: ColorMode) => void
   onLanguageChange: (language: AppLanguage) => void
   onFontChange: (font: AppFontName) => void
+  onViewableDocumentExtensionsChange: (extensions: string[]) => void
 }): React.JSX.Element {
   const location = useLocation()
   const navigate = useNavigate()
@@ -301,10 +322,12 @@ function AppContent({
         mode={colorMode}
         language={language}
         font={font}
+        viewableDocumentExtensions={viewableDocumentExtensions}
         onThemeChange={onThemeChange}
         onModeChange={onColorModeChange}
         onLanguageChange={onLanguageChange}
         onFontChange={onFontChange}
+        onViewableDocumentExtensionsChange={onViewableDocumentExtensionsChange}
         workspaceRoot={workspace?.folder?.rootPath}
         onBack={() => navigate('/')}
       />
@@ -335,7 +358,7 @@ function AppContent({
       )}
 
       {error ? (
-        <pre className="m-4 shrink-0 overflow-auto rounded-md border bg-fd-error/10 p-4 text-sm text-fd-error">
+        <pre className="fixed top-14 right-4 z-50 max-h-48 max-w-[min(42rem,calc(100vw-2rem))] overflow-auto whitespace-pre-wrap rounded-lg border border-fd-error/30 bg-fd-background/95 p-4 text-sm text-fd-error shadow-xl backdrop-blur" role="alert">
           {error}
         </pre>
       ) : null}
@@ -400,6 +423,7 @@ function AppContent({
         <Route path="/settings" element={<Navigate to="/settings/language" replace />} />
         <Route path="/settings/language" element={renderSettingsRoute('language')} />
         <Route path="/settings/appearance" element={renderSettingsRoute('appearance')} />
+        <Route path="/settings/documents" element={renderSettingsRoute('documents')} />
         <Route path="/settings/updates" element={renderSettingsRoute('updates')} />
         <Route path="/settings/skills" element={renderSettingsRoute('skills')} />
         <Route path="/settings/*" element={<Navigate to="/settings/language" replace />} />

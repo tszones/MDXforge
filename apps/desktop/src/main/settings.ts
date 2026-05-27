@@ -1,4 +1,8 @@
 import electronStoreModule from 'electron-store'
+import {
+  defaultViewableDocumentExtensions,
+  normalizeViewableDocumentExtensions
+} from '../shared/viewable-documents'
 
 export interface AppWindowState {
   x?: number
@@ -30,6 +34,7 @@ export interface AppSettings {
   colorMode: AppColorMode
   language: AppLanguage
   font: AppFontName
+  viewableDocumentExtensions: string[]
   windowState: AppWindowState
 }
 
@@ -50,6 +55,7 @@ const store = new ElectronStore<AppSettings>({
     colorMode: 'dark',
     language: 'en-US',
     font: 'system',
+    viewableDocumentExtensions: [...defaultViewableDocumentExtensions],
     windowState: {
       width: 900,
       height: 670
@@ -63,6 +69,9 @@ export function getAppSettings(): AppSettings {
     colorMode: store.get('colorMode'),
     language: store.get('language'),
     font: store.get('font'),
+    viewableDocumentExtensions: normalizeViewableDocumentExtensions(
+      store.get('viewableDocumentExtensions')
+    ),
     windowState: store.get('windowState')
   }
 }
@@ -72,6 +81,12 @@ export function setAppSettings(settings: Partial<AppSettings>): AppSettings {
   if (settings.colorMode) store.set('colorMode', settings.colorMode)
   if (settings.language) store.set('language', settings.language)
   if (settings.font) store.set('font', settings.font)
+  if (settings.viewableDocumentExtensions) {
+    store.set(
+      'viewableDocumentExtensions',
+      normalizeViewableDocumentExtensions(settings.viewableDocumentExtensions)
+    )
+  }
   if (settings.windowState) store.set('windowState', settings.windowState)
   return getAppSettings()
 }

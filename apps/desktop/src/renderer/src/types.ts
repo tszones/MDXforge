@@ -9,6 +9,7 @@ export interface AppSettings {
   colorMode: AppColorMode
   language: AppLanguage
   font: AppFontName
+  viewableDocumentExtensions: string[]
 }
 
 export type AppThemeName =
@@ -25,6 +26,8 @@ export type AppThemeName =
   | 'aspen'
 
 export type AppColorMode = 'light' | 'dark'
+
+export { defaultViewableDocumentExtensions, normalizeDocumentExtension } from '../../shared/viewable-documents'
 
 export interface MdxFile {
   path: string

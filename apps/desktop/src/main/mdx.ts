@@ -10,7 +10,7 @@ import {
   writeFileSync
 } from 'fs'
 import matter from 'gray-matter'
-import { dirname, extname, isAbsolute, join, relative, resolve } from 'path'
+import { dirname, isAbsolute, join, relative, resolve } from 'path'
 import { readWorkspaceExtensionManifest, type WorkspaceExtensionManifest } from './extensions'
 import { mainMessage } from './i18n'
 import { remarkLocalImages } from './local-images'
@@ -24,6 +24,7 @@ import {
   readMdxFolder
 } from './page-tree'
 import { remarkWikiLinks } from './wiki-links'
+import { isViewableDocumentPath } from './viewable-documents'
 
 const statePath = () => `${app.getPath('userData')}/state.json`
 
@@ -170,7 +171,15 @@ export async function deleteMdxPath(
   const resolvedRoot = workspaceRoot ? resolve(workspaceRoot) : undefined
   ensurePathInsideWorkspace(resolvedTarget, resolvedRoot)
 
-  rmSync(resolvedTarget, { recursive: true, force: false })
+  const stat = statSync(resolvedTarget)
+  if (stat.isDirectory()) {
+    deleteViewableDocumentsInDirectory(resolvedTarget)
+  } else {
+    if (!isViewableDocumentPath(resolvedTarget)) {
+      throw new Error(mainMessage('error_no_mdx_found', { filePath: targetPath }))
+    }
+    rmSync(resolvedTarget, { force: false })
+  }
 
   if (!resolvedRoot || !existsSync(resolvedRoot)) return null
 
@@ -302,7 +311,7 @@ export function resolveMdxTarget(inputPath: string): string | null {
 
   const stat = statSync(targetPath)
   if (stat.isFile()) {
-    return ['.md', '.mdx'].includes(extname(targetPath).toLowerCase()) ? targetPath : null
+    return isViewableDocumentPath(targetPath) ? targetPath : null
   }
 
   if (!stat.isDirectory()) return null
@@ -314,9 +323,22 @@ export function resolveMdxTarget(inputPath: string): string | null {
   }
 
   const firstMdxFile = readdirSync(targetPath)
-    .filter((fileName) => ['.mdx', '.md'].includes(extname(fileName).toLowerCase()))
+    .filter((fileName) => isViewableDocumentPath(fileName))
     .sort((a, b) => a.localeCompare(b))
     .at(0)
 
   return firstMdxFile ? join(targetPath, firstMdxFile) : null
+}
+
+function deleteViewableDocumentsInDirectory(directoryPath: string): void {
+  for (const entry of readdirSync(directoryPath, { withFileTypes: true })) {
+    const entryPath = join(directoryPath, entry.name)
+    if (entry.isDirectory()) {
+      deleteViewableDocumentsInDirectory(entryPath)
+      continue
+    }
+    if (entry.isFile() && isViewableDocumentPath(entryPath)) {
+      rmSync(entryPath, { force: false })
+    }
+  }
 }

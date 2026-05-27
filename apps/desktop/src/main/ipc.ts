@@ -11,13 +11,7 @@ import {
 } from './mdx'
 import { readMdxRawSource } from './mdx-raw-source'
 import { readMdxFolder } from './page-tree'
-import {
-  type AppColorMode,
-  type AppLanguage,
-  type AppThemeName,
-  getAppSettings,
-  setAppSettings
-} from './settings'
+import { getAppSettings, setAppSettings, type AppSettings } from './settings'
 import {
   addLocalSkillFolder,
   createLocalSkill,
@@ -203,10 +197,7 @@ export function registerAppIpc(options: {
   ipcMain.handle('settings:get', () => getAppSettings())
   ipcMain.handle(
     'settings:set',
-    (
-      _,
-      settings: Partial<{ theme: AppThemeName; colorMode: AppColorMode; language: AppLanguage }>
-    ) => setAppSettings(settings)
+    (_, settings: Partial<AppSettings>) => setAppSettings(settings)
   )
 }
 

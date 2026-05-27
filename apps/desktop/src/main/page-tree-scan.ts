@@ -1,5 +1,5 @@
 import { readdirSync } from 'fs'
-import { extname, join } from 'path'
+import { join } from 'path'
 import { readMdxMetadata, readMetaFile } from './page-tree-meta'
 import type { FolderScan, PageFile } from './page-tree-types'
 import {
@@ -10,9 +10,9 @@ import {
   joinPath,
   stripMarkdownExtension
 } from './page-tree-utils'
+import { isViewableDocumentPath } from './viewable-documents'
 
 const ignoredDirectories = new Set(['.git', 'node_modules', 'dist', 'build', '.next', 'out'])
-const markdownExtensions = new Set(['.md', '.mdx'])
 
 export function scanFolder(
   absolutePath: string,
@@ -45,7 +45,7 @@ export function scanFolder(
       continue
     }
 
-    if (!entry.isFile() || !markdownExtensions.has(extname(entry.name).toLowerCase())) continue
+    if (!entry.isFile() || !isViewableDocumentPath(entry.name)) continue
 
     const stem = stripMarkdownExtension(entry.name)
     if (isLocaleVariantStem(stem)) continue

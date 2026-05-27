@@ -5,11 +5,12 @@ import type { ColorMode, FumadocsThemeName } from '../lib/theme'
 import { m } from '../paraglide/messages'
 import type { AppLanguage } from '../types'
 import { AppearanceSettingsPage } from './settings/AppearanceSettingsPage'
+import { DocumentsSettingsPage } from './settings/DocumentsSettingsPage'
 import { LanguageSettingsPage } from './settings/LanguageSettingsPage'
 import { SkillsSettingsPage } from './settings/SkillsSettingsPage'
 import { UpdateSettingsCard } from './UpdateSettingsCard'
 
-export type SettingsRoute = 'language' | 'appearance' | 'updates' | 'skills'
+export type SettingsRoute = 'language' | 'appearance' | 'documents' | 'updates' | 'skills'
 
 interface SettingsPageProps {
   page: SettingsRoute
@@ -17,10 +18,12 @@ interface SettingsPageProps {
   mode: ColorMode
   language: AppLanguage
   font: AppFontName
+  viewableDocumentExtensions: string[]
   onThemeChange: (theme: FumadocsThemeName) => void
   onModeChange: (mode: ColorMode) => void
   onLanguageChange: (language: AppLanguage) => void
   onFontChange: (font: AppFontName) => void
+  onViewableDocumentExtensionsChange: (extensions: string[]) => void
   workspaceRoot?: string
   onBack: () => void
 }
@@ -31,10 +34,12 @@ export function SettingsPage({
   mode,
   language,
   font,
+  viewableDocumentExtensions,
   onThemeChange,
   onModeChange,
   onLanguageChange,
   onFontChange,
+  onViewableDocumentExtensionsChange,
   workspaceRoot,
   onBack
 }: SettingsPageProps): React.JSX.Element {
@@ -58,6 +63,7 @@ export function SettingsPage({
             <SettingsNavLink to="/settings/appearance">
               {m.settings_appearance_tab()}
             </SettingsNavLink>
+            <SettingsNavLink to="/settings/documents">{m.settings_documents_title()}</SettingsNavLink>
             <SettingsNavLink to="/settings/updates">{m.settings_updates_title()}</SettingsNavLink>
             <SettingsNavLink to="/settings/skills">{m.settings_skills_title()}</SettingsNavLink>
           </nav>
@@ -87,6 +93,12 @@ export function SettingsPage({
             />
           ) : null}
           {page === 'updates' ? <UpdateSettingsCard /> : null}
+          {page === 'documents' ? (
+            <DocumentsSettingsPage
+              extensions={viewableDocumentExtensions}
+              onExtensionsChange={onViewableDocumentExtensionsChange}
+            />
+          ) : null}
           {page === 'skills' ? <SkillsSettingsPage workspaceRoot={workspaceRoot} /> : null}
         </div>
       </div>
@@ -121,6 +133,7 @@ function SettingsNavLink({
 function settingsPageTitle(page: SettingsRoute): string {
   if (page === 'language') return m.settings_language_tab()
   if (page === 'appearance') return m.settings_appearance_title()
+  if (page === 'documents') return m.settings_documents_title()
   if (page === 'skills') return m.settings_skills_title()
   return m.settings_updates_title()
 }
@@ -128,6 +141,7 @@ function settingsPageTitle(page: SettingsRoute): string {
 function settingsPageDescription(page: SettingsRoute): string {
   if (page === 'language') return m.settings_language_description()
   if (page === 'appearance') return m.settings_appearance_description()
+  if (page === 'documents') return m.settings_documents_description()
   if (page === 'skills') return m.settings_skills_description()
   return m.settings_updates_description()
 }

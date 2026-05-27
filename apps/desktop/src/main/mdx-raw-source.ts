@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, statSync } from 'fs'
-import { extname, resolve } from 'path'
+import { resolve } from 'path'
+import { isViewableDocumentPath } from './viewable-documents'
 
 export function readMdxRawSource(filePath: string): string {
   const resolvedPath = resolve(filePath)
@@ -8,8 +9,7 @@ export function readMdxRawSource(filePath: string): string {
     throw new Error(`No MDX / Markdown file found: ${filePath}`)
   }
 
-  const extension = extname(resolvedPath).toLowerCase()
-  if (extension !== '.mdx' && extension !== '.md') {
+  if (!isViewableDocumentPath(resolvedPath)) {
     throw new Error(`No MDX / Markdown file found: ${filePath}`)
   }
 
