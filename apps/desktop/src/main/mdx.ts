@@ -1,6 +1,14 @@
 import { compile } from '@mdx-js/mdx'
 import { app, dialog } from 'electron'
-import { existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'fs'
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  rmSync,
+  statSync,
+  writeFileSync
+} from 'fs'
 import matter from 'gray-matter'
 import { dirname, extname, isAbsolute, join, relative, resolve } from 'path'
 import { readWorkspaceExtensionManifest, type WorkspaceExtensionManifest } from './extensions'
@@ -138,12 +146,7 @@ export async function renameMdxPath(
   }
 
   const resolvedRoot = workspaceRoot ? resolve(workspaceRoot) : undefined
-  if (resolvedRoot) {
-    const relativeTarget = relative(resolvedRoot, resolvedTarget)
-    if (relativeTarget.startsWith('..') || isAbsolute(relativeTarget)) {
-      throw new Error(mainMessage('error_path_outside_workspace', { filePath: targetPath }))
-    }
-  }
+  ensurePathInsideWorkspace(resolvedTarget, resolvedRoot)
 
   const nextPath = resolve(dirname(resolvedTarget), trimmedName)
   if (nextPath !== resolvedTarget && existsSync(nextPath)) {
@@ -153,6 +156,33 @@ export async function renameMdxPath(
   renameSync(resolvedTarget, nextPath)
   const nextRoot = resolvedRoot === resolvedTarget ? nextPath : resolvedRoot
   return readMdxWorkspace(nextPath, nextRoot)
+}
+
+export async function deleteMdxPath(
+  targetPath: string,
+  workspaceRoot?: string
+): Promise<MdxWorkspace | null> {
+  const resolvedTarget = resolve(targetPath)
+  if (!existsSync(resolvedTarget))
+    throw new Error(mainMessage('error_path_not_found', { filePath: targetPath }))
+
+  const resolvedRoot = workspaceRoot ? resolve(workspaceRoot) : undefined
+  ensurePathInsideWorkspace(resolvedTarget, resolvedRoot)
+
+  rmSync(resolvedTarget, { recursive: true, force: false })
+
+  if (!resolvedRoot || !existsSync(resolvedRoot)) return null
+
+  const nextTarget = resolveMdxTarget(resolvedRoot)
+  return nextTarget ? readMdxWorkspace(nextTarget, resolvedRoot) : null
+}
+
+function ensurePathInsideWorkspace(targetPath: string, workspaceRoot?: string): void {
+  if (!workspaceRoot) return
+  const relativeTarget = relative(workspaceRoot, targetPath)
+  if (relativeTarget.startsWith('..') || isAbsolute(relativeTarget)) {
+    throw new Error(mainMessage('error_path_outside_workspace', { filePath: targetPath }))
+  }
 }
 
 function setLastOpenFolder(folderPath: string): void {

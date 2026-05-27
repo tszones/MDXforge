@@ -30,6 +30,7 @@ interface MdxPreviewProps {
   onOpenFolder: () => void
   onOpenPath: (filePath: string, workspaceRoot?: string) => void
   onRenamePath: (targetPath: string, nextName: string, workspaceRoot?: string) => Promise<void>
+  onDeletePath: (targetPath: string, workspaceRoot?: string) => Promise<void>
   opening: boolean
 }
 
@@ -87,6 +88,7 @@ export function MdxPreview({
   onOpenFolder,
   onOpenPath,
   onRenamePath,
+  onDeletePath,
   opening
 }: MdxPreviewProps): React.JSX.Element {
   const file = workspace.file
@@ -305,6 +307,7 @@ export function MdxPreview({
                 onOpenFolder={onOpenFolder}
                 onOpenPath={onOpenPath}
                 onRenamePath={onRenamePath}
+                onDeletePath={onDeletePath}
                 opening={opening}
                 collapsed={collapsed}
                 onCollapseSidebar={collapseSidebar}

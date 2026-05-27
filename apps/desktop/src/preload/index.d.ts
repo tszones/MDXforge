@@ -237,6 +237,7 @@ export interface AppAPI {
     nextName: string,
     workspaceRoot?: string
   ) => Promise<MdxWorkspace>
+  deleteMdxPath: (targetPath: string, workspaceRoot?: string) => Promise<MdxWorkspace | null>
   copyMdxRawSource: (filePath: string) => Promise<void>
   copyPath: (filePath: string) => Promise<void>
   showInFolder: (filePath: string) => Promise<boolean>

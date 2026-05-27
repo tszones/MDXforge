@@ -1,4 +1,4 @@
-import { Code2, Copy, FolderOpen } from 'lucide-react'
+import { Code2, Copy, FolderOpen, Trash2 } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { m } from '../../paraglide/messages'
 
@@ -13,6 +13,7 @@ export function FileTreeNodeContextMenu({
   onCopyPath,
   onShowInFolder,
   onOpenInVsCode,
+  onDelete,
   onRename,
   items
 }: {
@@ -20,6 +21,7 @@ export function FileTreeNodeContextMenu({
   onCopyPath?: (path: string) => void
   onShowInFolder?: (path: string) => void
   onOpenInVsCode?: (path: string) => void
+  onDelete?: (path: string) => void
   onRename?: (path: string) => void
   items?: FileTreeNodeContextMenuItem[]
 }): React.JSX.Element | null {
@@ -79,6 +81,17 @@ export function FileTreeNodeContextMenu({
         >
           <Code2 className="size-4 text-fd-primary" />
           {m.preview_open_in_vscode()}
+        </button>
+      ) : null}
+      {onDelete ? (
+        <button
+          type="button"
+          role="menuitem"
+          className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-start text-fd-error hover:bg-fd-error/10"
+          onClick={() => onDelete(menu.path)}
+        >
+          <Trash2 className="size-4" />
+          {m.preview_delete_item()}
         </button>
       ) : null}
       {onRename ? (

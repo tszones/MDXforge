@@ -18,6 +18,7 @@ export function PreviewSidebar({
   onOpenFolder,
   onOpenPath,
   onRenamePath,
+  onDeletePath,
   opening,
   collapsed,
   onCollapseSidebar,
@@ -28,6 +29,7 @@ export function PreviewSidebar({
   onOpenFolder: () => void
   onOpenPath: (filePath: string, workspaceRoot?: string) => void
   onRenamePath: (targetPath: string, nextName: string, workspaceRoot?: string) => Promise<void>
+  onDeletePath: (targetPath: string, workspaceRoot?: string) => Promise<void>
   opening: boolean
   collapsed?: boolean
   onCollapseSidebar?: () => void
@@ -158,6 +160,11 @@ export function PreviewSidebar({
   async function openInVsCode(path: string): Promise<void> {
     setContextMenu(null)
     await window.api.openInVsCode(path)
+  }
+
+  async function deletePath(path: string): Promise<void> {
+    setContextMenu(null)
+    await onDeletePath(path, workspace.folder?.rootPath)
   }
 
   return (
@@ -347,6 +354,7 @@ export function PreviewSidebar({
                       }
                     ]}
                     onCopyPath={(path) => void copyPath(path)}
+                    onDelete={(path) => void deletePath(path)}
                     onRename={(path) => {
                       setContextMenu(null)
                       setRenamingPath(path)

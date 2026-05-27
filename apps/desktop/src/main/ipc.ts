@@ -1,7 +1,14 @@
-import { app, type BrowserWindow, clipboard, ipcMain, shell } from 'electron'
+import { app, type BrowserWindow, clipboard, dialog, ipcMain, shell } from 'electron'
+import { mainMessage } from './i18n'
 import { type SetExtensionManifest, watchMdxWorkspace } from './app-open'
 import { getWorkspaceExtensionTrustKey, type WorkspaceExtensionManifest } from './extensions'
-import { openMdxFile, openMdxFolder, readMdxWorkspace, renameMdxPath } from './mdx'
+import {
+  deleteMdxPath,
+  openMdxFile,
+  openMdxFolder,
+  readMdxWorkspace,
+  renameMdxPath
+} from './mdx'
 import { readMdxRawSource } from './mdx-raw-source'
 import { readMdxFolder } from './page-tree'
 import {
@@ -105,6 +112,24 @@ export function registerAppIpc(options: {
           setCurrentExtensionManifest
         )
       }
+      return workspace
+    }
+  )
+  ipcMain.handle(
+    'mdx:delete-path',
+    async (_, targetPath: string, workspaceRoot?: string) => {
+      const result = await dialog.showMessageBox({
+        type: 'warning',
+        buttons: [mainMessage('dialog_delete_confirm'), mainMessage('dialog_delete_cancel')],
+        defaultId: 1,
+        cancelId: 1,
+        title: mainMessage('dialog_delete_title'),
+        message: mainMessage('dialog_delete_message', { filePath: targetPath })
+      })
+      if (result.response !== 0) return null
+
+      const workspace = await deleteMdxPath(targetPath, workspaceRoot)
+      setCurrentExtensionManifest(workspace?.extensions ?? null)
       return workspace
     }
   )

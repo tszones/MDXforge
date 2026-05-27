@@ -229,6 +229,21 @@ function AppContent({
     }
   }
 
+  async function deletePath(targetPath: string, workspaceRoot?: string): Promise<void> {
+    setLoading(true)
+    setError(null)
+
+    try {
+      const nextWorkspace = await window.api.deleteMdxPath(targetPath, workspaceRoot)
+      setWorkspace(nextWorkspace)
+      navigate('/')
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause))
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useHotkeys(
     [
       {
@@ -332,6 +347,7 @@ function AppContent({
           onOpenFolder={openFolder}
           onOpenPath={openPath}
           onRenamePath={renamePath}
+          onDeletePath={deletePath}
           opening={loading}
         />
       ) : (

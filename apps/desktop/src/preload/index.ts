@@ -26,6 +26,8 @@ const api = {
     ipcRenderer.invoke('mdx:open-path', filePath, workspaceRoot),
   renameMdxPath: (targetPath: string, nextName: string, workspaceRoot?: string) =>
     ipcRenderer.invoke('mdx:rename-path', targetPath, nextName, workspaceRoot),
+  deleteMdxPath: (targetPath: string, workspaceRoot?: string) =>
+    ipcRenderer.invoke('mdx:delete-path', targetPath, workspaceRoot),
   copyMdxRawSource: (filePath: string) => ipcRenderer.invoke('mdx:copy-raw-source', filePath),
   copyPath: (filePath: string) => ipcRenderer.invoke('mdx:copy-path', filePath),
   showInFolder: (filePath: string) => ipcRenderer.invoke('mdx:show-in-folder', filePath),
