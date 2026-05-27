@@ -10,7 +10,7 @@ import { useWorkspaceActions } from './hooks/useWorkspaceActions'
 import { appHotkeys } from './lib/hotkeys'
 import type { ColorMode, FumadocsThemeName } from './lib/theme'
 import { m } from './paraglide/messages'
-import type { AppFontName, AppLanguage } from './types'
+import type { AppFontName, AppLanguage, WorkbenchLayoutSettings } from './types'
 
 function App(): React.JSX.Element {
   const {
@@ -19,11 +19,13 @@ function App(): React.JSX.Element {
     language,
     font,
     viewableDocumentExtensions,
+    workbenchLayout,
     setTheme,
     setColorMode,
     setLanguage,
     setFont,
-    setViewableDocumentExtensions
+    setViewableDocumentExtensions,
+    setWorkbenchLayout
   } = useAppSettings()
 
   return (
@@ -33,6 +35,7 @@ function App(): React.JSX.Element {
       language={language}
       font={font}
       viewableDocumentExtensions={viewableDocumentExtensions}
+      workbenchLayout={workbenchLayout}
       onThemeChange={(nextTheme) => void setTheme(nextTheme)}
       onColorModeChange={(nextMode) => void setColorMode(nextMode)}
       onLanguageChange={(nextLanguage) => void setLanguage(nextLanguage)}
@@ -40,6 +43,7 @@ function App(): React.JSX.Element {
       onViewableDocumentExtensionsChange={(nextExtensions) =>
         void setViewableDocumentExtensions(nextExtensions)
       }
+      onWorkbenchLayoutChange={(nextLayout) => void setWorkbenchLayout(nextLayout)}
     />
   )
 }
@@ -50,27 +54,40 @@ function AppContent({
   language,
   font,
   viewableDocumentExtensions,
+  workbenchLayout,
   onThemeChange,
   onColorModeChange,
   onLanguageChange,
   onFontChange,
-  onViewableDocumentExtensionsChange
+  onViewableDocumentExtensionsChange,
+  onWorkbenchLayoutChange
 }: {
   theme: FumadocsThemeName
   colorMode: ColorMode
   language: AppLanguage
   font: AppFontName
   viewableDocumentExtensions: string[]
+  workbenchLayout: WorkbenchLayoutSettings | undefined
   onThemeChange: (theme: FumadocsThemeName) => void
   onColorModeChange: (mode: ColorMode) => void
   onLanguageChange: (language: AppLanguage) => void
   onFontChange: (font: AppFontName) => void
   onViewableDocumentExtensionsChange: (extensions: string[]) => void
+  onWorkbenchLayoutChange: (layout: WorkbenchLayoutSettings) => void
 }): React.JSX.Element {
   const location = useLocation()
   const navigate = useNavigate()
-  const { workspace, error, loading, openFile, openFolder, openPath, renamePath, deletePath } =
-    useWorkspaceActions()
+  const {
+    workspace,
+    error,
+    loading,
+    setWorkspace,
+    openFile,
+    openFolder,
+    openPath,
+    renamePath,
+    deletePath
+  } = useWorkspaceActions()
   const inSettingsRoute =
     location.pathname === '/settings' || location.pathname.startsWith('/settings/')
 
@@ -178,12 +195,15 @@ function AppContent({
       {workspace ? (
         <MdxPreview
           workspace={workspace}
+          setWorkspace={setWorkspace}
           onOpenFile={openFile}
           onOpenFolder={openFolder}
           onOpenPath={openPath}
           onRenamePath={renamePath}
           onDeletePath={deletePath}
           opening={loading}
+          workbenchLayout={workbenchLayout}
+          onWorkbenchLayoutChange={onWorkbenchLayoutChange}
         />
       ) : (
         <section className="flex min-h-0 flex-1 items-center justify-center overflow-auto p-8 text-center">

@@ -7,7 +7,7 @@ import {
   type FumadocsThemeName,
   isFumadocsThemeName
 } from '../lib/theme'
-import type { AppFontName, AppLanguage, AppSettings } from '../types'
+import type { AppFontName, AppLanguage, AppSettings, WorkbenchLayoutSettings } from '../types'
 import { defaultViewableDocumentExtensions } from '../types'
 
 export function readInitialSettings(): Partial<AppSettings> {
@@ -22,11 +22,13 @@ export function useAppSettings(): {
   language: AppLanguage
   font: AppFontName
   viewableDocumentExtensions: string[]
+  workbenchLayout?: WorkbenchLayoutSettings
   setTheme: (theme: FumadocsThemeName) => Promise<void>
   setColorMode: (mode: ColorMode) => Promise<void>
   setLanguage: (language: AppLanguage) => Promise<void>
   setFont: (font: AppFontName) => Promise<void>
   setViewableDocumentExtensions: (extensions: string[]) => Promise<void>
+  setWorkbenchLayout: (layout: WorkbenchLayoutSettings) => Promise<void>
 } {
   const initialSettings = readInitialSettings()
   const [theme, setThemeState] = useState<FumadocsThemeName>(() =>
@@ -48,6 +50,9 @@ export function useAppSettings(): {
       ? initialSettings.viewableDocumentExtensions
       : [...defaultViewableDocumentExtensions]
   )
+  const [workbenchLayout, setWorkbenchLayoutState] = useState<WorkbenchLayoutSettings | undefined>(
+    () => initialSettings.workbenchLayout
+  )
   const [, rerenderForLocaleChange] = useState(0)
 
   useEffect(() => {
@@ -61,6 +66,7 @@ export function useAppSettings(): {
       setLanguageState(nextLanguage)
       setFontState(nextFont)
       setViewableDocumentExtensionsState(settings.viewableDocumentExtensions)
+      setWorkbenchLayoutState(settings.workbenchLayout)
       applyFumadocsTheme(nextTheme, nextColorMode)
       applyLanguage(nextLanguage)
       applyAppFont(nextFont)
@@ -110,16 +116,24 @@ export function useAppSettings(): {
     setViewableDocumentExtensionsState(settings.viewableDocumentExtensions)
   }
 
+  async function setWorkbenchLayout(layout: WorkbenchLayoutSettings): Promise<void> {
+    setWorkbenchLayoutState(layout)
+    const settings = await window.api.setSettings({ workbenchLayout: layout })
+    setWorkbenchLayoutState(settings.workbenchLayout)
+  }
+
   return {
     theme,
     colorMode,
     language,
     font,
     viewableDocumentExtensions,
+    workbenchLayout,
     setTheme,
     setColorMode,
     setLanguage,
     setFont,
-    setViewableDocumentExtensions
+    setViewableDocumentExtensions,
+    setWorkbenchLayout
   }
 }

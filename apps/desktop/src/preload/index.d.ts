@@ -180,12 +180,18 @@ export interface MdxWorkspace {
   extensions?: WorkspaceExtensionManifest
 }
 
+export interface WorkbenchLayoutSettings {
+  horizontal?: Record<string, number>
+  centerVertical?: Record<string, number>
+}
+
 export interface AppSettings {
   theme: AppThemeName
   colorMode: AppColorMode
   language: AppLanguage
   font: AppFontName
   viewableDocumentExtensions: string[]
+  workbenchLayout?: WorkbenchLayoutSettings
 }
 
 export type AppThemeName =

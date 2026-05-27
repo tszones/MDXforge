@@ -1,0 +1,988 @@
+---
+title: Workbench 布局重构方案
+description: 将 MDXForge 重构为类似 VS Code 的工作台交互模式，支持左右可拖拽侧边栏、底部面板、左右侧多面板标签和中间多文档标签页。
+---
+
+# Workbench 布局重构方案
+
+MDXForge 当前更像一个「单文档文档站预览页」。下一阶段如果要支持类似 VS Code 的交互模式，需要把整体 UI 抽象升级为「工作台 Workbench」：左侧是可切换的工作区面板，中间是多文档标签页，右侧是可切换的辅助面板，例如目录和 AI 聊天，底部预留给终端、日志、问题面板等技术人员常用能力。
+
+<Callout title="核心判断" type="info">
+不要继续在当前 Fumadocs docs layout 上打补丁。应该让 MDXForge 自己拥有顶层 Workbench 布局，再把 Fumadocs/MDX 渲染能力放进中间的文档视图里。
+</Callout>
+
+## 目标交互模式
+
+目标布局大致如下：
+
+```txt
+┌──────────────────────────────────────────────────────────────┐
+│ 窗口标题栏 / 全局操作                                        │
+├──────────────┬───────────────────────────────┬───────────────┤
+│ 左侧边栏     │ 文档标签栏                    │ 右侧边栏      │
+│ 文件 | 搜索  ├───────────────────────────────┤ 目录 | AI     │
+│              │ 当前文档预览 / 编辑区域       │               │
+│ 文件树面板   │                               │ 目录面板      │
+│ 搜索面板     │                               │ AI 聊天面板   │
+├──────────────┴───────────────────────────────┴───────────────┤
+│ 底部面板：Terminal | Problems | Output                       │
+└──────────────────────────────────────────────────────────────┘
+```
+
+需要支持：
+
+- 左侧边栏可以拖拽调整宽度。
+- 左侧边栏有 tab：
+  - 文件树 / Explorer。
+  - 搜索 / Search。
+- 右侧边栏可以拖拽调整宽度。
+- 右侧边栏有 tab：
+  - 目录 / Outline。
+  - AI 聊天面板。
+- 中间区域支持同时打开多个文档 tab。
+- 底部预留可拖拽面板，首选用于终端，后续可扩展 Problems / Output / Logs。
+- 打开文档时，如果文档已经打开，则激活已有 tab；否则创建新 tab。
+- 当前激活 tab 决定：正文内容、右侧目录、查找目标、AI 上下文。
+
+## 当前架构现状
+
+目前主渲染路径是：
+
+```txt
+App
+  useWorkspaceActions()
+    workspace.file
+  MdxPreview
+    MdxDocsLayout
+      PreviewSidebar
+      MdxPageContainer
+      MdxToc
+```
+
+关键文件：
+
+```txt
+apps/desktop/src/renderer/src/App.tsx
+apps/desktop/src/renderer/src/components/MdxPreview.tsx
+apps/desktop/src/renderer/src/components/MdxDocsLayout.tsx
+apps/desktop/src/renderer/src/components/preview/WorkspaceSidebar.tsx
+apps/desktop/src/renderer/src/hooks/useWorkspaceActions.ts
+apps/desktop/src/renderer/src/types.ts
+apps/desktop/src/main/mdx.ts
+apps/desktop/src/main/ipc.ts
+apps/desktop/src/preload/index.ts
+```
+
+这套结构适合「打开一个文档并预览」，但不适合作为 VS Code-like 工作台。
+
+## 主要卡点
+
+### 1. 顶层布局是 Fumadocs 文档页布局
+
+当前 `MdxDocsLayout.tsx` 写死了文档站式三栏结构：
+
+```txt
+左侧 sidebar | 中间 main article | 右侧 toc
+```
+
+它内部写死了布局网格：
+
+```txt
+"sidebar sidebar header toc toc"
+"sidebar sidebar toc-popover toc toc"
+"sidebar sidebar main toc toc"
+```
+
+也写死了宽度变量：
+
+```txt
+--fd-sidebar-width: 268px
+--fd-toc-width: 268px
+```
+
+这会限制：
+
+- 左侧边栏不能自然拖拽。
+- 右侧边栏不能自然拖拽。
+- 右侧只能放 TOC，不是通用 panel。
+- 中间区域只是单个 article，不是多 tab 工作区。
+
+所以最大问题不是拖拽实现本身，而是当前外壳抽象不是 Workbench。
+
+### 2. 左右侧栏都还不是通用 panel tabs
+
+当前左侧虽然已经拆出了文件树和搜索相关组件，但本质仍是一个 `WorkspaceSidebar` 内部状态切换，不是 Workbench 级别的左侧 panel tabs。当前右侧由 `MdxToc` 负责，直接绑定 Fumadocs TOC：
+
+```txt
+TOCProvider
+  MdxToc
+    useTOCItems()
+```
+
+这意味着左侧和右侧都缺少统一的 panel 模型：左侧不容易扩展更多工作区视图，右侧天然只服务目录，不适合扩展成：
+
+- AI 聊天。
+- 文档元信息。
+- 校验结果。
+- Backlinks。
+- 未来其它辅助面板。
+
+目标应该是：
+
+```txt
+LeftSidebar
+  LeftSidebarTabs
+    ExplorerPanel
+    SearchPanel
+
+RightSidebar
+  RightSidebarTabs
+    OutlinePanel
+    AiChatPanel
+```
+
+其中 `ExplorerPanel` / `SearchPanel` 是左侧面板 tab，`OutlinePanel` / `AiChatPanel` 是右侧面板 tab。目录不应该再是整个布局的一部分。
+
+### 3. `MdxPreview` 是单文档中心模型
+
+`MdxPreview.tsx` 开头就是：
+
+```ts
+const file = workspace.file
+```
+
+后续所有逻辑都围绕这个单个 file 展开：
+
+- 标题。
+- 描述。
+- MDX 编译模块。
+- TOC。
+- 原文复制。
+- 路径复制。
+- 右键菜单。
+- Backlinks。
+- 扩展组件。
+- Unsupported document placeholder。
+
+多文档 tab 需要的是：
+
+```ts
+tabs: DocumentTab[]
+activeTabId: string | null
+activeFile: MdxFile | null
+```
+
+而不是只有：
+
+```ts
+workspace.file
+```
+
+### 4. 当前打开路径是“替换当前文档”
+
+现在 `onOpenPath(filePath)` 的语义大概率是：读取文件，然后替换 `workspace.file`。
+
+Workbench 语义应该变成：
+
+```txt
+openPath(path)
+  如果 tab 已经打开 -> 激活 tab
+  如果 tab 未打开 -> 加载文档 -> 创建 tab -> 激活 tab
+```
+
+这意味着 `openPath` 不再只是「切换当前文档」，而是「打开或激活一个文档标签」。
+
+### 5. 查找和搜索也绑定单文件
+
+当前 `App.tsx` 里：
+
+```tsx
+<FindInPageBar
+  enabled={Boolean(workspace && !inSettingsRoute)}
+  sourceKey={workspace?.file.path ?? ''}
+/>
+```
+
+多 tab 后应该变成：
+
+```tsx
+<FindInPageBar
+  enabled={Boolean(activeTab && !inSettingsRoute)}
+  sourceKey={activeTab?.file.path ?? ''}
+/>
+```
+
+全局搜索结果打开文档时，也需要定义行为：
+
+- 替换当前 tab？
+- 新建 tab？
+- 如果已经打开则激活？
+- 以后是否支持 Ctrl/Cmd 点击强制新 tab？
+
+建议默认：搜索结果点击 = 打开或激活 tab。
+
+### 6. Fumadocs sidebar primitive 不适合作为 Workbench 外壳
+
+当前 `MdxDocsLayout.tsx` 使用：
+
+```txt
+SidebarProvider
+BaseSidebarContent
+useSidebar()
+```
+
+这套能力适合文档站的侧边栏折叠、hover 展开，不是 VS Code 这种可拖拽、可持久化、左右多面板的工作台布局。
+
+可以继续在局部复用 Fumadocs 的视觉或组件，但不建议让它继续控制顶层 shell。
+
+## 关于 node_modules 源码
+
+你提到可以提供一些 `node_modules` 里的源码，这确实可能有帮助，但它不是最核心的阻塞点。
+
+当前真正的问题不是「Fumadocs 某个组件做不到」，而是：
+
+```txt
+当前：Fumadocs docs layout 拥有顶层页面结构
+目标：MDXForge Workbench 拥有顶层页面结构
+```
+
+也就是说，应该反过来：
+
+- MDXForge 控制整体布局。
+- Fumadocs 只负责文档内容内部的渲染体验。
+
+<Callout title="建议" type="warning">
+不建议直接修改 `node_modules`。这些修改会在重新安装依赖或升级依赖时丢失。如果确实需要某些 Fumadocs 行为，建议阅读源码后复制模式，或者封装公共 API，而不是 patch node_modules。
+</Callout>
+
+如果后续需要你提供源码，最值得看的不是整个 Fumadocs，而是这些部分：
+
+```txt
+fumadocs-ui/layouts/docs/page
+fumadocs-ui/components/toc
+fumadocs-ui/components/sidebar/base
+```
+
+目的不是直接改它们，而是确认哪些内部样式或上下文依赖需要在新 Workbench 里兼容。
+
+
+## Fumadocs 源码观察
+
+已查看 `C:\Users\admin\Desktop\fumadocs-dev` 中和布局相关的源码。结论更加明确：Fumadocs 的 docs/notebook layout 可以参考，但不适合作为 MDXForge Workbench 的顶层布局。
+
+关键源码位置：
+
+```txt
+packages/base-ui/src/layouts/docs/client.tsx
+packages/base-ui/src/layouts/docs/slots/container.tsx
+packages/base-ui/src/layouts/docs/slots/sidebar.tsx
+packages/base-ui/src/layouts/notebook/slots/container.tsx
+packages/base-ui/src/components/sidebar/base.tsx
+packages/base-ui/src/components/sidebar/tabs/index.tsx
+packages/base-ui/src/components/toc/index.tsx
+```
+
+### docs layout 的核心限制
+
+`packages/base-ui/src/layouts/docs/slots/container.tsx` 里，顶层 grid 仍然是文档站模型：
+
+```txt
+"sidebar sidebar header toc toc"
+"sidebar sidebar toc-popover toc toc"
+"sidebar sidebar main toc toc"
+```
+
+它依赖这些 CSS 变量：
+
+```txt
+--fd-sidebar-width
+--fd-sidebar-col
+--fd-toc-width
+--fd-layout-width
+```
+
+这说明 Fumadocs 的 layout 目标是「文档站页面宽度 + 左侧文档导航 + 右侧 TOC」，不是「应用工作台」。如果继续沿用它，我们会持续和 grid 区域、TOC 区域、sidebar collapse 逻辑对抗。
+
+### notebook layout 也不是 Workbench
+
+`packages/base-ui/src/layouts/notebook/slots/container.tsx` 比 docs layout 稍微接近应用布局，但本质仍然是：
+
+```txt
+sidebar | main | toc
+```
+
+它仍然围绕 `--fd-sidebar-col`、`--fd-toc-width` 和固定 grid areas 工作。可以参考样式，但不建议直接采用。
+
+### sidebar/base 适合文档导航，不适合 Workbench panel
+
+`packages/base-ui/src/components/sidebar/base.tsx` 提供：
+
+- `SidebarProvider`
+- `useSidebar`
+- `SidebarContent`
+- `SidebarDrawerContent`
+- folder open/close context
+
+这些能力很适合文档树导航和移动端 drawer，但 Workbench 需要的是：
+
+- 左右两侧都可拖拽。
+- 底部面板也可拖拽调整高度。
+- 左右两侧都有 panel tabs。
+- 底部也有 panel tabs。
+- 侧栏宽度和底部高度持久化。
+- 中间多文档 tabs。
+- active document 驱动右侧 outline。
+
+所以可以复用局部样式思想，不建议复用它作为顶层状态容器。
+
+### sidebar/tabs 不是我们需要的左侧 tabs
+
+`packages/base-ui/src/components/sidebar/tabs/index.tsx` 里的 `getSidebarTabs()` 是从 Fumadocs page tree 里提取文档分组 tabs。
+
+它的语义是：
+
+```txt
+文档站不同 section 的导航 tab
+```
+
+不是我们需要的：
+
+```txt
+Explorer / Search 这种工作区功能 tab
+```
+
+因此左侧 Workbench tabs 应该由 MDXForge 自己实现，不应直接套用 Fumadocs sidebar tabs。
+
+### TOC 可以继续复用
+
+`packages/base-ui/src/components/toc/index.tsx` 比较适合继续借鉴。它把 TOC 拆成：
+
+```txt
+TOCProvider
+useTOCItems
+TOCScrollArea
+useActiveAnchor / useActiveAnchors
+```
+
+这部分可以在 `OutlinePanel` 内部复用或模仿。关键是：TOC provider 应该包住当前 active document 的 outline 区域，而不是控制整个 app layout。
+
+### 源码结论
+
+Fumadocs 源码验证了这件事：
+
+```txt
+Fumadocs layout = 文档站外壳
+MDXForge Workbench = 桌面应用外壳
+```
+
+两者边界应拆开。MDXForge 应自己实现 Workbench shell，只复用 Fumadocs 的文档内容组件、TOC 工具和局部样式经验。
+
+## 推荐目标架构
+
+新增 Workbench 层：
+
+```txt
+components/workbench/
+  WorkbenchLayout.tsx
+  ResizablePane.tsx
+  LeftSidebar.tsx
+  LeftSidebarTabs.tsx
+  ExplorerPanel.tsx
+  SearchPanel.tsx
+  DocumentTabs.tsx
+  RightSidebar.tsx
+  OutlinePanel.tsx
+  AiChatPanel.tsx
+  BottomPanel.tsx
+  TerminalPanel.tsx
+  ProblemsPanel.tsx
+  OutputPanel.tsx
+```
+
+重构 preview 层：
+
+```txt
+components/preview/
+  MdxDocumentView.tsx
+  DocumentSurface.tsx
+  DocumentPageActions.tsx
+  DocumentContextMenu.tsx
+```
+
+新增或调整 hooks：
+
+```txt
+hooks/
+  useWorkspaceActions.ts
+  useWorkbenchTabs.ts
+  useResizableWorkbenchLayout.ts
+```
+
+目标是职责清晰：
+
+```txt
+WorkbenchLayout 负责布局
+LeftSidebar 负责左侧面板切换
+DocumentTabs 负责中间文档标签页
+MdxDocumentView 负责单文档渲染
+RightSidebar 负责右侧面板切换
+BottomPanel 负责底部面板切换
+ExplorerPanel 负责文件树
+SearchPanel 负责工作区搜索
+```
+
+## 推荐数据模型
+
+可以先让 renderer 拥有 tab 状态，主进程仍然按 path 读取和编译单个文档。
+
+建议类型：
+
+```ts
+type DocumentTab = {
+  id: string
+  path: string
+  title: string
+  workspaceRoot?: string
+  file: MdxFile
+  dirty?: boolean
+}
+
+type WorkbenchState = {
+  tabs: DocumentTab[]
+  activeTabId: string | null
+  leftSidebarWidth: number
+  rightSidebarWidth: number
+  leftSidebarCollapsed: boolean
+  rightSidebarCollapsed: boolean
+  bottomPanelHeight: number
+  bottomPanelCollapsed: boolean
+  leftSidebarTab: 'explorer' | 'search'
+  rightSidebarTab: 'outline' | 'ai'
+  bottomPanelTab: 'terminal' | 'problems' | 'output'
+}
+```
+
+打开文档流程：
+
+```txt
+用户在左侧 Explorer 或 Search 中选择文档
+  -> openDocument(path, workspaceRoot)
+  -> 如果 tab 已存在：激活 tab
+  -> 如果 tab 不存在：调用 window.api.openPath(path, workspaceRoot)
+  -> 得到文档内容
+  -> 创建 DocumentTab
+  -> 激活 DocumentTab
+```
+
+后续可以再把主进程 API 调整得更精准：
+
+```ts
+readWorkspaceDocument(path, workspaceRoot): Promise<MdxFile>
+```
+
+这样就不需要每次打开 tab 都返回完整 `MdxWorkspace`。
+
+## 组件职责拆分
+
+### `WorkbenchLayout`
+
+负责物理布局。
+
+职责：
+
+- 左中右三栏。
+- 左侧宽度。
+- 右侧宽度。
+- 拖拽 handle。
+- 折叠状态。
+- 最小/最大宽度。
+- 中间区域 overflow。
+
+它不应该知道 MDX 编译细节。
+
+### `LeftSidebar`
+
+负责左侧工作区 panel tabs。
+
+职责：
+
+- 展示 Explorer / Search tabs。
+- 保存当前左侧 active tab。
+- 承载文件树面板和搜索面板。
+- 处理左侧空状态和折叠状态。
+
+### `ExplorerPanel`
+
+负责文件树。
+
+职责：
+
+- 展示 workspace 文件树。
+- 重命名 / 删除 / 右键菜单。
+- 打开文件 / 文件夹。
+- 点击文档时调用 `openDocument(path)`。
+
+### `SearchPanel`
+
+负责工作区搜索。
+
+职责：
+
+- 输入搜索关键词。
+- 展示搜索结果。
+- 维护搜索 loading / empty / collapsed group 状态。
+- 点击结果时调用 `openDocument(path)`。
+
+### `DocumentTabs`
+
+负责中间文档标签栏。
+
+职责：
+
+- 展示已打开文档。
+- 激活 tab。
+- 关闭 tab。
+- 后续可支持拖拽排序。
+- 后续可显示 dirty 状态。
+
+### `MdxDocumentView`
+
+负责渲染一个文档。
+
+职责：
+
+- 编译 / 渲染当前文件。
+- 展示标题、描述、正文。
+- 计算当前文档 TOC。
+- 展示 backlinks。
+- 展示 unsupported document placeholder。
+- 提供复制源码、复制路径等文档操作。
+
+它应该接收一个 `file`，不应该控制整体布局。
+
+### `RightSidebar`
+
+负责右侧 panel tabs。
+
+职责：
+
+- 展示 Outline / AI tab。
+- 处理空状态。
+- 接收当前 active document context。
+- 为未来更多右侧 panel 预留结构。
+
+### `OutlinePanel`
+
+负责展示当前 active tab 的目录。
+
+需要处理：
+
+- 没有打开文档。
+- 当前文档不是 Markdown / MDX。
+- 当前文档没有 heading。
+- 当前文档还在编译。
+
+
+### `BottomPanel`
+
+负责底部技术面板。
+
+职责：
+
+- 展示 Terminal / Problems / Output tabs。
+- 支持拖拽调整高度。
+- 支持折叠和恢复。
+- 为未来本地命令执行、MDX 校验、构建日志、AI agent 输出预留空间。
+
+### `TerminalPanel`
+
+首版可以先做占位，不必马上实现真实终端。
+
+后续可能能力：
+
+- 显示工作区根目录。
+- 运行本地只读或用户确认后的命令。
+- 展示命令输出。
+- 和 AI chat 共享上下文，但必须明确权限边界。
+
+### `ProblemsPanel`
+
+用于展示文档问题。
+
+可能来源：
+
+- MDX 编译错误。
+- Frontmatter 缺失。
+- 不受支持的组件。
+- 链接失效。
+- 图片路径错误。
+
+### `OutputPanel`
+
+用于展示系统日志或任务输出。
+
+可能来源：
+
+- 文件夹扫描。
+- 搜索索引。
+- Component Pack 加载。
+- AI 操作日志。
+
+### `AiChatPanel`
+
+首版可以先做占位。
+
+后续上下文输入可以包括：
+
+- 当前文件路径。
+- 当前文件原文。
+- 当前文档标题。
+- 当前文档 headings。
+- 工作区根目录。
+- 当前打开的 tabs。
+- 用户选中文本。
+
+## 拖拽布局实现方式
+
+### 方案 A：使用 `react-resizable-panels`
+
+优点：
+
+- 实现快。
+- 拖拽体验成熟。
+- 基础无障碍能力较好。
+- 很适合这类左右 panel 布局。
+
+缺点：
+
+- 增加依赖。
+- 需要自己做视觉适配。
+
+示意：
+
+```tsx
+<PanelGroup direction="vertical">
+  <Panel minSize={50}>
+    <PanelGroup direction="horizontal">
+      <Panel minSize={14} defaultSize={20}>
+        <LeftSidebar />
+      </Panel>
+      <PanelResizeHandle />
+      <Panel minSize={40}>
+        <DocumentArea />
+      </Panel>
+      <PanelResizeHandle />
+      <Panel minSize={16} defaultSize={22}>
+        <RightSidebar />
+      </Panel>
+    </PanelGroup>
+  </Panel>
+  <PanelResizeHandle />
+  <Panel minSize={12} defaultSize={22} collapsible>
+    <BottomPanel />
+  </Panel>
+</PanelGroup>
+```
+
+### 方案 B：自己写 pointer drag + CSS variables
+
+优点：
+
+- 不增加依赖。
+- 宽度可以用像素精确持久化。
+- 控制力最强。
+
+缺点：
+
+- 要处理更多边界情况。
+- 包括 pointer capture、min/max、拖拽时禁止选中文本、窗口 resize 等。
+
+示意：
+
+```tsx
+<div
+  className="grid"
+  style={{
+    gridTemplateColumns: `${leftWidth}px 1fr ${rightWidth}px`,
+    gridTemplateRows: `1fr ${bottomHeight}px`
+  }}
+>
+  <aside />
+  <main />
+  <aside />
+</div>
+```
+
+推荐：优先用 `react-resizable-panels`，除非明确不想加依赖。
+
+## 需要先确定的产品行为
+
+| 问题 | 推荐默认行为 |
+| --- | --- |
+| 点击左侧 Explorer 文件 | 打开或激活中间文档 tab |
+| 点击已经打开的文件 | 激活已有 tab，不重复打开 |
+| 关闭当前文档 tab | 优先激活右边的文档 tab，否则激活左边的文档 tab |
+| 没有 tab 时 | 中间显示空状态 |
+| 单文件模式 | 仍显示 tab bar，左侧可隐藏或折叠 |
+| 左侧默认 tab | Explorer |
+| 右侧默认 tab | Outline |
+| 右侧用户切到 AI 后 | 保持 AI tab，切文档不自动跳回 Outline |
+| 左侧 active tab | 持久化到设置 |
+| 右侧 active tab | 持久化到设置 |
+| 底部默认 tab | Terminal |
+| 底部 active tab | 持久化到设置 |
+| 侧栏宽度 | 持久化到设置 |
+| 底部高度 | 持久化到设置 |
+| 打开 tabs 是否持久化 | 后续再做 |
+
+## 一次到位的实施方案
+
+### 1. 新建 Workbench 外壳
+
+新增：
+
+```txt
+components/workbench/WorkbenchLayout.tsx
+components/workbench/LeftSidebar.tsx
+components/workbench/LeftSidebarTabs.tsx
+components/workbench/ExplorerPanel.tsx
+components/workbench/SearchPanel.tsx
+components/workbench/RightSidebar.tsx
+components/workbench/DocumentTabs.tsx
+components/workbench/OutlinePanel.tsx
+components/workbench/AiChatPanel.tsx
+components/workbench/BottomPanel.tsx
+components/workbench/TerminalPanel.tsx
+components/workbench/ProblemsPanel.tsx
+components/workbench/OutputPanel.tsx
+```
+
+`MdxDocsLayout` 不再作为顶层页面布局。
+
+### 2. 抽出单文档视图
+
+从 `MdxPreview.tsx` 中抽出：
+
+```txt
+components/preview/MdxDocumentView.tsx
+```
+
+它只负责一个文件的渲染，不负责左栏、右栏和 tabs。
+
+建议输入：
+
+```ts
+type MdxDocumentViewProps = {
+  workspace: MdxWorkspace
+  file: MdxFile
+  onOpenPath: (filePath: string, workspaceRoot?: string) => void
+  onTocChange?: (toc: TOCItemType[]) => void
+}
+```
+
+### 3. 新增 tab 状态管理
+
+新增：
+
+```txt
+hooks/useWorkbenchTabs.ts
+```
+
+核心操作：
+
+```ts
+openOrActivate(path, workspaceRoot)
+activate(tabId)
+close(tabId)
+replaceActive(file)
+```
+
+### 4. 改造左侧 panel tabs 和打开文档行为
+
+左侧不再是一个混合了文件树和搜索状态的单体 `WorkspaceSidebar`，而是拆成：
+
+```txt
+LeftSidebar
+  ExplorerPanel
+  SearchPanel
+```
+
+`ExplorerPanel` 点击文件、`SearchPanel` 点击搜索结果时，都不再只是切换 `workspace.file`，而是调用：
+
+```ts
+openDocument(path, workspaceRoot)
+```
+
+### 5. 改造右侧目录
+
+右侧不再由 `MdxDocsLayout` 直接生成 TOC。
+
+新流程：
+
+```txt
+MdxDocumentView 计算 toc
+  -> 上抛给 Workbench state
+  -> RightSidebar / OutlinePanel 渲染 active tab toc
+```
+
+### 6. 接入 AI panel 占位
+
+首版 `AiChatPanel` 可以只显示：
+
+```txt
+当前文档：xxx.mdx
+AI chat coming soon
+```
+
+但结构上要接收 active document context，避免后续重构。
+
+### 7. 更新全局查找和搜索
+
+`FindInPageBar` 的 `sourceKey` 改为 active tab。
+
+`SearchOverlay` 的打开行为改为 open-or-activate tab。
+
+## 高风险点
+
+### TOC 所属权
+
+当前 TOC 跟 `MdxDocsLayout` 绑定。Workbench 后，TOC 必须跟 active tab 绑定。
+
+不要让右侧 Outline 直接依赖全局 Fumadocs layout context。
+
+### Scroll container
+
+现在正文滚动在 `MdxPageContainer` 里。Workbench 后需要保证：
+
+```txt
+左侧 sidebar 自己滚动
+中间 active document 自己滚动
+右侧 sidebar 自己滚动
+整体窗口不乱滚
+```
+
+### Fumadocs 样式变量
+
+`DocsBody`、`DocsTitle`、`DocsDescription` 可以继续用，但它们可能默认依赖 docs layout 的 CSS 环境。
+
+如果迁移后样式有问题，需要在新的 document surface 里补齐：
+
+- 正文最大宽度。
+- padding。
+- prose 样式。
+- 暗色模式。
+- 代码块样式。
+
+### 多 tab 下的编译状态
+
+每个 tab 都可能有自己的：
+
+- compiled source。
+- compile error。
+- render error。
+- toc。
+- extension state。
+
+不要把这些状态放成全局单例。
+
+### AI 上下文边界
+
+AI 面板不应该直接读 DOM。应该通过明确的数据输入拿上下文：
+
+```ts
+activeFilePath
+activeTitle
+workspaceRoot
+rawSource
+headings
+```
+
+这样未来更容易做权限、安全和提示词控制。
+
+## 可能需要修改的文件
+
+高影响文件：
+
+```txt
+apps/desktop/src/renderer/src/components/MdxPreview.tsx
+apps/desktop/src/renderer/src/components/MdxDocsLayout.tsx
+apps/desktop/src/renderer/src/App.tsx
+apps/desktop/src/renderer/src/hooks/useWorkspaceActions.ts
+apps/desktop/src/renderer/src/types.ts
+```
+
+新增文件：
+
+```txt
+apps/desktop/src/renderer/src/components/workbench/WorkbenchLayout.tsx
+apps/desktop/src/renderer/src/components/workbench/LeftSidebar.tsx
+apps/desktop/src/renderer/src/components/workbench/LeftSidebarTabs.tsx
+apps/desktop/src/renderer/src/components/workbench/ExplorerPanel.tsx
+apps/desktop/src/renderer/src/components/workbench/SearchPanel.tsx
+apps/desktop/src/renderer/src/components/workbench/DocumentTabs.tsx
+apps/desktop/src/renderer/src/components/workbench/RightSidebar.tsx
+apps/desktop/src/renderer/src/components/workbench/OutlinePanel.tsx
+apps/desktop/src/renderer/src/components/workbench/AiChatPanel.tsx
+apps/desktop/src/renderer/src/components/workbench/BottomPanel.tsx
+apps/desktop/src/renderer/src/components/workbench/TerminalPanel.tsx
+apps/desktop/src/renderer/src/components/workbench/ProblemsPanel.tsx
+apps/desktop/src/renderer/src/components/workbench/OutputPanel.tsx
+apps/desktop/src/renderer/src/hooks/useWorkbenchTabs.ts
+```
+
+可能后续需要调整：
+
+```txt
+apps/desktop/src/main/mdx.ts
+apps/desktop/src/main/ipc.ts
+apps/desktop/src/preload/index.ts
+apps/desktop/src/preload/index.d.ts
+apps/desktop/src/shared/ipc.ts
+```
+
+## 验收标准
+
+完成后应满足：
+
+- 左侧边栏可以拖拽调整宽度。
+- 左侧边栏有 tab：
+  - 文件树 / Explorer。
+  - 搜索 / Search。
+- 右侧边栏可以拖拽调整宽度。
+- 右侧边栏可以在「目录」和「AI」之间切换。
+- 底部面板可以拖拽调整高度。
+- 底部面板至少预留「终端」tab，并可扩展 Problems / Output。
+- 中间区域有文档 tab bar。
+- 可以同时打开多个文档。
+- 点击已经打开的文档会激活已有 tab，而不是重复打开。
+- 当前 active tab 决定右侧目录内容。
+- 现有 MDX 渲染能力仍然可用。
+- Backlinks、页面操作、右键菜单仍然可用。
+- 设置页仍然独立可用。
+- `pnpm run lint` 通过。
+- `pnpm run typecheck` 通过。
+
+## 最终建议
+
+这次重构应该以 Workbench 为中心，而不是以 Fumadocs docs layout 为中心。
+
+推荐边界：
+
+```txt
+MDXForge 负责：
+  App shell
+  左右可拖拽面板
+  底部可拖拽技术面板
+  左侧 Explorer / Search tabs
+  中间文档 tabs
+  右侧 Outline / AI tabs
+  底部 Terminal / Problems / Output tabs
+  active document session state
+
+Fumadocs 负责：
+  文档正文排版
+  MDX 内容展示
+  TOC 数据或渲染能力的局部复用
+```
+
+这样才能一次到位地接近 VS Code 的交互模式，同时避免继续被当前单文档 docs-page 布局限制。

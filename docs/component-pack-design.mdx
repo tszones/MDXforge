@@ -1,0 +1,741 @@
+---
+title: MDXForge Component Pack 设计方案
+description: 让 AI 生成的结构化 MDX 内容通过可安装组件包渲染为更好的阅读体验。
+---
+
+# MDXForge Component Pack 设计方案
+
+## 目标
+
+MDXForge 不做通用 Markdown 编辑器，而是做 **AI 文档阅读、审阅、校验环境**。
+
+AI 时代的文档不应该只停留在纯 Markdown 或 ASCII 图。AI 应该可以输出结构化 MDX：
+
+```mdx
+<LayoutDiagram
+  title="Workbench Layout"
+  left="文件树 / 搜索 / 工作区操作"
+  center="文档预览 / 源码轻编辑"
+  right="目录 / AI 审阅"
+/>
+```
+
+MDXForge 负责把它渲染成更适合人类阅读的 UI。
+
+```txt
+AI 写结构
+→ MDXForge 校验结构
+→ 组件包负责渲染
+→ 人类负责审阅
+```
+
+---
+
+## 产品原则
+
+### 1. Read-first
+
+MDXForge 的主定位不是写作，而是阅读与审批。
+
+```txt
+AI writes.
+Human reviews.
+MDXForge renders, validates, and assists.
+```
+
+因此组件系统服务于：
+
+- 更好阅读
+- 更好审阅
+- 更好理解 AI 生成文档
+- 更好表达结构化内容
+
+不服务于：
+
+- 任意应用开发
+- 业务逻辑执行
+- 通用 React 插件市场
+- 富文本编辑器生态
+
+### 2. Source of truth 仍是 MDX
+
+文档的唯一真相仍然是：
+
+```txt
+.md / .mdx 文件
+```
+
+组件包不能引入私有文档状态。
+
+正确：
+
+```txt
+MDX source → compile → registered components → preview
+```
+
+错误：
+
+```txt
+MDX source → component private state → hidden document model
+```
+
+### 3. 可扩展，但默认安全
+
+组件应可以下载、添加、自制、在工作区共享，并给 AI 写作规则使用。
+
+但安全边界必须清楚：
+
+```txt
+可扩展组件 ≠ 任意执行不可信第三方 JS
+```
+
+第一版优先支持：
+
+```txt
+workspace-local component package
++ 显式启用
++ 安全提示
++ 受控加载
+```
+
+---
+
+## 当前已有基础
+
+项目里已经有扩展包雏形。
+
+关键文件：
+
+```txt
+apps/desktop/src/main/extensions.ts
+apps/desktop/src/renderer/src/components/preview/useWorkspaceExtensions.ts
+apps/desktop/src/renderer/src/components/preview/extensions.ts
+```
+
+已有能力：
+
+- 读取 `mdxforge.config.json`
+- 加载 workspace-local package
+- 校验包路径必须在工作区内
+- 支持 package `entry`
+- 支持 package `styles`
+- 支持 package `rules`
+- 支持安全模式提示
+- 用户显式启用后动态加载组件
+- 支持 `mdxforge-extension://` 协议访问资源
+
+示例配置：
+
+```json
+{
+  "packages": ["./.mdxforge/extensions/local-components"]
+}
+```
+
+示例组件包：
+
+```txt
+.mdxforge/extensions/local-components/
+├── package.json
+├── rules.mdx
+└── bundle/
+    ├── extension.js
+    └── style.css
+```
+
+---
+
+## Component Pack v1 目标
+
+把已有 extension prototype 产品化为：
+
+```txt
+MDXForge Component Pack v1
+```
+
+它应该支持：
+
+- 本地安装组件包
+- 工作区声明组件包
+- 用户显式启用组件包
+- 组件进入 MDX 白名单
+- AI 写作规则自动知道可用组件
+- 渲染失败时显示错误卡片
+- 包含示例文档与规则文档
+
+---
+
+## 包结构
+
+推荐标准结构：
+
+```txt
+.mdxforge/extensions/layout-diagrams/
+├── package.json
+├── README.mdx
+├── rules.mdx
+├── examples/
+│   └── workbench-layout.mdx
+└── bundle/
+    ├── extension.js
+    └── style.css
+```
+
+## package.json
+
+```json
+{
+  "name": "@workspace/layout-diagrams",
+  "version": "0.1.0",
+  "private": true,
+  "mdxforge": {
+    "schema": 1,
+    "type": "component",
+    "entry": "./bundle/extension.js",
+    "styles": ["./bundle/style.css"],
+    "rules": ["./rules.mdx"],
+    "components": [
+      {
+        "name": "LayoutDiagram",
+        "description": "Render a document/workbench layout diagram.",
+        "props": {
+          "title": "string",
+          "left": "string",
+          "center": "string",
+          "right": "string"
+        }
+      }
+    ]
+  }
+}
+```
+
+第一版可以先不做完整 JSON Schema，但 manifest 必须开始声明组件名。
+
+## extension.js
+
+组件包入口返回可注册组件：
+
+```js
+export default function defineLayoutDiagramComponents(runtime) {
+  const { jsx, jsxs } = runtime
+
+  function LayoutDiagram({ title, left, center, right }) {
+    return jsxs('section', {
+      className: 'mdxforge-layout-diagram',
+      children: [
+        title
+          ? jsx('h3', {
+              className: 'mdxforge-layout-diagram__title',
+              children: title
+            })
+          : null,
+        jsxs('div', {
+          className: 'mdxforge-layout-diagram__grid',
+          children: [
+            jsx('div', {
+              className: 'mdxforge-layout-diagram__panel mdxforge-layout-diagram__side',
+              children: left
+            }),
+            jsx('div', {
+              className: 'mdxforge-layout-diagram__panel mdxforge-layout-diagram__center',
+              children: center
+            }),
+            jsx('div', {
+              className: 'mdxforge-layout-diagram__panel mdxforge-layout-diagram__side',
+              children: right
+            })
+          ]
+        })
+      ]
+    })
+  }
+
+  return {
+    components: {
+      LayoutDiagram
+    }
+  }
+}
+```
+
+## style.css
+
+```css
+.mdxforge-layout-diagram {
+  margin: 1.5rem 0;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 1rem;
+  padding: 1rem;
+  background: color-mix(in oklab, var(--color-fd-card), transparent 0%);
+}
+
+.mdxforge-layout-diagram__title {
+  margin: 0 0 0.75rem;
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.mdxforge-layout-diagram__grid {
+  display: grid;
+  grid-template-columns: minmax(8rem, 0.8fr) minmax(14rem, 1.6fr) minmax(8rem, 0.8fr);
+  gap: 0.75rem;
+}
+
+.mdxforge-layout-diagram__panel {
+  min-height: 7rem;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 0.75rem;
+  padding: 0.875rem;
+  background: var(--color-fd-background);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.mdxforge-layout-diagram__center {
+  min-height: 10rem;
+}
+
+@media (max-width: 800px) {
+  .mdxforge-layout-diagram__grid {
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+## rules.mdx
+
+该文件告诉 AI 如何使用组件：
+
+````mdx
+---
+title: Layout Diagrams Rules
+description: Writing rules for layout diagram components.
+---
+
+# Layout Diagrams Rules
+
+Use `<LayoutDiagram />` when describing application layouts, workspace layouts, dashboards, or editor shells.
+
+## Component
+
+### LayoutDiagram
+
+Use this component instead of ASCII box diagrams.
+
+```mdx
+<LayoutDiagram
+  title="MDXForge Workbench"
+  left="文件树 / 搜索 / 工作区操作"
+  center="文档预览 / 源码轻编辑"
+  right="目录 / AI 审阅"
+/>
+```
+
+## Rules
+
+- Keep each region short.
+- Prefer nouns over long paragraphs.
+- Do not use this for process flows.
+- Use Markdown prose before or after the diagram to explain details.
+````
+
+---
+
+## MDX 使用方式
+
+AI 可以写：
+
+```mdx
+---
+title: Workbench Layout
+description: MDXForge workbench layout proposal.
+---
+
+# Workbench Layout
+
+<LayoutDiagram
+  title="MDXForge Workbench"
+  left="文件树 / 搜索 / 工作区操作"
+  center="文档标签栏 / 当前文档预览 / 源码轻编辑"
+  right="目录 / AI 审阅"
+/>
+
+这个布局保持 read-first：中间仍以预览为主，源码编辑只是辅助能力。
+```
+
+---
+
+## 工作区配置
+
+用户在工作区根目录添加：
+
+```json
+{
+  "packages": ["./.mdxforge/extensions/layout-diagrams"]
+}
+```
+
+打开工作区后，MDXForge 检测扩展包。
+
+默认状态：
+
+```txt
+detected but disabled
+```
+
+用户点击：
+
+```txt
+Enable workspace extensions
+```
+
+之后该组件进入当前 workspace 的 MDX 组件白名单。
+
+---
+
+## 安全策略
+
+### v1 安全边界
+
+第一版只支持：
+
+- workspace-local package
+- package 路径必须在 workspace 内
+- 用户显式启用
+- 禁止自动启用
+- npm/git source 标记为 unsupported
+- 加载失败显示错误
+- 不允许组件访问主进程 IPC
+- 不允许组件读写文件
+- 不允许组件声明额外 Electron 权限
+
+### v1 不做
+
+- 远程市场安装
+- npm 直接安装
+- git 直接安装
+- 自动更新
+- 任意权限申请
+- 后台执行任务
+- Node API 暴露
+
+---
+
+## 后续升级
+
+### v2：组件 manifest
+
+为每个组件声明：
+
+- name
+- description
+- props
+- examples
+- category
+- AI writing rules
+
+示例：
+
+```json
+{
+  "name": "LayoutDiagram",
+  "category": "diagram",
+  "description": "Render a three-region layout diagram.",
+  "propsSchema": {
+    "type": "object",
+    "required": ["left", "center", "right"],
+    "properties": {
+      "title": { "type": "string" },
+      "left": { "type": "string" },
+      "center": { "type": "string" },
+      "right": { "type": "string" }
+    }
+  }
+}
+```
+
+### v3：Schema 校验
+
+渲染前校验 props：
+
+```txt
+MDX component props
+→ schema validate
+→ valid: render
+→ invalid: error card
+```
+
+错误展示：
+
+```txt
+LayoutDiagram props invalid:
+- center is required
+- right must be a string
+```
+
+### v4：下载与市场
+
+允许来源：
+
+- official registry
+- GitHub release
+- local `.mdxforge-pack`
+- enterprise internal registry
+
+但仍必须：
+
+- 显式安装
+- 显式启用
+- 显示权限
+- 可禁用
+- 可卸载
+
+---
+
+## 与 Skills 的关系
+
+项目里已有 skills 系统：
+
+```txt
+apps/desktop/src/main/skills.ts
+apps/desktop/src/main/skills/manifest.ts
+```
+
+建议区分：
+
+```txt
+Skill = AI 写作规则 / 模板 / agent adapter
+Extension Package = 运行时渲染组件 / 样式
+```
+
+Component Pack 可以同时包含：
+
+```txt
+runtime extension
++ AI writing rules
++ examples
+```
+
+即：
+
+```txt
+一个包同时告诉 AI 怎么写，也告诉 MDXForge 怎么渲染
+```
+
+---
+
+## MVP 实施步骤
+
+### Step 1：补齐 manifest
+
+扩展 `WorkspaceExtensionPackage`：
+
+```ts
+components: WorkspaceExtensionComponent[]
+```
+
+组件结构：
+
+```ts
+interface WorkspaceExtensionComponent {
+  name: string
+  description?: string
+  category?: string
+}
+```
+
+### Step 2：读取 package.json components
+
+从：
+
+```json
+{
+  "mdxforge": {
+    "components": []
+  }
+}
+```
+
+读取组件声明。
+
+### Step 3：传给 renderer
+
+让 renderer 知道：
+
+```txt
+当前 workspace 有哪些 extension components
+```
+
+用于：
+
+- 安全提示
+- AI 规则面板
+- 可用组件列表
+- 错误提示
+
+### Step 4：增强安全提示
+
+安全提示展示：
+
+```txt
+This workspace wants to enable:
+- @workspace/layout-diagrams
+  - Components: LayoutDiagram
+  - Styles: style.css
+  - Rules: rules.mdx
+```
+
+### Step 5：AI prompt 集成
+
+把 active extension rules 合并进 AI 写作上下文。
+
+AI 看到：
+
+```txt
+Available components:
+- LayoutDiagram
+```
+
+于是优先输出结构化 MDX，而不是 ASCII 图。
+
+### Step 6：创建脚手架
+
+新增操作：
+
+```txt
+Create local component pack
+```
+
+输入：
+
+```txt
+name: layout-diagrams
+component: LayoutDiagram
+```
+
+生成：
+
+```txt
+.mdxforge/extensions/layout-diagrams/
+├── package.json
+├── rules.mdx
+├── examples/demo.mdx
+└── bundle/
+    ├── extension.js
+    └── style.css
+```
+
+---
+
+## 推荐首批组件包
+
+### Diagrams Pack
+
+组件：
+
+- `LayoutDiagram`
+- `FlowDiagram`
+- `ArchitectureDiagram`
+
+用途：
+
+```txt
+把 AI 常写的 ASCII 图变成可读图表
+```
+
+### Review Pack
+
+组件：
+
+- `ReviewChecklist`
+- `ApprovalStatus`
+- `DecisionRecord`
+
+用途：
+
+```txt
+服务人类审批流程
+```
+
+### AI Document Pack
+
+组件：
+
+- `AssumptionList`
+- `RiskList`
+- `OpenQuestions`
+- `ActionItems`
+
+用途：
+
+```txt
+让 AI 输出更适合审阅的结构化文档
+```
+
+---
+
+## 最终形态
+
+用户安装组件包：
+
+```txt
+@mdxforge/diagrams
+@mdxforge/review
+@company/product-docs
+```
+
+AI 生成 MDX：
+
+```mdx
+<LayoutDiagram
+  title="Workbench"
+  left="Explorer / Search"
+  center="Preview / Source Quick Edit"
+  right="Outline / AI Review"
+/>
+
+<ReviewChecklist>
+  <ReviewItem>信息架构清晰</ReviewItem>
+  <ReviewItem>组件使用合规</ReviewItem>
+  <ReviewItem>无 MDX 编译错误</ReviewItem>
+</ReviewChecklist>
+```
+
+MDXForge 渲染为高级阅读界面。
+
+---
+
+## 结论
+
+MDXForge 应把自定义组件做成 **Component Pack**，而不是只做内置组件。
+
+最小可行路线：
+
+```txt
+workspace-local package
+→ manifest 声明组件
+→ 用户显式启用
+→ runtime 注册组件
+→ rules 告诉 AI 怎么写
+→ preview 渲染
+```
+
+长期路线：
+
+```txt
+Component Pack Registry
+→ 下载
+→ 安装
+→ 权限
+→ schema 校验
+→ AI-aware authoring
+```
+
+核心差异化：
+
+```txt
+不是让人写 Markdown
+而是让 AI 写结构化文档
+让人用更好的 UI 审阅它
+```

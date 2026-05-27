@@ -1,4 +1,4 @@
-import type { MdxFolderEntry, MdxFolderTreeNode } from '../../types'
+import type { MdxFile, MdxFolderEntry, MdxFolderTreeNode } from '../../types'
 
 export type FileTreeNode =
   | { type: 'file'; entry: MdxFolderEntry }
@@ -16,6 +16,28 @@ export type FileTreeNode =
     }
   | { type: 'separator'; label: string; icon?: string }
   | { type: 'link'; label: string; href: string; external?: boolean; icon?: string }
+
+export function buildSingleFileTree(file: MdxFile): FileTreeNode[] {
+  return [
+    {
+      type: 'file',
+      entry: {
+        path: file.path,
+        name: file.name,
+        relativePath: file.name,
+        displayPath: file.name,
+        slug: [],
+        title: typeof file.frontmatter.title === 'string' ? file.frontmatter.title : undefined,
+        description:
+          typeof file.frontmatter.description === 'string'
+            ? file.frontmatter.description
+            : undefined,
+        links: [],
+        backlinks: []
+      }
+    }
+  ]
+}
 
 export function buildFileTree(
   entries: MdxFolderEntry[],

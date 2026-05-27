@@ -7,17 +7,27 @@ export type SidebarTab = 'files' | 'search'
 
 export function useWorkspaceSidebarTabs({
   hasWorkspaceFolder,
+  activeTab: controlledActiveTab,
+  onActiveTabChange,
   onExpandSidebar,
   workspaceSearchInputRef
 }: {
   hasWorkspaceFolder: boolean
+  activeTab?: SidebarTab
+  onActiveTabChange?: (tab: SidebarTab) => void
   onExpandSidebar?: () => void
   workspaceSearchInputRef: React.RefObject<HTMLInputElement | null>
 }): {
   activeTab: SidebarTab
   setActiveTab: (tab: SidebarTab) => void
 } {
-  const [activeTab, setActiveTab] = useState<SidebarTab>('files')
+  const [internalActiveTab, setInternalActiveTab] = useState<SidebarTab>('files')
+  const activeTab = controlledActiveTab ?? internalActiveTab
+
+  function setActiveTab(tab: SidebarTab): void {
+    setInternalActiveTab(tab)
+    onActiveTabChange?.(tab)
+  }
 
   useHotkeys(
     [

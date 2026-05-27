@@ -1,3 +1,4 @@
+import { SidebarProvider } from 'fumadocs-ui/components/sidebar/base'
 import { Code2, FileText, FolderOpen } from 'lucide-react'
 import { m } from '../../../paraglide/messages'
 import { FileTreeNodeContextMenu } from '../FileTreeNodeContextMenu'
@@ -56,44 +57,46 @@ export function WorkspaceFilesPanel({
             : m.preview_current_file()}
       </p>
       {nodes.length > 0 ? (
-        <div className="flex flex-col gap-0.5">
-          {nodes.map((node, index) => (
-            <FileTreeNodeView
-              key={getTreeNodeKey(node, index)}
-              node={node}
-              activePath={activePath}
-              onOpenPath={(filePath) => onOpenPath(filePath, workspaceRoot)}
-              onRenamePath={(targetPath, nextName) =>
-                onRenamePath(targetPath, nextName, workspaceRoot)
-              }
-              renamingPath={renamingPath}
-              onStartRename={onStartRename}
-              onStopRename={onStopRename}
-              onOpenContextMenu={onOpenContextMenu}
+        <SidebarProvider defaultOpenLevel={1}>
+          <div className="flex flex-col gap-0.5">
+            {nodes.map((node, index) => (
+              <FileTreeNodeView
+                key={getTreeNodeKey(node, index)}
+                node={node}
+                activePath={activePath}
+                onOpenPath={(filePath) => onOpenPath(filePath, workspaceRoot)}
+                onRenamePath={(targetPath, nextName) =>
+                  onRenamePath(targetPath, nextName, workspaceRoot)
+                }
+                renamingPath={renamingPath}
+                onStartRename={onStartRename}
+                onStopRename={onStopRename}
+                onOpenContextMenu={onOpenContextMenu}
+              />
+            ))}
+            <FileTreeNodeContextMenu
+              menu={contextMenu}
+              items={[
+                {
+                  label: m.preview_show_in_folder(),
+                  icon: <FolderOpen className="size-4 text-fd-primary" />,
+                  onSelect: () => onShowInFolder(contextMenu?.path ?? '')
+                },
+                {
+                  label: m.preview_open_in_vscode(),
+                  icon: <Code2 className="size-4 text-fd-primary" />,
+                  onSelect: () => onOpenInVsCode(contextMenu?.path ?? '')
+                }
+              ]}
+              onCopyPath={(path) => onCopyPath(path)}
+              onDelete={(path) => onDelete(path)}
+              onRename={(path) => {
+                onSetContextMenu(null)
+                onStartRename(path)
+              }}
             />
-          ))}
-          <FileTreeNodeContextMenu
-            menu={contextMenu}
-            items={[
-              {
-                label: m.preview_show_in_folder(),
-                icon: <FolderOpen className="size-4 text-fd-primary" />,
-                onSelect: () => onShowInFolder(contextMenu?.path ?? '')
-              },
-              {
-                label: m.preview_open_in_vscode(),
-                icon: <Code2 className="size-4 text-fd-primary" />,
-                onSelect: () => onOpenInVsCode(contextMenu?.path ?? '')
-              }
-            ]}
-            onCopyPath={(path) => onCopyPath(path)}
-            onDelete={(path) => onDelete(path)}
-            onRename={(path) => {
-              onSetContextMenu(null)
-              onStartRename(path)
-            }}
-          />
-        </div>
+          </div>
+        </SidebarProvider>
       ) : hasWorkspaceFolder ? (
         <SidebarEmptyState>
           {fileFilterQuery.trim().length > 0

@@ -1,13 +1,14 @@
-import { BookOpen, FileText, FolderOpen, PanelLeft, PanelLeftClose, Search } from 'lucide-react'
+import { BookOpen, FileText, FolderOpen, Search } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { m } from '../../paraglide/messages'
 import type { MdxWorkspace } from '../../types'
 import { SidebarFilterInput, SidebarTabs } from './sidebar/SidebarControls'
 import { useWorkspaceSidebarContextMenu } from './sidebar/useWorkspaceSidebarContextMenu'
+import type { SidebarTab } from './sidebar/useWorkspaceSidebarTabs'
 import { useWorkspaceSearch, useWorkspaceSidebarTabs } from './sidebar/useWorkspaceSidebarTabs'
 import { WorkspaceFilesPanel } from './sidebar/WorkspaceFilesPanel'
 import { WorkspaceSearchPanel } from './sidebar/WorkspaceSearchPanel'
-import { buildFileTree, filterFileTree } from './workspace-tree'
+import { buildFileTree, buildSingleFileTree, filterFileTree } from './workspace-tree'
 
 export function PreviewSidebar({
   workspace,
@@ -17,8 +18,8 @@ export function PreviewSidebar({
   onRenamePath,
   onDeletePath,
   opening,
-  collapsed,
-  onCollapseSidebar,
+  activeTab: controlledActiveTab,
+  onActiveTabChange,
   onExpandSidebar
 }: {
   workspace: MdxWorkspace
@@ -28,8 +29,8 @@ export function PreviewSidebar({
   onRenamePath: (targetPath: string, nextName: string, workspaceRoot?: string) => Promise<void>
   onDeletePath: (targetPath: string, workspaceRoot?: string) => Promise<void>
   opening: boolean
-  collapsed?: boolean
-  onCollapseSidebar?: () => void
+  activeTab?: SidebarTab
+  onActiveTabChange?: (tab: SidebarTab) => void
   onExpandSidebar?: () => void
 }): React.JSX.Element {
   const file = workspace.file
@@ -42,6 +43,8 @@ export function PreviewSidebar({
   const workspaceSearchInputRef = useRef<HTMLInputElement>(null)
   const { activeTab, setActiveTab } = useWorkspaceSidebarTabs({
     hasWorkspaceFolder,
+    activeTab: controlledActiveTab,
+    onActiveTabChange,
     onExpandSidebar,
     workspaceSearchInputRef
   })
@@ -63,19 +66,17 @@ export function PreviewSidebar({
   } = useWorkspaceSidebarContextMenu({ onDeletePath, workspaceRoot })
   const tree = useMemo(
     () =>
-      buildFileTree(
-        workspace.folder?.files ?? [],
-        workspace.folder?.tree,
-        workspace.folder?.rootPath
-      ),
-    [workspace.folder]
+      workspace.folder
+        ? buildFileTree(workspace.folder.files, workspace.folder.tree, workspace.folder.rootPath)
+        : buildSingleFileTree(file),
+    [file, workspace.folder]
   )
   const filteredTree = useMemo(() => filterFileTree(tree, fileFilterQuery), [tree, fileFilterQuery])
-  const activeTree = workspace.folder ? filteredTree : tree
+  const activeTree = filteredTree
 
   return (
     <div className="h-full min-h-0 bg-fd-card text-sm">
-      <div className="flex h-full w-[268px] flex-col">
+      <div className="flex h-full min-w-0 flex-col">
         <div className="flex flex-col gap-3 border-b p-4 pb-3">
           <div className="flex items-center">
             <div className="me-auto flex min-w-0 items-center">
@@ -84,20 +85,6 @@ export function PreviewSidebar({
                 <span>MDXForge</span>
               </div>
             </div>
-            {onCollapseSidebar ? (
-              <button
-                type="button"
-                aria-label={collapsed ? m.preview_expand_sidebar() : m.preview_collapse_sidebar()}
-                onClick={collapsed ? onExpandSidebar : onCollapseSidebar}
-                className="flex size-8 items-center justify-center rounded-lg text-fd-muted-foreground transition-colors hover:bg-fd-accent hover:text-fd-accent-foreground"
-              >
-                {collapsed ? (
-                  <PanelLeft className="size-4" />
-                ) : (
-                  <PanelLeftClose className="size-4" />
-                )}
-              </button>
-            ) : null}
           </div>
           {workspace.folder ? (
             <>

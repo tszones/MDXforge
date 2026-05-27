@@ -69,6 +69,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-router": "^7.15.1",
+    "react-resizable-panels": "catalog:ui",
     "recharts": "catalog:",
     "rehype-katex": "^7.0.1",
     "remark-gfm": "^4.0.1",

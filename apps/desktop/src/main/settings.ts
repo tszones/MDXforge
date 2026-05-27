@@ -12,6 +12,11 @@ export interface AppWindowState {
   isMaximized?: boolean
 }
 
+export interface WorkbenchLayoutSettings {
+  horizontal?: Record<string, number>
+  centerVertical?: Record<string, number>
+}
+
 export type AppThemeName =
   | 'neutral'
   | 'black'
@@ -36,6 +41,7 @@ export interface AppSettings {
   font: AppFontName
   viewableDocumentExtensions: string[]
   windowState: AppWindowState
+  workbenchLayout: WorkbenchLayoutSettings
 }
 
 type Store = {
@@ -63,7 +69,8 @@ const defaultAppSettings: AppSettings = {
   windowState: {
     width: 900,
     height: 670
-  }
+  },
+  workbenchLayout: {}
 }
 
 let store: Store | null = null
@@ -92,6 +99,24 @@ function getStore(): Store {
   return store
 }
 
+function normalizeWorkbenchLayout(value: unknown): WorkbenchLayoutSettings {
+  if (!value || typeof value !== 'object') return {}
+  const layout = value as WorkbenchLayoutSettings
+  return {
+    horizontal: normalizeLayoutMap(layout.horizontal),
+    centerVertical: normalizeLayoutMap(layout.centerVertical)
+  }
+}
+
+function normalizeLayoutMap(value: unknown): Record<string, number> | undefined {
+  if (!value || typeof value !== 'object') return undefined
+  const entries = Object.entries(value).flatMap(([key, size]) => {
+    if (typeof size !== 'number' || !Number.isFinite(size) || size < 0 || size > 100) return []
+    return [[key, size] as const]
+  })
+  return entries.length > 0 ? Object.fromEntries(entries) : undefined
+}
+
 export function getAppSettings(): AppSettings {
   const store = getStore()
   return {
@@ -102,7 +127,8 @@ export function getAppSettings(): AppSettings {
     viewableDocumentExtensions: normalizeViewableDocumentExtensions(
       store.get('viewableDocumentExtensions')
     ),
-    windowState: store.get('windowState')
+    windowState: store.get('windowState'),
+    workbenchLayout: normalizeWorkbenchLayout(store.get('workbenchLayout'))
   }
 }
 
@@ -119,6 +145,8 @@ export function setAppSettings(settings: Partial<AppSettings>): AppSettings {
     )
   }
   if (settings.windowState) store.set('windowState', settings.windowState)
+  if (settings.workbenchLayout)
+    store.set('workbenchLayout', normalizeWorkbenchLayout(settings.workbenchLayout))
   return getAppSettings()
 }
 

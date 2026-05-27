@@ -47,7 +47,7 @@ export function useWorkspaceActions(): {
   setError: (error: string | null) => void
   openFile: () => Promise<void>
   openFolder: () => Promise<void>
-  openPath: (filePath: string, workspaceRoot?: string) => Promise<void>
+  openPath: (filePath: string, workspaceRoot?: string) => Promise<MdxWorkspace | null>
   renamePath: (targetPath: string, nextName: string, workspaceRoot?: string) => Promise<void>
   deletePath: (targetPath: string, workspaceRoot?: string) => Promise<void>
 } {
@@ -58,7 +58,9 @@ export function useWorkspaceActions(): {
 
   useInitialOpenPath({ setWorkspace, setError })
 
-  async function openWithLoader(loadWorkspace: () => Promise<MdxWorkspace | null>): Promise<void> {
+  async function openWithLoader(
+    loadWorkspace: () => Promise<MdxWorkspace | null>
+  ): Promise<MdxWorkspace | null> {
     setLoading(true)
     setError(null)
 
@@ -68,8 +70,10 @@ export function useWorkspaceActions(): {
         setWorkspace(result)
         navigate('/')
       }
+      return result
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause))
+      return null
     } finally {
       setLoading(false)
     }
@@ -83,8 +87,8 @@ export function useWorkspaceActions(): {
     await openWithLoader(() => window.api.openMdxFolder())
   }
 
-  async function openPath(filePath: string, workspaceRoot?: string): Promise<void> {
-    await openWithLoader(() => window.api.openMdxPath(filePath, workspaceRoot))
+  async function openPath(filePath: string, workspaceRoot?: string): Promise<MdxWorkspace | null> {
+    return openWithLoader(() => window.api.openMdxPath(filePath, workspaceRoot))
   }
 
   async function renamePath(
