@@ -63,7 +63,9 @@ export function SettingsPage({
             <SettingsNavLink to="/settings/appearance">
               {m.settings_appearance_tab()}
             </SettingsNavLink>
-            <SettingsNavLink to="/settings/documents">{m.settings_documents_title()}</SettingsNavLink>
+            <SettingsNavLink to="/settings/documents">
+              {m.settings_documents_title()}
+            </SettingsNavLink>
             <SettingsNavLink to="/settings/updates">{m.settings_updates_title()}</SettingsNavLink>
             <SettingsNavLink to="/settings/skills">{m.settings_skills_title()}</SettingsNavLink>
           </nav>

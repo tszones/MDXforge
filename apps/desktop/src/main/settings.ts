@@ -38,6 +38,11 @@ export interface AppSettings {
   windowState: AppWindowState
 }
 
+type Store = {
+  get<Key extends keyof AppSettings>(key: Key): AppSettings[Key]
+  set<Key extends keyof AppSettings>(key: Key, value: AppSettings[Key]): void
+}
+
 type StoreConstructor = new <T extends object>(options: {
   defaults: T
 }) => {
@@ -49,21 +54,46 @@ const ElectronStore = (
   'default' in electronStoreModule ? electronStoreModule.default : electronStoreModule
 ) as StoreConstructor
 
-const store = new ElectronStore<AppSettings>({
-  defaults: {
-    theme: 'purple',
-    colorMode: 'dark',
-    language: 'en-US',
-    font: 'system',
-    viewableDocumentExtensions: [...defaultViewableDocumentExtensions],
-    windowState: {
-      width: 900,
-      height: 670
+const defaultAppSettings: AppSettings = {
+  theme: 'purple',
+  colorMode: 'dark',
+  language: 'en-US',
+  font: 'system',
+  viewableDocumentExtensions: [...defaultViewableDocumentExtensions],
+  windowState: {
+    width: 900,
+    height: 670
+  }
+}
+
+let store: Store | null = null
+
+function createMemoryStore(defaults: AppSettings): Store {
+  const values = { ...defaults }
+  return {
+    get: (key) => values[key],
+    set: (key, value) => {
+      values[key] = value
     }
   }
-})
+}
+
+function getStore(): Store {
+  if (store) return store
+
+  try {
+    store = new ElectronStore<AppSettings>({
+      defaults: defaultAppSettings
+    })
+  } catch {
+    store = createMemoryStore(defaultAppSettings)
+  }
+
+  return store
+}
 
 export function getAppSettings(): AppSettings {
+  const store = getStore()
   return {
     theme: store.get('theme'),
     colorMode: store.get('colorMode'),
@@ -77,6 +107,7 @@ export function getAppSettings(): AppSettings {
 }
 
 export function setAppSettings(settings: Partial<AppSettings>): AppSettings {
+  const store = getStore()
   if (settings.theme) store.set('theme', settings.theme)
   if (settings.colorMode) store.set('colorMode', settings.colorMode)
   if (settings.language) store.set('language', settings.language)
@@ -92,9 +123,9 @@ export function setAppSettings(settings: Partial<AppSettings>): AppSettings {
 }
 
 export function getWindowState(): AppWindowState {
-  return store.get('windowState')
+  return getStore().get('windowState')
 }
 
 export function setWindowState(windowState: AppWindowState): void {
-  store.set('windowState', windowState)
+  getStore().set('windowState', windowState)
 }

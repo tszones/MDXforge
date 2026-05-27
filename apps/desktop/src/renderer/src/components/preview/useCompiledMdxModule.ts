@@ -42,7 +42,8 @@ export function useCompiledMdxModule({
 
         if (!canceled) setModule(nextModule)
       } catch (cause) {
-        if (!canceled) setCurrentCompileError(cause instanceof Error ? cause.message : String(cause))
+        if (!canceled)
+          setCurrentCompileError(cause instanceof Error ? cause.message : String(cause))
       }
     }
 

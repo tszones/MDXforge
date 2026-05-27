@@ -1,5 +1,14 @@
 import { useHotkeys } from '@tanstack/react-hotkeys'
-import { BookOpen, Code2, FileText, FolderOpen, PanelLeft, PanelLeftClose, Search, X } from 'lucide-react'
+import {
+  BookOpen,
+  Code2,
+  FileText,
+  FolderOpen,
+  PanelLeft,
+  PanelLeftClose,
+  Search,
+  X
+} from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { appHotkeys } from '../../lib/hotkeys'

@@ -1,18 +1,7 @@
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync
-} from 'fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'fs'
 import { dirname, join, resolve } from 'path'
 import { agentAdapters } from './agents'
 import { createTextDiff } from './diff'
-import { removeManagedBlock, upsertManagedBlock } from './managed-block'
-import { isPathInside, toPosixRelativePath } from './path-utils'
-import { buildCompactAgentRules } from './rules'
-import { getInstalledSkillPath, getSkillPlatformTarget } from './platform-targets'
 import {
   applyManagedAgentDisable,
   applyManagedAgentInstall,
@@ -22,6 +11,10 @@ import {
   previewManagedAgentInstall,
   uninstallPlatformSkillLink
 } from './managed-agents'
+import { removeManagedBlock, upsertManagedBlock } from './managed-block'
+import { isPathInside, toPosixRelativePath } from './path-utils'
+import { getInstalledSkillPath, getSkillPlatformTarget } from './platform-targets'
+import { buildCompactAgentRules } from './rules'
 import type { AgentAdapter, AgentId, ProjectedDirectory, WorkspaceSkill } from './types'
 
 export interface AgentInstallPreview {
@@ -37,7 +30,8 @@ export interface AgentInstallPreview {
 }
 
 export function previewAgentInstall(workspaceRoot: string, agentId: AgentId): AgentInstallPreview {
-  if (isManagedAgentInstall(agentId)) return previewManagedAgentInstall(resolveAppRoot(workspaceRoot), agentId)
+  if (isManagedAgentInstall(agentId))
+    return previewManagedAgentInstall(resolveAppRoot(workspaceRoot), agentId)
 
   const projection = getAgentProjection(resolveAppRoot(workspaceRoot), agentId)
   if ('content' in projection && projection.action === 'copy') {
@@ -76,7 +70,8 @@ export function previewAgentInstall(workspaceRoot: string, agentId: AgentId): Ag
 }
 
 export function applyAgentInstall(workspaceRoot: string, agentId: AgentId): AgentInstallPreview {
-  if (isManagedAgentInstall(agentId)) return applyManagedAgentInstall(resolveAppRoot(workspaceRoot), agentId)
+  if (isManagedAgentInstall(agentId))
+    return applyManagedAgentInstall(resolveAppRoot(workspaceRoot), agentId)
 
   const preview = previewAgentInstall(workspaceRoot, agentId)
   if (preview.action === 'copy') return preview
@@ -95,7 +90,8 @@ export function applyAgentInstall(workspaceRoot: string, agentId: AgentId): Agen
 }
 
 export function previewAgentDisable(workspaceRoot: string, agentId: AgentId): AgentInstallPreview {
-  if (isManagedAgentInstall(agentId)) return previewManagedAgentDisable(resolveAppRoot(workspaceRoot), agentId)
+  if (isManagedAgentInstall(agentId))
+    return previewManagedAgentDisable(resolveAppRoot(workspaceRoot), agentId)
 
   const projection = getAgentProjection(resolveAppRoot(workspaceRoot), agentId)
   if ('content' in projection && projection.action === 'copy') {
@@ -134,7 +130,8 @@ export function previewAgentDisable(workspaceRoot: string, agentId: AgentId): Ag
 }
 
 export function applyAgentDisable(workspaceRoot: string, agentId: AgentId): AgentInstallPreview {
-  if (isManagedAgentInstall(agentId)) return applyManagedAgentDisable(resolveAppRoot(workspaceRoot), agentId)
+  if (isManagedAgentInstall(agentId))
+    return applyManagedAgentDisable(resolveAppRoot(workspaceRoot), agentId)
 
   const preview = previewAgentDisable(workspaceRoot, agentId)
   if (preview.action === 'copy') return preview
@@ -301,7 +298,10 @@ function resolveAppRoot(workspaceRoot: string): string {
     resolve(__dirname, '..', '..', '..', '..'),
     resolve(__dirname, '..', '..', '..', '..', '..')
   ]
-  return candidates.find((candidate) => existsSync(join(candidate, 'skills', 'mdxforge-mdx'))) ?? candidates[0]
+  return (
+    candidates.find((candidate) => existsSync(join(candidate, 'skills', 'mdxforge-mdx'))) ??
+    candidates[0]
+  )
 }
 
 function createBuiltinMdxForgeSkill(root: string): WorkspaceSkill {

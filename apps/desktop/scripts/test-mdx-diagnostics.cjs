@@ -12,7 +12,9 @@ assert.deepEqual(findMdxCompileDiagnostic(htmlCommentSource), {
   snippet: '<!-- draft note -->'
 })
 
-const fencedHtmlCommentSource = ['# Title', '', '```html', '<!-- legal sample -->', '```'].join('\n')
+const fencedHtmlCommentSource = ['# Title', '', '```html', '<!-- legal sample -->', '```'].join(
+  '\n'
+)
 assert.equal(findMdxCompileDiagnostic(fencedHtmlCommentSource), null)
 
 const doctypeSource = ['# HTML sample', '', '<!DOCTYPE html>'].join('\n')

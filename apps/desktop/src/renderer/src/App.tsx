@@ -358,7 +358,10 @@ function AppContent({
       )}
 
       {error ? (
-        <pre className="fixed top-14 right-4 z-50 max-h-48 max-w-[min(42rem,calc(100vw-2rem))] overflow-auto whitespace-pre-wrap rounded-lg border border-fd-error/30 bg-fd-background/95 p-4 text-sm text-fd-error shadow-xl backdrop-blur" role="alert">
+        <pre
+          className="fixed top-14 right-4 z-50 max-h-48 max-w-[min(42rem,calc(100vw-2rem))] overflow-auto whitespace-pre-wrap rounded-lg border border-fd-error/30 bg-fd-background/95 p-4 text-sm text-fd-error shadow-xl backdrop-blur"
+          role="alert"
+        >
           {error}
         </pre>
       ) : null}

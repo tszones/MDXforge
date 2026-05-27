@@ -14,8 +14,8 @@ import { dirname, extname, isAbsolute, join, relative, resolve } from 'path'
 import { readWorkspaceExtensionManifest, type WorkspaceExtensionManifest } from './extensions'
 import { mainMessage } from './i18n'
 import { remarkLocalImages } from './local-images'
-import { getMDXForgeRehypePlugins, getMDXForgeRemarkPlugins } from './mdx-options'
 import { findMdxCompileDiagnostic } from './mdx-diagnostics'
+import { getMDXForgeRehypePlugins, getMDXForgeRemarkPlugins } from './mdx-options'
 import { readMdxRawSource } from './mdx-raw-source'
 import {
   type MdxFolder,
@@ -23,8 +23,8 @@ import {
   type MdxFolderTreeNode,
   readMdxFolder
 } from './page-tree'
-import { remarkWikiLinks } from './wiki-links'
 import { isViewableDocumentPath } from './viewable-documents'
+import { remarkWikiLinks } from './wiki-links'
 
 const statePath = () => `${app.getPath('userData')}/state.json`
 
@@ -91,7 +91,10 @@ export async function openMdxFile(): Promise<MdxWorkspace | null> {
     defaultPath: getLastOpenPath(),
     properties: ['openFile'],
     filters: [
-      { name: mainMessage('dialog_filter_mdx_markdown'), extensions: ['mdx', 'md', 'html', 'htm', 'pdf'] },
+      {
+        name: mainMessage('dialog_filter_mdx_markdown'),
+        extensions: ['mdx', 'md', 'html', 'htm', 'pdf']
+      },
       { name: mainMessage('dialog_filter_all_files'), extensions: ['*'] }
     ]
   })

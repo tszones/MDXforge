@@ -27,7 +27,10 @@ export type AppThemeName =
 
 export type AppColorMode = 'light' | 'dark'
 
-export { defaultViewableDocumentExtensions, normalizeDocumentExtension } from '../../shared/viewable-documents'
+export {
+  defaultViewableDocumentExtensions,
+  normalizeDocumentExtension
+} from '../../shared/viewable-documents'
 
 export type MdxFileKind = 'markdown' | 'html' | 'pdf' | 'unsupported'
 

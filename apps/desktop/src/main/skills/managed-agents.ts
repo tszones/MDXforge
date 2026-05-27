@@ -1,14 +1,18 @@
 import { execFileSync } from 'child_process'
 import { existsSync, mkdirSync, rmSync, symlinkSync } from 'fs'
 import { dirname, join, resolve } from 'path'
-import type { AgentId } from './types'
-import { getInstalledSkillPath, getSkillPlatformTarget, mdxforgeSkillName } from './platform-targets'
-import { commandEnv, commandExists, resolveCommand } from './adapters/commands'
 import {
   claudeMarketplaceName,
   claudePluginName,
   getClaudeMarketplaceRoot
 } from './adapters/claude-plugin'
+import { commandEnv, commandExists, resolveCommand } from './adapters/commands'
+import {
+  getInstalledSkillPath,
+  getSkillPlatformTarget,
+  mdxforgeSkillName
+} from './platform-targets'
+import type { AgentId } from './types'
 
 const managedAgentIds = new Set<AgentId>()
 

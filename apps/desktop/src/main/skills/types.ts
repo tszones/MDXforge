@@ -53,7 +53,11 @@ export interface WorkspaceSkillsState {
 
 export type AgentId = 'claude-code' | 'cursor' | 'codex'
 export type AgentStatus = 'detected' | 'not-detected' | 'installed' | 'error'
-export type AgentIntegrationMode = 'managed-file' | 'managed-directory' | 'native-plugin' | 'copy-only'
+export type AgentIntegrationMode =
+  | 'managed-file'
+  | 'managed-directory'
+  | 'native-plugin'
+  | 'copy-only'
 
 export interface AgentDetectionResult {
   id: AgentId

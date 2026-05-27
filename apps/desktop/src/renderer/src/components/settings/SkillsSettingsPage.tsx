@@ -1,8 +1,8 @@
+import { Sparkles } from 'lucide-react'
+import { useEffect, useState } from 'react'
 import claudeCodeIcon from '../../assets/agent-icons/claude-code.ico'
 import codexIcon from '../../assets/agent-icons/codex.ico'
 import cursorIcon from '../../assets/agent-icons/cursor.ico'
-import { Sparkles } from 'lucide-react'
-import { useEffect, useState } from 'react'
 import { m } from '../../paraglide/messages'
 import type { AgentDetectionResult, AgentId } from '../../types'
 

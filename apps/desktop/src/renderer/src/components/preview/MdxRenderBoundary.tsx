@@ -11,10 +11,7 @@ type MdxRenderBoundaryState = {
   error: string | null
 }
 
-export class MdxRenderBoundary extends Component<
-  MdxRenderBoundaryProps,
-  MdxRenderBoundaryState
-> {
+export class MdxRenderBoundary extends Component<MdxRenderBoundaryProps, MdxRenderBoundaryState> {
   state: MdxRenderBoundaryState = {
     sourceKey: this.props.sourceKey,
     error: null

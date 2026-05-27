@@ -64,7 +64,10 @@ assert.equal(upsertManagedBlock('<!-- mdxforge:managed:start -->', 'Rules').conf
 
 const claudePreview = previewAgentInstall(root, 'claude-code')
 assert.equal(claudePreview.kind, 'directory')
-assert.equal(claudePreview.relativePath.replaceAll('\\\\', '/').endsWith('/.claude/skills/mdxforge-mdx'), true)
+assert.equal(
+  claudePreview.relativePath.replaceAll('\\\\', '/').endsWith('/.claude/skills/mdxforge-mdx'),
+  true
+)
 assert.equal(claudePreview.action, 'create')
 assert.match(claudePreview.after, /SKILL\.md/)
 applyAgentInstall(root, 'claude-code')
@@ -86,7 +89,10 @@ applyAgentDisable(root, 'claude-code')
 assert.equal(existsSync(join(root, '.claude', 'skills', 'mdxforge-mdx', 'SKILL.md')), false)
 
 const cursorPreview = previewAgentInstall(root, 'cursor')
-assert.equal(cursorPreview.relativePath.replaceAll('\\\\', '/').endsWith('/.cursor/skills/mdxforge-mdx'), true)
+assert.equal(
+  cursorPreview.relativePath.replaceAll('\\\\', '/').endsWith('/.cursor/skills/mdxforge-mdx'),
+  true
+)
 assert.equal(cursorPreview.kind, 'directory')
 assert.equal(cursorPreview.action, 'create')
 applyAgentInstall(root, 'cursor')
@@ -96,7 +102,10 @@ assert.match(
 )
 
 const codexPreview = previewAgentInstall(root, 'codex')
-assert.equal(codexPreview.relativePath.replaceAll('\\\\', '/').endsWith('/.agents/skills/mdxforge-mdx'), true)
+assert.equal(
+  codexPreview.relativePath.replaceAll('\\\\', '/').endsWith('/.agents/skills/mdxforge-mdx'),
+  true
+)
 assert.equal(codexPreview.kind, 'directory')
 assert.equal(codexPreview.action, 'create')
 applyAgentInstall(root, 'codex')
@@ -107,7 +116,12 @@ assert.match(
 assert.equal(existsSync(join(root, '.agents', 'skills', 'mdxforge-mdx', 'patterns')), true)
 
 const openclawPreview = previewAgentInstall(root, 'openclaw')
-assert.equal(openclawPreview.relativePath.replaceAll('\\\\', '/').endsWith('/.openclaw/skills/mdxforge/mdxforge-mdx'), true)
+assert.equal(
+  openclawPreview.relativePath
+    .replaceAll('\\\\', '/')
+    .endsWith('/.openclaw/skills/mdxforge/mdxforge-mdx'),
+  true
+)
 assert.equal(openclawPreview.kind, 'directory')
 assert.equal(openclawPreview.action, 'create')
 

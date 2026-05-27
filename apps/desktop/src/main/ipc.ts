@@ -1,17 +1,11 @@
 import { app, type BrowserWindow, clipboard, dialog, ipcMain, shell } from 'electron'
-import { mainMessage } from './i18n'
 import { type SetExtensionManifest, watchMdxWorkspace } from './app-open'
 import { getWorkspaceExtensionTrustKey, type WorkspaceExtensionManifest } from './extensions'
-import {
-  deleteMdxPath,
-  openMdxFile,
-  openMdxFolder,
-  readMdxWorkspace,
-  renameMdxPath
-} from './mdx'
+import { mainMessage } from './i18n'
+import { deleteMdxPath, openMdxFile, openMdxFolder, readMdxWorkspace, renameMdxPath } from './mdx'
 import { readMdxRawSource } from './mdx-raw-source'
 import { readMdxFolder } from './page-tree'
-import { getAppSettings, setAppSettings, type AppSettings } from './settings'
+import { type AppSettings, getAppSettings, setAppSettings } from './settings'
 import {
   addLocalSkillFolder,
   createLocalSkill,
@@ -109,24 +103,21 @@ export function registerAppIpc(options: {
       return workspace
     }
   )
-  ipcMain.handle(
-    'mdx:delete-path',
-    async (_, targetPath: string, workspaceRoot?: string) => {
-      const result = await dialog.showMessageBox({
-        type: 'warning',
-        buttons: [mainMessage('dialog_delete_confirm'), mainMessage('dialog_delete_cancel')],
-        defaultId: 1,
-        cancelId: 1,
-        title: mainMessage('dialog_delete_title'),
-        message: mainMessage('dialog_delete_message', { filePath: targetPath })
-      })
-      if (result.response !== 0) return null
+  ipcMain.handle('mdx:delete-path', async (_, targetPath: string, workspaceRoot?: string) => {
+    const result = await dialog.showMessageBox({
+      type: 'warning',
+      buttons: [mainMessage('dialog_delete_confirm'), mainMessage('dialog_delete_cancel')],
+      defaultId: 1,
+      cancelId: 1,
+      title: mainMessage('dialog_delete_title'),
+      message: mainMessage('dialog_delete_message', { filePath: targetPath })
+    })
+    if (result.response !== 0) return null
 
-      const workspace = await deleteMdxPath(targetPath, workspaceRoot)
-      setCurrentExtensionManifest(workspace?.extensions ?? null)
-      return workspace
-    }
-  )
+    const workspace = await deleteMdxPath(targetPath, workspaceRoot)
+    setCurrentExtensionManifest(workspace?.extensions ?? null)
+    return workspace
+  })
   ipcMain.handle(
     'mdx:set-workspace-extensions-enabled',
     (_, enabled: boolean, trustKey?: string) => {
@@ -195,10 +186,7 @@ export function registerAppIpc(options: {
   ipcMain.handle('mdx:register-default-app', () => app.setAsDefaultProtocolClient('mdx'))
   ipcMain.handle('mdx:is-default-app', () => app.isDefaultProtocolClient('mdx'))
   ipcMain.handle('settings:get', () => getAppSettings())
-  ipcMain.handle(
-    'settings:set',
-    (_, settings: Partial<AppSettings>) => setAppSettings(settings)
-  )
+  ipcMain.handle('settings:set', (_, settings: Partial<AppSettings>) => setAppSettings(settings))
 }
 
 function toVsCodeFilePath(filePath: string): string {
