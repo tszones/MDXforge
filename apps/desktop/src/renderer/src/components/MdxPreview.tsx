@@ -1,7 +1,7 @@
 import type { TOCItemType } from 'fumadocs-core/toc'
 import { buttonVariants } from 'fumadocs-ui/components/ui/button'
 import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page'
-import { Check, Copy, FileText, Link2 } from 'lucide-react'
+import { Check, Code2, Copy, FileText, FolderOpen, Link2 } from 'lucide-react'
 import type { MDXComponents } from 'mdx/types'
 import { Component, useEffect, useMemo, useState } from 'react'
 import * as runtime from 'react/jsx-runtime'
@@ -275,6 +275,16 @@ export function MdxPreview({
     }
   }
 
+  async function showDocumentInFolder(): Promise<void> {
+    setDocumentContextMenu(null)
+    await window.api.showInFolder(file.path)
+  }
+
+  async function openDocumentInVsCode(): Promise<void> {
+    setDocumentContextMenu(null)
+    await window.api.openInVsCode(file.path)
+  }
+
   function openDocumentContextMenu(event: React.MouseEvent): void {
     event.preventDefault()
     setDocumentContextMenu({ x: event.clientX, y: event.clientY, path: file.path })
@@ -355,6 +365,16 @@ export function MdxPreview({
                 setDocumentContextMenu(null)
                 void copyRawSource()
               }
+            },
+            {
+              label: m.preview_show_in_folder(),
+              icon: <FolderOpen className="size-4 text-fd-primary" />,
+              onSelect: () => void showDocumentInFolder()
+            },
+            {
+              label: m.preview_open_in_vscode(),
+              icon: <Code2 className="size-4 text-fd-primary" />,
+              onSelect: () => void openDocumentInVsCode()
             },
             {
               label: m.preview_copy_file_path(),

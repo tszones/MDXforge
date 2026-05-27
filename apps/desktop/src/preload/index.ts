@@ -28,6 +28,8 @@ const api = {
     ipcRenderer.invoke('mdx:rename-path', targetPath, nextName, workspaceRoot),
   copyMdxRawSource: (filePath: string) => ipcRenderer.invoke('mdx:copy-raw-source', filePath),
   copyPath: (filePath: string) => ipcRenderer.invoke('mdx:copy-path', filePath),
+  showInFolder: (filePath: string) => ipcRenderer.invoke('mdx:show-in-folder', filePath),
+  openInVsCode: (filePath: string) => ipcRenderer.invoke('mdx:open-in-vscode', filePath),
   searchMdxWorkspace: (workspaceRoot: string, query: string) =>
     ipcRenderer.invoke('mdx:search-workspace', workspaceRoot, query),
   setWorkspaceExtensionsEnabled: (enabled: boolean, trustKey?: string) =>

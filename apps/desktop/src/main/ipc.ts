@@ -126,6 +126,16 @@ export function registerAppIpc(options: {
   ipcMain.handle('mdx:copy-path', (_, filePath: string) => {
     clipboard.writeText(filePath)
   })
+  ipcMain.handle('mdx:show-in-folder', (_, filePath: string) => {
+    if (!filePath) return false
+    shell.showItemInFolder(filePath)
+    return true
+  })
+  ipcMain.handle('mdx:open-in-vscode', async (_, filePath: string) => {
+    if (!filePath) return false
+    await shell.openExternal(`vscode://file/${toVsCodeFilePath(filePath)}`)
+    return true
+  })
   ipcMain.handle('mdx:search-workspace', async (_, workspaceRoot: string, query: string) => {
     const folder = readMdxFolder(workspaceRoot)
     return searchMdxWorkspaceFiles(folder.files, query)
@@ -173,4 +183,13 @@ export function registerAppIpc(options: {
       settings: Partial<{ theme: AppThemeName; colorMode: AppColorMode; language: AppLanguage }>
     ) => setAppSettings(settings)
   )
+}
+
+function toVsCodeFilePath(filePath: string): string {
+  return filePath
+    .replace(/\\/g, '/')
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/')
+    .replace(/^([A-Za-z])%3A/, '$1:')
 }

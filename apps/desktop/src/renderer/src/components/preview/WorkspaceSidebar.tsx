@@ -1,5 +1,5 @@
 import { useHotkeys } from '@tanstack/react-hotkeys'
-import { BookOpen, FileText, FolderOpen, PanelLeft, PanelLeftClose, Search, X } from 'lucide-react'
+import { BookOpen, Code2, FileText, FolderOpen, PanelLeft, PanelLeftClose, Search, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { appHotkeys } from '../../lib/hotkeys'
@@ -150,6 +150,16 @@ export function PreviewSidebar({
     }
   }
 
+  async function showInFolder(path: string): Promise<void> {
+    setContextMenu(null)
+    await window.api.showInFolder(path)
+  }
+
+  async function openInVsCode(path: string): Promise<void> {
+    setContextMenu(null)
+    await window.api.openInVsCode(path)
+  }
+
   return (
     <div className="h-full min-h-0 bg-fd-card text-sm">
       <div className="flex h-full w-[268px] flex-col">
@@ -291,6 +301,8 @@ export function PreviewSidebar({
               )}
               <FileTreeNodeContextMenu
                 menu={contextMenu}
+                onShowInFolder={(path) => void showInFolder(path)}
+                onOpenInVsCode={(path) => void openInVsCode(path)}
                 onCopyPath={(path) => void copyPath(path)}
               />
             </>
@@ -322,6 +334,18 @@ export function PreviewSidebar({
                   ))}
                   <FileTreeNodeContextMenu
                     menu={contextMenu}
+                    items={[
+                      {
+                        label: m.preview_show_in_folder(),
+                        icon: <FolderOpen className="size-4 text-fd-primary" />,
+                        onSelect: () => void showInFolder(contextMenu?.path ?? '')
+                      },
+                      {
+                        label: m.preview_open_in_vscode(),
+                        icon: <Code2 className="size-4 text-fd-primary" />,
+                        onSelect: () => void openInVsCode(contextMenu?.path ?? '')
+                      }
+                    ]}
                     onCopyPath={(path) => void copyPath(path)}
                     onRename={(path) => {
                       setContextMenu(null)

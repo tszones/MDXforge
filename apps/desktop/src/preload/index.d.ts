@@ -239,6 +239,8 @@ export interface AppAPI {
   ) => Promise<MdxWorkspace>
   copyMdxRawSource: (filePath: string) => Promise<void>
   copyPath: (filePath: string) => Promise<void>
+  showInFolder: (filePath: string) => Promise<boolean>
+  openInVsCode: (filePath: string) => Promise<boolean>
   searchMdxWorkspace: (workspaceRoot: string, query: string) => Promise<MdxWorkspaceSearchResult[]>
   setWorkspaceExtensionsEnabled: (enabled: boolean, trustKey?: string) => Promise<boolean>
   getWorkspaceSkills: (workspaceRoot: string) => Promise<WorkspaceSkillsState>
