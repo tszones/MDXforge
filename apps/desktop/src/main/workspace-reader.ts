@@ -39,6 +39,18 @@ export interface ReadMdxWorkspaceOptions {
   refreshFolder?: boolean
 }
 
+type WorkspaceCache = {
+  rootPath: string
+  folder: MdxFolder
+  extensions: WorkspaceExtensionManifest | undefined
+}
+
+let workspaceCache: WorkspaceCache | null = null
+
+export function invalidateMdxWorkspaceCache(workspaceRoot?: string): void {
+  if (!workspaceRoot || workspaceCache?.rootPath === resolve(workspaceRoot)) workspaceCache = null
+}
+
 export async function readMdxWorkspace(
   inputPath: string,
   workspaceRoot?: string,
@@ -50,13 +62,13 @@ export async function readMdxWorkspace(
   if (!filePath) throw new Error(mainMessage('error_no_mdx_found', { filePath: inputPath }))
 
   const folderRoot = getWorkspaceRoot(resolvedPath, workspaceRoot)
-  const shouldReadFolder = refreshFolder && folderRoot !== null
   const file = await readMdxFile(filePath, folderRoot ?? undefined)
+  const cachedWorkspace = folderRoot ? getCachedWorkspace(folderRoot, refreshFolder) : null
 
   return {
     file,
-    folder: shouldReadFolder ? readMdxFolder(folderRoot) : undefined,
-    extensions: shouldReadFolder ? readWorkspaceExtensionManifest(folderRoot) : undefined
+    folder: cachedWorkspace?.folder,
+    extensions: cachedWorkspace?.extensions
   }
 }
 
@@ -157,6 +169,19 @@ function getWorkspaceRoot(inputPath: string, workspaceRoot?: string): string | n
   if (!existsSync(inputPath)) return null
   const stat = statSync(inputPath)
   return stat.isDirectory() ? inputPath : null
+}
+
+function getCachedWorkspace(folderRoot: string, refreshFolder: boolean): WorkspaceCache {
+  const rootPath = resolve(folderRoot)
+  const cachedWorkspace = workspaceCache
+  if (!refreshFolder && cachedWorkspace?.rootPath === rootPath) return cachedWorkspace
+
+  workspaceCache = {
+    rootPath,
+    folder: readMdxFolder(rootPath),
+    extensions: readWorkspaceExtensionManifest(rootPath)
+  }
+  return workspaceCache
 }
 
 function getMdxFileKind(filePath: string): MdxFileKind {

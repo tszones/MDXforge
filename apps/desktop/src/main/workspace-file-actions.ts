@@ -2,7 +2,12 @@ import { existsSync, readdirSync, renameSync, rmSync, statSync } from 'fs'
 import { dirname, isAbsolute, join, relative, resolve } from 'path'
 import { mainMessage } from './i18n'
 import { isViewableDocumentPath } from './viewable-documents'
-import { type MdxWorkspace, readMdxWorkspace, resolveMdxTarget } from './workspace-reader'
+import {
+  invalidateMdxWorkspaceCache,
+  type MdxWorkspace,
+  readMdxWorkspace,
+  resolveMdxTarget
+} from './workspace-reader'
 
 export async function renameMdxPath(
   targetPath: string,
@@ -28,8 +33,9 @@ export async function renameMdxPath(
   }
 
   renameSync(resolvedTarget, nextPath)
+  invalidateMdxWorkspaceCache(resolvedRoot)
   const nextRoot = resolvedRoot === resolvedTarget ? nextPath : resolvedRoot
-  return readMdxWorkspace(nextPath, nextRoot)
+  return readMdxWorkspace(nextPath, nextRoot, { refreshFolder: true })
 }
 
 export async function deleteMdxPath(
@@ -56,8 +62,9 @@ export async function deleteMdxPath(
 
   if (!resolvedRoot || !existsSync(resolvedRoot)) return null
 
+  invalidateMdxWorkspaceCache(resolvedRoot)
   const nextTarget = resolveMdxTarget(resolvedRoot)
-  return nextTarget ? readMdxWorkspace(nextTarget, resolvedRoot) : null
+  return nextTarget ? readMdxWorkspace(nextTarget, resolvedRoot, { refreshFolder: true }) : null
 }
 
 function ensurePathInsideWorkspace(targetPath: string, workspaceRoot?: string): void {

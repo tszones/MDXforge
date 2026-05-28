@@ -3,7 +3,12 @@ import { type FSWatcher, watch } from 'fs'
 import { resolve } from 'path'
 import { IpcChannels } from '../shared/ipc'
 import type { WorkspaceExtensionManifest } from './extensions'
-import { readMdxWorkspace, resolveMdxTarget, setLastOpenPath } from './mdx'
+import {
+  invalidateMdxWorkspaceCache,
+  readMdxWorkspace,
+  resolveMdxTarget,
+  setLastOpenPath
+} from './mdx'
 
 export type SetExtensionManifest = (manifest: WorkspaceExtensionManifest | null) => void
 
@@ -35,6 +40,7 @@ export async function openMdxPath(
     const workspace = await readMdxWorkspace(filePath)
     setManifest(workspace.extensions ?? null)
     setLastOpenPath(workspace.file.path)
+    invalidateMdxWorkspaceCache(workspace.folder?.rootPath)
     watchMdxWorkspace(filePath, workspace.folder?.rootPath, window, setManifest)
     window.webContents.send(IpcChannels.mdx.fileOpened, workspace)
   } catch (cause) {
@@ -90,7 +96,10 @@ async function reloadWatchedMdxWorkspace(): Promise<void> {
   if (!notifyWindow || !watchedOpenedPath || !setCurrentExtensionManifest) return
 
   try {
-    const workspace = await readMdxWorkspace(watchedOpenedPath, watchedWorkspaceRoot)
+    invalidateMdxWorkspaceCache(watchedWorkspaceRoot)
+    const workspace = await readMdxWorkspace(watchedOpenedPath, watchedWorkspaceRoot, {
+      refreshFolder: true
+    })
     setCurrentExtensionManifest(workspace.extensions ?? null)
     notifyWindow.webContents.send(IpcChannels.mdx.fileChanged, workspace)
   } catch (cause) {
