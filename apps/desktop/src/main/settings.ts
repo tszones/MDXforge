@@ -15,6 +15,7 @@ export interface AppWindowState {
 export interface WorkbenchLayoutSettings {
   horizontal?: Record<string, number>
   centerVertical?: Record<string, number>
+  tocPinned?: boolean
 }
 
 export type AppThemeName =
@@ -104,7 +105,8 @@ function normalizeWorkbenchLayout(value: unknown): WorkbenchLayoutSettings {
   const layout = value as WorkbenchLayoutSettings
   return {
     horizontal: normalizeLayoutMap(layout.horizontal),
-    centerVertical: normalizeLayoutMap(layout.centerVertical)
+    centerVertical: normalizeLayoutMap(layout.centerVertical),
+    tocPinned: typeof layout.tocPinned === 'boolean' ? layout.tocPinned : undefined
   }
 }
 

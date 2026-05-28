@@ -21,12 +21,16 @@ export function MdxDocumentView({
   workspace,
   file,
   onOpenPath,
-  onTocChange
+  onTocChange,
+  tocPinned,
+  onTocPinnedChange
 }: {
   workspace: MdxWorkspace
   file: MdxFile
   onOpenPath: (filePath: string, workspaceRoot?: string) => void
   onTocChange: (toc: TOCItemType[]) => void
+  tocPinned: boolean
+  onTocPinnedChange: (pinned: boolean) => void
 }): React.JSX.Element {
   const isMarkdownDocument = file.kind === 'markdown'
   const { sourceCopyState, pathCopyState, copyRawSource, copyDocumentPath } =
@@ -77,8 +81,8 @@ export function MdxDocumentView({
   }, [onTocChange, toc])
 
   return (
-    <div className="relative h-full min-h-0 overflow-hidden">
-      <div className="h-full min-h-0 overflow-auto">
+    <div className="relative flex h-full min-h-0 overflow-hidden">
+      <div className="min-h-0 flex-1 overflow-auto">
         <article
           id="nd-page"
           className="mx-auto flex min-h-full w-full max-w-[900px] flex-col gap-4 px-4 py-6 md:px-6 md:pt-8 xl:px-8 xl:pt-10"
@@ -159,7 +163,7 @@ export function MdxDocumentView({
           />
         </article>
       </div>
-      <DocumentTocRail toc={toc} />
+      <DocumentTocRail toc={toc} pinned={tocPinned} onPinnedChange={onTocPinnedChange} />
     </div>
   )
 }

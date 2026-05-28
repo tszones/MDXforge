@@ -148,6 +148,8 @@
   "workbench_outline": "Outline",
   "workbench_ai": "AI",
   "docs_toc": "On this page",
+  "docs_toc_pin": "Pin table of contents",
+  "docs_toc_unpin": "Unpin table of contents",
   "docs_not_found": "Not found",
   "todo_status_todo": "To do",
   "todo_status_active": "In progress",

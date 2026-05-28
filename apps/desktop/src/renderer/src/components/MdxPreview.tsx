@@ -48,7 +48,7 @@ export function MdxPreview({
     [activeFile, workspace]
   )
 
-  function updateWorkbenchLayout(key: keyof WorkbenchLayoutSettings, layout: Layout): void {
+  function updateWorkbenchLayout(key: keyof WorkbenchLayoutSettings, layout: Layout | boolean): void {
     onWorkbenchLayoutChange({
       ...workbenchLayout,
       [key]: layout
@@ -87,6 +87,8 @@ export function MdxPreview({
             file={activeFile}
             onOpenPath={(filePath, workspaceRoot) => void openOrActivate(filePath, workspaceRoot)}
             onTocChange={() => undefined}
+            tocPinned={Boolean(workbenchLayout?.tocPinned)}
+            onTocPinnedChange={(pinned) => updateWorkbenchLayout('tocPinned', pinned)}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-fd-muted-foreground">

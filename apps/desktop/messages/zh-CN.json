@@ -148,6 +148,8 @@
   "workbench_outline": "目录",
   "workbench_ai": "AI",
   "docs_toc": "目录",
+  "docs_toc_pin": "固定目录",
+  "docs_toc_unpin": "取消固定目录",
   "docs_not_found": "未找到",
   "todo_status_todo": "待办",
   "todo_status_active": "进行中",

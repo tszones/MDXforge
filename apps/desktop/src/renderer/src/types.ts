@@ -7,6 +7,7 @@ export type AppFontName = (typeof APP_FONT_OPTIONS)[number]
 export interface WorkbenchLayoutSettings {
   horizontal?: Record<string, number>
   centerVertical?: Record<string, number>
+  tocPinned?: boolean
 }
 
 export interface AppSettings {
