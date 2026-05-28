@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { useRef, useState } from 'react'
 import type { Layout, PanelImperativeHandle, PanelSize } from 'react-resizable-panels'
 import { Group, Panel, Separator } from 'react-resizable-panels'
+import { m } from '../../paraglide/messages'
 import type { WorkbenchLayoutSettings } from '../../types'
 import type { SidebarTab } from '../preview/sidebar/useWorkspaceSidebarTabs'
 import type { RightSidebarTab } from './RightSidebar'
@@ -60,14 +61,14 @@ export function WorkbenchLayout({
       <WorkbenchActivityBar>
         <ActivityButton
           active={!leftCollapsed && leftTab === 'files'}
-          label="Explorer"
+          label={m.workbench_explorer()}
           onClick={() => toggleLeft('files')}
         >
           <FolderTree className="size-5" />
         </ActivityButton>
         <ActivityButton
           active={!leftCollapsed && leftTab === 'search'}
-          label="Search"
+          label={m.workbench_search()}
           onClick={() => toggleLeft('search')}
         >
           <Search className="size-5" />
@@ -128,14 +129,14 @@ export function WorkbenchLayout({
       <WorkbenchActivityBar>
         <ActivityButton
           active={!rightCollapsed && rightTab === 'outline'}
-          label="Outline"
+          label={m.workbench_outline()}
           onClick={() => toggleRight('outline')}
         >
           <ListTree className="size-5" />
         </ActivityButton>
         <ActivityButton
           active={!rightCollapsed && rightTab === 'ai'}
-          label="AI"
+          label={m.workbench_ai()}
           onClick={() => toggleRight('ai')}
         >
           <Bot className="size-5" />
