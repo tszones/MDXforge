@@ -1,4 +1,4 @@
-import { BookOpen, Bot, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Search } from 'lucide-react'
+import { PanelLeftOpen, PanelRightOpen } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useRef, useState } from 'react'
 import type { Layout, PanelImperativeHandle, PanelSize } from 'react-resizable-panels'
@@ -7,6 +7,9 @@ import { m } from '../../paraglide/messages'
 import type { WorkbenchLayoutSettings } from '../../types'
 import type { SidebarTab } from '../preview/sidebar/useWorkspaceSidebarTabs'
 import type { RightSidebarTab } from './RightSidebar'
+import { WorkbenchIconButton } from './WorkbenchIconButton'
+import { WorkbenchLeftPanelHeader, WorkbenchRightPanelHeader } from './WorkbenchPanelHeader'
+import { WorkbenchSidePanel } from './WorkbenchSidePanel'
 
 export function WorkbenchLayout({
   leftSidebar,
@@ -62,9 +65,9 @@ export function WorkbenchLayout({
     <div className="relative flex min-h-0 flex-1 bg-fd-background">
       {leftCollapsed ? (
         <div className="z-20 flex h-8 w-11 shrink-0 self-start justify-center">
-          <IconButton label={m.preview_expand_sidebar()} onClick={toggleLeftPanel}>
+          <WorkbenchIconButton label={m.preview_expand_sidebar()} onClick={toggleLeftPanel}>
             <PanelLeftOpen className="size-4" />
-          </IconButton>
+          </WorkbenchIconButton>
         </div>
       ) : null}
 
@@ -85,29 +88,18 @@ export function WorkbenchLayout({
             collapsedSize="0px"
             onResize={(size) => setLeftCollapsed(isCollapsed(size))}
           >
-            <div className="flex h-full min-h-0 flex-col bg-fd-card">
-              <div className="flex h-8 items-center gap-1 border-b px-2">
-                <IconButton label={m.preview_collapse_sidebar()} onClick={toggleLeftPanel}>
-                  <PanelLeftClose className="size-4" />
-                </IconButton>
-                <div className="mx-1 h-5 w-px bg-fd-border" />
-                <TabIconButton
-                  active={leftTab === 'files'}
-                  label={m.workbench_discover()}
-                  onClick={() => openLeftTab('files')}
-                >
-                  <BookOpen className="size-4" />
-                </TabIconButton>
-                <TabIconButton
-                  active={leftTab === 'search'}
-                  label={m.workbench_search()}
-                  onClick={() => openLeftTab('search')}
-                >
-                  <Search className="size-4" />
-                </TabIconButton>
-              </div>
-              <div className="min-h-0 flex-1">{leftSidebar}</div>
-            </div>
+            <WorkbenchSidePanel
+              side="left"
+              header={
+                <WorkbenchLeftPanelHeader
+                  activeTab={leftTab}
+                  onTabChange={openLeftTab}
+                  onCollapse={toggleLeftPanel}
+                />
+              }
+            >
+              {leftSidebar}
+            </WorkbenchSidePanel>
           </Panel>
           <Panel id="center" minSize="520px">
             <Group
@@ -134,77 +126,30 @@ export function WorkbenchLayout({
             collapsedSize="0px"
             onResize={(size) => setRightCollapsed(isCollapsed(size))}
           >
-            <div className="flex h-full min-h-0 flex-col border-l bg-fd-card">
-              <div className="flex h-8 items-center gap-1 border-b px-2">
-                <IconButton label={m.preview_collapse_sidebar()} onClick={toggleRightPanel}>
-                  <PanelRightClose className="size-4" />
-                </IconButton>
-                <div className="mx-1 h-5 w-px bg-fd-border" />
-                <TabIconButton active={rightTab === 'ai'} label={m.workbench_ai()} onClick={openRightPanel}>
-                  <Bot className="size-4" />
-                </TabIconButton>
-              </div>
-              <div className="min-h-0 flex-1">{rightSidebar}</div>
-            </div>
+            <WorkbenchSidePanel
+              side="right"
+              header={
+                <WorkbenchRightPanelHeader
+                  activeTab={rightTab}
+                  onOpenAi={openRightPanel}
+                  onCollapse={toggleRightPanel}
+                />
+              }
+            >
+              {rightSidebar}
+            </WorkbenchSidePanel>
           </Panel>
         </Group>
       </div>
 
       {rightCollapsed ? (
         <div className="absolute right-0 top-0 z-20 flex h-8 w-11 justify-center">
-          <IconButton label={m.preview_expand_sidebar()} onClick={toggleRightPanel}>
+          <WorkbenchIconButton label={m.preview_expand_sidebar()} onClick={toggleRightPanel}>
             <PanelRightOpen className="size-4" />
-          </IconButton>
+          </WorkbenchIconButton>
         </div>
       ) : null}
     </div>
-  )
-}
-
-function TabIconButton({
-  active,
-  label,
-  onClick,
-  children
-}: {
-  active: boolean
-  label: string
-  onClick: () => void
-  children: ReactNode
-}): React.JSX.Element {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      aria-pressed={active}
-      title={label}
-      onClick={onClick}
-      className="inline-flex size-8 items-center justify-center rounded-md text-fd-muted-foreground transition-colors hover:bg-fd-accent/70 hover:text-fd-accent-foreground aria-pressed:bg-transparent aria-pressed:text-fd-foreground"
-    >
-      {children}
-    </button>
-  )
-}
-
-function IconButton({
-  label,
-  onClick,
-  children
-}: {
-  label: string
-  onClick: () => void
-  children: ReactNode
-}): React.JSX.Element {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-      className="inline-flex size-8 items-center justify-center rounded-md text-fd-muted-foreground transition-colors hover:bg-fd-accent/70 hover:text-fd-accent-foreground"
-    >
-      {children}
-    </button>
   )
 }
 
