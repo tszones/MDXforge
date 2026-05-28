@@ -69,7 +69,9 @@ export function MdxPreview({
           workspace={activeWorkspace}
           onOpenFile={onOpenFile}
           onOpenFolder={onOpenFolder}
-          onOpenPath={(filePath, workspaceRoot) => void openOrActivate(filePath, workspaceRoot)}
+          onOpenPath={(filePath, workspaceRoot, options) =>
+            void openOrActivate(filePath, workspaceRoot, options)
+          }
           onRenamePath={onRenamePath}
           onDeletePath={onDeletePath}
           opening={opening}
@@ -85,7 +87,9 @@ export function MdxPreview({
           <MdxDocumentView
             workspace={activeWorkspace}
             file={activeFile}
-            onOpenPath={(filePath, workspaceRoot) => void openOrActivate(filePath, workspaceRoot)}
+            onOpenPath={(filePath, workspaceRoot, options) =>
+              void openOrActivate(filePath, workspaceRoot, options)
+            }
             tocPinned={Boolean(workbenchLayout?.tocPinned)}
             onTocPinnedChange={(pinned) => updateWorkbenchLayout('tocPinned', pinned)}
           />

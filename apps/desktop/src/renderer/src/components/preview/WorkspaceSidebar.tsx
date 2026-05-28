@@ -20,7 +20,7 @@ export function PreviewSidebar({
   workspace: MdxWorkspace
   onOpenFile: () => void
   onOpenFolder: () => void
-  onOpenPath: (filePath: string, workspaceRoot?: string) => void
+  onOpenPath: (filePath: string, workspaceRoot?: string, options?: { newTab?: boolean }) => void
   onRenamePath: (targetPath: string, nextName: string, workspaceRoot?: string) => Promise<void>
   onDeletePath: (targetPath: string, workspaceRoot?: string) => Promise<void>
   opening: boolean

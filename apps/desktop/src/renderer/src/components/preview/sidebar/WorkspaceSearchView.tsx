@@ -18,7 +18,7 @@ export function WorkspaceSearchView({
   workspace: MdxWorkspace
   onOpenFile: () => void
   onOpenFolder: () => void
-  onOpenPath: (filePath: string, workspaceRoot?: string) => void
+  onOpenPath: (filePath: string, workspaceRoot?: string, options?: { newTab?: boolean }) => void
   onDeletePath: (targetPath: string, workspaceRoot?: string) => Promise<void>
   opening: boolean
 }): React.JSX.Element {

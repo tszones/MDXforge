@@ -25,7 +25,7 @@ export function MdxDocumentView({
 }: {
   workspace: MdxWorkspace
   file: MdxFile
-  onOpenPath: (filePath: string, workspaceRoot?: string) => void
+  onOpenPath: (filePath: string, workspaceRoot?: string, options?: { newTab?: boolean }) => void
   tocPinned: boolean
   onTocPinnedChange: (pinned: boolean) => void
 }): React.JSX.Element {

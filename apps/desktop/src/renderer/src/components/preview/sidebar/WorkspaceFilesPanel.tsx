@@ -36,7 +36,7 @@ export function WorkspaceFilesPanel({
   nodes: FileTreeNode[]
   renamingPath: string | null
   contextMenu: SidebarContextMenuState
-  onOpenPath: (filePath: string, workspaceRoot?: string) => void
+  onOpenPath: (filePath: string, workspaceRoot?: string, options?: { newTab?: boolean }) => void
   onRenamePath: (targetPath: string, nextName: string, workspaceRoot?: string) => Promise<void>
   onStartRename: (path: string) => void
   onStopRename: () => void
@@ -64,7 +64,7 @@ export function WorkspaceFilesPanel({
                 key={getTreeNodeKey(node, index)}
                 node={node}
                 activePath={activePath}
-                onOpenPath={(filePath) => onOpenPath(filePath, workspaceRoot)}
+                onOpenPath={(filePath, options) => onOpenPath(filePath, workspaceRoot, options)}
                 onRenamePath={(targetPath, nextName) =>
                   onRenamePath(targetPath, nextName, workspaceRoot)
                 }

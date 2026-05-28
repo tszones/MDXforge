@@ -28,7 +28,7 @@ export function FileTreeNodeView({
 }: {
   node: FileTreeNode
   activePath: string
-  onOpenPath: (filePath: string) => void
+  onOpenPath: (filePath: string, options?: { newTab?: boolean }) => void
   onRenamePath: (targetPath: string, nextName: string) => Promise<void>
   renamingPath: string | null
   onStartRename: (path: string) => void
@@ -98,7 +98,7 @@ function FileTreeFolder({
 }: {
   node: Extract<FileTreeNode, { type: 'folder' }>
   activePath: string
-  onOpenPath: (filePath: string) => void
+  onOpenPath: (filePath: string, options?: { newTab?: boolean }) => void
   onRenamePath: (targetPath: string, nextName: string) => Promise<void>
   renamingPath: string | null
   onStartRename: (path: string) => void
@@ -176,7 +176,7 @@ function FileTreeItem({
 }: {
   entry: MdxFolderEntry
   active: boolean
-  onOpenPath: (filePath: string) => void
+  onOpenPath: (filePath: string, options?: { newTab?: boolean }) => void
   onRenamePath: (targetPath: string, nextName: string) => Promise<void>
   renamingPath: string | null
   onStartRename: (path: string) => void
@@ -194,7 +194,7 @@ function FileTreeItem({
       onClick={(event) => {
         event.preventDefault()
         if (renamingPath === entry.path) return
-        onOpenPath(entry.path)
+        onOpenPath(entry.path, { newTab: event.ctrlKey || event.metaKey })
       }}
       onDoubleClick={(event) => {
         event.preventDefault()

@@ -28,7 +28,7 @@ export function WorkspaceSearchPanel({
   collapsedSearchFiles: Set<string>
   contextMenu: SidebarContextMenuState
   onToggleResult: (path: string) => void
-  onOpenPath: (filePath: string, workspaceRoot?: string) => void
+  onOpenPath: (filePath: string, workspaceRoot?: string, options?: { newTab?: boolean }) => void
   onOpenContextMenu: (event: React.MouseEvent, path: string) => void
   onShowInFolder: (path: string) => void
   onOpenInVsCode: (path: string) => void
@@ -57,7 +57,7 @@ export function WorkspaceSearchPanel({
                 active={result.path === activePath}
                 collapsed={collapsedSearchFiles.has(result.path)}
                 onToggle={() => onToggleResult(result.path)}
-                onOpenPath={(filePath) => onOpenPath(filePath, workspaceRoot)}
+                onOpenPath={(filePath, options) => onOpenPath(filePath, workspaceRoot, options)}
                 onOpenContextMenu={onOpenContextMenu}
               />
             ))}

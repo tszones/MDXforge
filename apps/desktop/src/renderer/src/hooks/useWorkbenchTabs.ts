@@ -2,6 +2,10 @@ import { useEffect, useMemo, useState } from 'react'
 import type { WorkbenchDocumentTab } from '../components/workbench/DocumentTabs'
 import type { MdxWorkspace } from '../types'
 
+interface OpenTabOptions {
+  newTab?: boolean
+}
+
 export function useWorkbenchTabs({
   workspace,
   setWorkspace,
@@ -18,7 +22,11 @@ export function useWorkbenchTabs({
   tabs: WorkbenchDocumentTab[]
   activeTabId: string | null
   activeTab: WorkbenchDocumentTab | null
-  openOrActivate: (filePath: string, workspaceRoot?: string) => Promise<void>
+  openOrActivate: (
+    filePath: string,
+    workspaceRoot?: string,
+    options?: OpenTabOptions
+  ) => Promise<void>
   activate: (tabId: string) => void
   close: (tabId: string) => void
 } {
@@ -38,9 +46,13 @@ export function useWorkbenchTabs({
     [activeTabId, tabs]
   )
 
-  async function openOrActivate(filePath: string, workspaceRoot?: string): Promise<void> {
+  async function openOrActivate(
+    filePath: string,
+    workspaceRoot?: string,
+    options: OpenTabOptions = {}
+  ): Promise<void> {
     const existing = tabs.find((tab) => tab.file.path === filePath)
-    if (existing) {
+    if (options.newTab && existing) {
       activate(existing.id)
       return
     }
@@ -49,7 +61,11 @@ export function useWorkbenchTabs({
     if (!nextWorkspace) return
 
     const tab = toTab(nextWorkspace)
-    setTabs((current) => (current.some((item) => item.id === tab.id) ? current : [...current, tab]))
+    if (options.newTab) {
+      setTabs((current) => (current.some((item) => item.id === tab.id) ? current : [...current, tab]))
+    } else {
+      setTabs((current) => replaceActiveTab(current, activeTabId, tab))
+    }
     setActiveTabId(tab.id)
     setWorkspace(nextWorkspace)
   }
@@ -86,4 +102,15 @@ function toTab(workspace: MdxWorkspace): WorkbenchDocumentTab {
     id: workspace.file.path,
     file: workspace.file
   }
+}
+
+function replaceActiveTab(
+  tabs: WorkbenchDocumentTab[],
+  activeTabId: string | null,
+  nextTab: WorkbenchDocumentTab
+): WorkbenchDocumentTab[] {
+  const withoutDuplicate = tabs.filter((tab) => tab.id !== nextTab.id)
+  const activeIndex = withoutDuplicate.findIndex((tab) => tab.id === activeTabId)
+  if (activeIndex === -1) return [...withoutDuplicate, nextTab]
+  return withoutDuplicate.map((tab, index) => (index === activeIndex ? nextTab : tab))
 }
