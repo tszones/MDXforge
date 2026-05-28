@@ -4,6 +4,7 @@ import { resolve } from 'path'
 import { IpcChannels } from '../shared/ipc'
 import type { WorkspaceExtensionManifest } from './extensions'
 import {
+  invalidateCompiledMdxCache,
   invalidateMdxWorkspaceCache,
   readMdxWorkspace,
   resolveMdxTarget,
@@ -97,6 +98,7 @@ async function reloadWatchedMdxWorkspace(): Promise<void> {
 
   try {
     invalidateMdxWorkspaceCache(watchedWorkspaceRoot)
+    invalidateCompiledMdxCache(watchedOpenedPath)
     const workspace = await readMdxWorkspace(watchedOpenedPath, watchedWorkspaceRoot, {
       refreshFolder: true
     })

@@ -3,6 +3,7 @@ import { dirname, isAbsolute, join, relative, resolve } from 'path'
 import { mainMessage } from './i18n'
 import { isViewableDocumentPath } from './viewable-documents'
 import {
+  invalidateCompiledMdxCache,
   invalidateMdxWorkspaceCache,
   type MdxWorkspace,
   readMdxWorkspace,
@@ -34,6 +35,7 @@ export async function renameMdxPath(
 
   renameSync(resolvedTarget, nextPath)
   invalidateMdxWorkspaceCache(resolvedRoot)
+  invalidateCompiledMdxCache(resolvedTarget)
   const nextRoot = resolvedRoot === resolvedTarget ? nextPath : resolvedRoot
   return readMdxWorkspace(nextPath, nextRoot, { refreshFolder: true })
 }
@@ -53,11 +55,13 @@ export async function deleteMdxPath(
   const stat = statSync(resolvedTarget)
   if (stat.isDirectory()) {
     deleteViewableDocumentsInDirectory(resolvedTarget)
+    invalidateCompiledMdxCache()
   } else {
     if (!isViewableDocumentPath(resolvedTarget)) {
       throw new Error(mainMessage('error_no_mdx_found', { filePath: targetPath }))
     }
     rmSync(resolvedTarget, { force: false })
+    invalidateCompiledMdxCache(resolvedTarget)
   }
 
   if (!resolvedRoot || !existsSync(resolvedRoot)) return null

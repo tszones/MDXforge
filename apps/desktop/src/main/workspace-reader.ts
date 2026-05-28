@@ -3,6 +3,12 @@ import matter from 'gray-matter'
 import { extname, join, resolve } from 'path'
 import { readWorkspaceExtensionManifest, type WorkspaceExtensionManifest } from './extensions'
 import { mainMessage } from './i18n'
+import {
+  getCompiledMdxCacheEntry,
+  getCompiledMdxCacheKey,
+  invalidateCompiledMdxCache,
+  setCompiledMdxCacheEntry
+} from './mdx-compile-cache'
 import { compileMdxSource, formatMdxError } from './mdx-compiler'
 import { readMdxRawSource } from './mdx-raw-source'
 import {
@@ -51,6 +57,8 @@ export function invalidateMdxWorkspaceCache(workspaceRoot?: string): void {
   if (!workspaceRoot || workspaceCache?.rootPath === resolve(workspaceRoot)) workspaceCache = null
 }
 
+export { invalidateCompiledMdxCache }
+
 export async function readMdxWorkspace(
   inputPath: string,
   workspaceRoot?: string,
@@ -77,10 +85,14 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
   if (!resolvedPath) throw new Error(mainMessage('error_no_mdx_found', { filePath }))
 
   const fileKind = getMdxFileKind(resolvedPath)
+  const cacheKey = getCompiledMdxCacheKey(resolvedPath, workspaceRoot)
+  const cachedFile = getCompiledMdxCacheEntry(cacheKey)
+  if (cachedFile) return cachedFile
+
   const raw = readMdxRawSource(resolvedPath)
 
   if (fileKind !== 'markdown') {
-    return {
+    const file: MdxFile = {
       path: resolvedPath,
       name: getFileName(resolvedPath),
       kind: fileKind,
@@ -89,6 +101,8 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
       compiledSource: '',
       raw
     }
+    setCompiledMdxCacheEntry(cacheKey, file)
+    return file
   }
 
   let parsed: matter.GrayMatterFile<string>
@@ -96,7 +110,7 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
   try {
     parsed = matter(raw)
   } catch (cause) {
-    return {
+    const file: MdxFile = {
       path: resolvedPath,
       name: getFileName(resolvedPath),
       kind: fileKind,
@@ -106,10 +120,12 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
       compileError: formatMdxError(cause, raw),
       raw
     }
+    setCompiledMdxCacheEntry(cacheKey, file)
+    return file
   }
 
   try {
-    return {
+    const file: MdxFile = {
       path: resolvedPath,
       name: getFileName(resolvedPath),
       kind: fileKind,
@@ -121,8 +137,10 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
       }),
       raw
     }
+    setCompiledMdxCacheEntry(cacheKey, file)
+    return file
   } catch (cause) {
-    return {
+    const file: MdxFile = {
       path: resolvedPath,
       name: getFileName(resolvedPath),
       kind: fileKind,
@@ -132,6 +150,8 @@ export async function readMdxFile(filePath: string, workspaceRoot?: string): Pro
       compileError: formatMdxError(cause, parsed.content),
       raw
     }
+    setCompiledMdxCacheEntry(cacheKey, file)
+    return file
   }
 }
 
