@@ -1,5 +1,5 @@
 import type { TOCItemType } from 'fumadocs-core/toc'
-import { TOCProvider, TOCScrollArea, useTOCItems } from 'fumadocs-ui/components/toc'
+import { TOCProvider, TOCScrollArea, useItems, useTOCItems } from 'fumadocs-ui/components/toc'
 import { TOCItem, TOCItems } from 'fumadocs-ui/components/toc/clerk'
 import { Pin, Text } from 'lucide-react'
 import { m } from '../../paraglide/messages'
@@ -83,17 +83,23 @@ function HoverToc({ onPin }: { onPin: () => void }): React.JSX.Element {
 }
 
 function MiniTocRail(): React.JSX.Element {
-  const items = useTOCItems()
+  const tocItems = useTOCItems()
+  const activeItems = useItems()
+  const activeUrls = new Set(
+    activeItems
+      .filter((item) => item.active || item.fallback)
+      .map((item) => item.original.url)
+  )
 
   return (
     <div className="pointer-events-auto absolute right-4 top-1/2 flex max-h-[min(576px,calc(100%-4rem))] -translate-y-1/2 cursor-pointer flex-col items-end gap-3 overflow-hidden py-6 pe-1 opacity-100 transition-opacity duration-200 group-hover/toc:opacity-0">
-      {items.map((item) => (
+      {tocItems.map((item) => (
         <a
           key={item.url}
           href={item.url}
           aria-label={String(item.title ?? '')}
           title={String(item.title ?? '')}
-          data-active={item.url === window.location.hash}
+          data-active={activeUrls.has(item.url)}
           className={
             item.depth > 2
               ? 'h-[3px] w-2.5 shrink-0 rounded-full bg-fd-muted-foreground/25 transition-colors hover:bg-fd-primary/70 data-[active=true]:bg-fd-primary'
