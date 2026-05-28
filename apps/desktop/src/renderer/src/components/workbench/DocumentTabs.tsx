@@ -1,4 +1,4 @@
-import { FileText, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import type { MdxFile } from '../../types'
 
 export interface WorkbenchDocumentTab {
@@ -17,27 +17,28 @@ export function DocumentTabs({
   onActivate: (tabId: string) => void
   onClose: (tabId: string) => void
 }): React.JSX.Element {
+  if (tabs.length <= 1) return <></>
+
   return (
-    <div className="flex h-10 shrink-0 items-center overflow-x-auto border-b bg-fd-card">
+    <div className="flex h-8 shrink-0 items-center overflow-x-auto bg-fd-background/80 px-2">
       {tabs.map((tab) => (
         <div
           key={tab.id}
           data-active={tab.id === activeTabId}
-          className="group flex h-full max-w-56 min-w-32 items-center border-r text-fd-muted-foreground text-sm transition-colors hover:bg-fd-accent/60 hover:text-fd-accent-foreground data-[active=true]:bg-fd-background data-[active=true]:text-fd-foreground"
+          className="group flex h-7 max-w-44 min-w-0 items-center rounded-md px-1 text-fd-muted-foreground text-xs transition-colors hover:bg-fd-accent/40 hover:text-fd-accent-foreground data-[active=true]:text-fd-foreground"
         >
           <button
             type="button"
             onClick={() => onActivate(tab.id)}
-            className="flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-start"
+            className="flex h-full min-w-0 flex-1 items-center px-2 text-start"
           >
-            <FileText className="size-3.5 shrink-0" />
             <span className="truncate">{tab.file.name}</span>
           </button>
           <button
             type="button"
             aria-label={`Close ${tab.file.name}`}
             onClick={() => onClose(tab.id)}
-            className="me-2 rounded p-0.5 opacity-60 transition-opacity hover:bg-fd-accent hover:opacity-100 group-hover:opacity-100"
+            className="rounded p-0.5 opacity-0 transition-opacity hover:bg-fd-accent hover:opacity-100 group-hover:opacity-60 data-[active=true]:opacity-50"
           >
             <X className="size-3.5" />
           </button>

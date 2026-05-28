@@ -142,6 +142,7 @@
   "workbench_problems_placeholder": "No problems detected yet.",
   "workbench_output_placeholder": "Output and task logs will appear here.",
   "workbench_no_open_tabs": "No open documents.",
+  "workbench_discover": "Discover",
   "workbench_explorer": "Explorer",
   "workbench_search": "Search",
   "workbench_outline": "Outline",

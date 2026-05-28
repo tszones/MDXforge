@@ -5,6 +5,7 @@ import { useEffect, useMemo } from 'react'
 import { m } from '../../paraglide/messages'
 import type { MdxFile, MdxWorkspace } from '../../types'
 import { Backlinks } from './Backlinks'
+import { DocumentTocRail } from './DocumentTocRail'
 import { ExtensionSafetyNotice } from './ExtensionSafetyNotice'
 import { FileTreeNodeContextMenu } from './FileTreeNodeContextMenu'
 import { MdxRenderBoundary } from './MdxRenderBoundary'
@@ -76,86 +77,89 @@ export function MdxDocumentView({
   }, [onTocChange, toc])
 
   return (
-    <div className="h-full min-h-0 overflow-auto">
-      <article
-        id="nd-page"
-        className="mx-auto flex min-h-full w-full max-w-[900px] flex-col gap-4 px-4 py-6 md:px-6 md:pt-8 xl:px-8 xl:pt-10"
-        onContextMenu={openDocumentContextMenu}
-      >
-        <DocsTitle>{title}</DocsTitle>
-        {description ? <DocsDescription>{description}</DocsDescription> : null}
-        <PageActions
-          sourceCopyState={sourceCopyState}
-          pathCopyState={pathCopyState}
-          onCopyRawSource={() => void copyRawSource()}
-          onCopyDocumentPath={() => void copyDocumentPath()}
-        />
-
-        {isMarkdownDocument && (hasExtensionPackages || extensionWarnings.length > 0) ? (
-          <ExtensionSafetyNotice
-            enabled={extensionsEnabled}
-            packages={extensionPackages}
-            warnings={extensionWarnings}
-            error={extensionError}
-            onEnable={enableExtensions}
-            onDisable={disableExtensions}
+    <div className="relative h-full min-h-0 overflow-hidden">
+      <div className="h-full min-h-0 overflow-auto">
+        <article
+          id="nd-page"
+          className="mx-auto flex min-h-full w-full max-w-[900px] flex-col gap-4 px-4 py-6 md:px-6 md:pt-8 xl:px-8 xl:pt-10"
+          onContextMenu={openDocumentContextMenu}
+        >
+          <DocsTitle>{title}</DocsTitle>
+          {description ? <DocsDescription>{description}</DocsDescription> : null}
+          <PageActions
+            sourceCopyState={sourceCopyState}
+            pathCopyState={pathCopyState}
+            onCopyRawSource={() => void copyRawSource()}
+            onCopyDocumentPath={() => void copyDocumentPath()}
           />
-        ) : null}
 
-        {isMarkdownDocument && (compileError || renderError) ? (
-          <pre className="overflow-auto rounded-md border bg-fd-error/10 p-4 text-sm text-fd-error">
-            {compileError ?? renderError}
-          </pre>
-        ) : null}
+          {isMarkdownDocument && (hasExtensionPackages || extensionWarnings.length > 0) ? (
+            <ExtensionSafetyNotice
+              enabled={extensionsEnabled}
+              packages={extensionPackages}
+              warnings={extensionWarnings}
+              error={extensionError}
+              onEnable={enableExtensions}
+              onDisable={disableExtensions}
+            />
+          ) : null}
 
-        {isMarkdownDocument && Mdx && !compileError ? (
-          <MdxRenderBoundary sourceKey={renderSourceKey} onError={setRenderError}>
-            <DocsBody className="mdxforge-mdx max-w-none text-fd-foreground/90 dark:prose-invert">
-              <Mdx components={mdxComponents} />
-            </DocsBody>
-          </MdxRenderBoundary>
-        ) : null}
+          {isMarkdownDocument && (compileError || renderError) ? (
+            <pre className="overflow-auto rounded-md border bg-fd-error/10 p-4 text-sm text-fd-error">
+              {compileError ?? renderError}
+            </pre>
+          ) : null}
 
-        {!isMarkdownDocument ? <UnsupportedDocumentPlaceholder kind={file.kind} /> : null}
+          {isMarkdownDocument && Mdx && !compileError ? (
+            <MdxRenderBoundary sourceKey={renderSourceKey} onError={setRenderError}>
+              <DocsBody className="mdxforge-mdx max-w-none text-fd-foreground/90 dark:prose-invert">
+                <Mdx components={mdxComponents} />
+              </DocsBody>
+            </MdxRenderBoundary>
+          ) : null}
 
-        {currentEntry && currentEntry.backlinks.length > 0 ? (
-          <Backlinks
-            backlinks={currentEntry.backlinks}
-            onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
+          {!isMarkdownDocument ? <UnsupportedDocumentPlaceholder kind={file.kind} /> : null}
+
+          {currentEntry && currentEntry.backlinks.length > 0 ? (
+            <Backlinks
+              backlinks={currentEntry.backlinks}
+              onOpenPath={(filePath) => onOpenPath(filePath, workspace.folder?.rootPath)}
+            />
+          ) : null}
+          <FileTreeNodeContextMenu
+            menu={documentContextMenu}
+            items={[
+              {
+                label: m.actions_copy_raw_source(),
+                icon: <FileText className="size-4 text-fd-primary" />,
+                onSelect: () => {
+                  closeDocumentContextMenu()
+                  void copyRawSource()
+                }
+              },
+              {
+                label: m.preview_show_in_folder(),
+                icon: <FolderOpen className="size-4 text-fd-primary" />,
+                onSelect: () => void showDocumentInFolder()
+              },
+              {
+                label: m.preview_open_in_vscode(),
+                icon: <Code2 className="size-4 text-fd-primary" />,
+                onSelect: () => void openDocumentInVsCode()
+              },
+              {
+                label: m.preview_copy_file_path(),
+                icon: <Copy className="size-4 text-fd-primary" />,
+                onSelect: () => {
+                  closeDocumentContextMenu()
+                  void copyDocumentPath()
+                }
+              }
+            ]}
           />
-        ) : null}
-        <FileTreeNodeContextMenu
-          menu={documentContextMenu}
-          items={[
-            {
-              label: m.actions_copy_raw_source(),
-              icon: <FileText className="size-4 text-fd-primary" />,
-              onSelect: () => {
-                closeDocumentContextMenu()
-                void copyRawSource()
-              }
-            },
-            {
-              label: m.preview_show_in_folder(),
-              icon: <FolderOpen className="size-4 text-fd-primary" />,
-              onSelect: () => void showDocumentInFolder()
-            },
-            {
-              label: m.preview_open_in_vscode(),
-              icon: <Code2 className="size-4 text-fd-primary" />,
-              onSelect: () => void openDocumentInVsCode()
-            },
-            {
-              label: m.preview_copy_file_path(),
-              icon: <Copy className="size-4 text-fd-primary" />,
-              onSelect: () => {
-                closeDocumentContextMenu()
-                void copyDocumentPath()
-              }
-            }
-          ]}
-        />
-      </article>
+        </article>
+      </div>
+      <DocumentTocRail toc={toc} />
     </div>
   )
 }

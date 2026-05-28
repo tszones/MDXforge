@@ -1,4 +1,4 @@
-import { BookOpen, FileText, Search } from 'lucide-react'
+import { FileText, Search } from 'lucide-react'
 import { useMemo, useRef, useState } from 'react'
 import { m } from '../../../paraglide/messages'
 import type { MdxWorkspace } from '../../../types'
@@ -55,8 +55,7 @@ export function WorkspaceFilesView({
       title={
         <>
           <div className="flex items-center gap-2 font-medium">
-            <BookOpen className="size-4 shrink-0 text-fd-primary" />
-            <span>Explorer</span>
+            <span>{m.workbench_discover()}</span>
           </div>
           {workspace.folder ? (
             <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground focus-within:border-fd-primary/50 focus-within:text-fd-foreground">

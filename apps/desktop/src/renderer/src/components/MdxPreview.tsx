@@ -1,4 +1,3 @@
-import type { TOCItemType } from 'fumadocs-core/toc'
 import { useMemo, useState } from 'react'
 import type { Layout } from 'react-resizable-panels'
 import { useWorkbenchTabs } from '../hooks/useWorkbenchTabs'
@@ -36,9 +35,8 @@ export function MdxPreview({
   workbenchLayout,
   onWorkbenchLayoutChange
 }: MdxPreviewProps): React.JSX.Element {
-  const [rightSidebarTab, setRightSidebarTab] = useState<RightSidebarTab>('outline')
+  const [rightSidebarTab, setRightSidebarTab] = useState<RightSidebarTab>('ai')
   const [leftSidebarTab, setLeftSidebarTab] = useState<SidebarTab>('files')
-  const [activeToc, setActiveToc] = useState<TOCItemType[]>([])
   const { tabs, activeTabId, activeTab, openOrActivate, activate, close } = useWorkbenchTabs({
     workspace,
     setWorkspace,
@@ -88,7 +86,7 @@ export function MdxPreview({
             workspace={activeWorkspace}
             file={activeFile}
             onOpenPath={(filePath, workspaceRoot) => void openOrActivate(filePath, workspaceRoot)}
-            onTocChange={setActiveToc}
+            onTocChange={() => undefined}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-fd-muted-foreground">
@@ -96,14 +94,7 @@ export function MdxPreview({
           </div>
         )
       }
-      rightSidebar={
-        <RightSidebar
-          activeTab={rightSidebarTab}
-          onActiveTabChange={setRightSidebarTab}
-          file={activeFile}
-          toc={activeToc}
-        />
-      }
+      rightSidebar={<RightSidebar file={activeFile} />}
     />
   )
 }
