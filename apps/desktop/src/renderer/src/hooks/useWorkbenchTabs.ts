@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { WorkbenchDocumentTab } from '../components/workbench/DocumentTabs'
 import type { MdxWorkspace } from '../types'
 
@@ -21,10 +21,13 @@ export function useWorkbenchTabs({
   const [tabs, setTabs] = useState<WorkbenchDocumentTab[]>(() => [toTab(workspace)])
   const [activeTabId, setActiveTabId] = useState(workspace.file.path)
 
-  if (!tabs.some((tab) => tab.id === workspace.file.path)) {
-    setTabs((current) => [...current, toTab(workspace)])
+  useEffect(() => {
+    setTabs((current) => {
+      if (current.some((tab) => tab.id === workspace.file.path)) return current
+      return [...current, toTab(workspace)]
+    })
     setActiveTabId(workspace.file.path)
-  }
+  }, [workspace])
 
   const activeTab = useMemo(
     () => tabs.find((tab) => tab.id === activeTabId) ?? tabs[0] ?? null,
