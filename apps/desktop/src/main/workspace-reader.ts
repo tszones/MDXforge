@@ -53,6 +53,11 @@ type WorkspaceCache = {
 
 let workspaceCache: WorkspaceCache | null = null
 
+export function getCachedMdxWorkspace(folderRoot: string): WorkspaceCache | null {
+  const rootPath = resolve(folderRoot)
+  return workspaceCache?.rootPath === rootPath ? workspaceCache : null
+}
+
 export function invalidateMdxWorkspaceCache(workspaceRoot?: string): void {
   if (!workspaceRoot || workspaceCache?.rootPath === resolve(workspaceRoot)) workspaceCache = null
 }

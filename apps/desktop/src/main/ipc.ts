@@ -3,9 +3,15 @@ import { IpcChannels } from '../shared/ipc'
 import { type SetExtensionManifest, watchMdxWorkspace } from './app-open'
 import { getWorkspaceExtensionTrustKey, type WorkspaceExtensionManifest } from './extensions'
 import { mainMessage } from './i18n'
-import { deleteMdxPath, openMdxFile, openMdxFolder, readMdxWorkspace, renameMdxPath } from './mdx'
+import {
+  deleteMdxPath,
+  getCachedMdxWorkspace,
+  openMdxFile,
+  openMdxFolder,
+  readMdxWorkspace,
+  renameMdxPath
+} from './mdx'
 import { readMdxRawSource } from './mdx-raw-source'
-import { readMdxFolder } from './page-tree'
 import { type AppSettings, getAppSettings, setAppSettings } from './settings'
 import {
   addLocalSkillFolder,
@@ -156,8 +162,9 @@ export function registerAppIpc(options: {
   ipcMain.handle(
     IpcChannels.mdx.searchWorkspace,
     async (_, workspaceRoot: string, query: string) => {
-      const folder = readMdxFolder(workspaceRoot)
-      return searchMdxWorkspaceFiles(folder.files, query)
+      const cachedWorkspace = getCachedMdxWorkspace(workspaceRoot)
+      const folder = cachedWorkspace?.folder ?? (await readMdxWorkspace(workspaceRoot)).folder
+      return searchMdxWorkspaceFiles(folder?.files ?? [], query)
     }
   )
   ipcMain.handle(IpcChannels.skills.getWorkspace, (_, workspaceRoot: string) =>

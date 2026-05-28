@@ -3,6 +3,7 @@ export { openMdxFile, openMdxFolder } from './open-dialogs'
 export { getLastOpenFile, setLastOpenPath } from './recent-state'
 export { deleteMdxPath, renameMdxPath } from './workspace-file-actions'
 export {
+  getCachedMdxWorkspace,
   invalidateCompiledMdxCache,
   invalidateMdxWorkspaceCache,
   type MdxFile,
