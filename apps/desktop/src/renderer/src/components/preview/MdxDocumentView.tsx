@@ -1,7 +1,6 @@
-import type { TOCItemType } from 'fumadocs-core/toc'
 import { DocsBody, DocsDescription, DocsTitle } from 'fumadocs-ui/layouts/docs/page'
 import { Code2, Copy, FileText, FolderOpen } from 'lucide-react'
-import { useEffect, useMemo } from 'react'
+import { useMemo } from 'react'
 import { m } from '../../paraglide/messages'
 import type { MdxFile, MdxWorkspace } from '../../types'
 import { Backlinks } from './Backlinks'
@@ -21,14 +20,12 @@ export function MdxDocumentView({
   workspace,
   file,
   onOpenPath,
-  onTocChange,
   tocPinned,
   onTocPinnedChange
 }: {
   workspace: MdxWorkspace
   file: MdxFile
   onOpenPath: (filePath: string, workspaceRoot?: string) => void
-  onTocChange: (toc: TOCItemType[]) => void
   tocPinned: boolean
   onTocPinnedChange: (pinned: boolean) => void
 }): React.JSX.Element {
@@ -75,10 +72,6 @@ export function MdxDocumentView({
   })
   const Mdx = module?.default
   const toc = useMemo(() => module?.toc?.filter((item) => item.depth > 1) ?? [], [module?.toc])
-
-  useEffect(() => {
-    onTocChange(toc)
-  }, [onTocChange, toc])
 
   return (
     <div className="relative flex h-full min-h-0 overflow-hidden">

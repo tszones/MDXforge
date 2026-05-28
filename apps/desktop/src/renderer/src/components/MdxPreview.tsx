@@ -86,7 +86,6 @@ export function MdxPreview({
             workspace={activeWorkspace}
             file={activeFile}
             onOpenPath={(filePath, workspaceRoot) => void openOrActivate(filePath, workspaceRoot)}
-            onTocChange={() => undefined}
             tocPinned={Boolean(workbenchLayout?.tocPinned)}
             onTocPinnedChange={(pinned) => updateWorkbenchLayout('tocPinned', pinned)}
           />
