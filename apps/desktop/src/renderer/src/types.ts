@@ -3,6 +3,7 @@ export const APP_FONT_OPTIONS = ['system', 'bricolage', 'serif', 'mono'] as cons
 
 export type AppLanguage = (typeof APP_LANGUAGE_OPTIONS)[number]
 export type AppFontName = (typeof APP_FONT_OPTIONS)[number]
+export type AskAiButtonAction = 'open-sidebar'
 
 export interface WorkbenchLayoutSettings {
   horizontal?: Record<string, number>
@@ -16,6 +17,7 @@ export interface AppSettings {
   language: AppLanguage
   font: AppFontName
   viewableDocumentExtensions: string[]
+  askAiButtonAction: AskAiButtonAction
   workbenchLayout?: WorkbenchLayoutSettings
 }
 

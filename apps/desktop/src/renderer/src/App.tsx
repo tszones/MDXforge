@@ -10,7 +10,7 @@ import { useWorkspaceActions } from './hooks/useWorkspaceActions'
 import { appHotkeys } from './lib/hotkeys'
 import type { ColorMode, FumadocsThemeName } from './lib/theme'
 import { m } from './paraglide/messages'
-import type { AppFontName, AppLanguage, WorkbenchLayoutSettings } from './types'
+import type { AppFontName, AppLanguage, AskAiButtonAction, WorkbenchLayoutSettings } from './types'
 
 function App(): React.JSX.Element {
   const {
@@ -19,12 +19,14 @@ function App(): React.JSX.Element {
     language,
     font,
     viewableDocumentExtensions,
+    askAiButtonAction,
     workbenchLayout,
     setTheme,
     setColorMode,
     setLanguage,
     setFont,
     setViewableDocumentExtensions,
+    setAskAiButtonAction,
     setWorkbenchLayout
   } = useAppSettings()
 
@@ -35,6 +37,7 @@ function App(): React.JSX.Element {
       language={language}
       font={font}
       viewableDocumentExtensions={viewableDocumentExtensions}
+      askAiButtonAction={askAiButtonAction}
       workbenchLayout={workbenchLayout}
       onThemeChange={(nextTheme) => void setTheme(nextTheme)}
       onColorModeChange={(nextMode) => void setColorMode(nextMode)}
@@ -43,6 +46,7 @@ function App(): React.JSX.Element {
       onViewableDocumentExtensionsChange={(nextExtensions) =>
         void setViewableDocumentExtensions(nextExtensions)
       }
+      onAskAiButtonActionChange={(nextAction) => void setAskAiButtonAction(nextAction)}
       onWorkbenchLayoutChange={(nextLayout) => void setWorkbenchLayout(nextLayout)}
     />
   )
@@ -54,12 +58,14 @@ function AppContent({
   language,
   font,
   viewableDocumentExtensions,
+  askAiButtonAction,
   workbenchLayout,
   onThemeChange,
   onColorModeChange,
   onLanguageChange,
   onFontChange,
   onViewableDocumentExtensionsChange,
+  onAskAiButtonActionChange,
   onWorkbenchLayoutChange
 }: {
   theme: FumadocsThemeName
@@ -67,12 +73,14 @@ function AppContent({
   language: AppLanguage
   font: AppFontName
   viewableDocumentExtensions: string[]
+  askAiButtonAction: AskAiButtonAction
   workbenchLayout: WorkbenchLayoutSettings | undefined
   onThemeChange: (theme: FumadocsThemeName) => void
   onColorModeChange: (mode: ColorMode) => void
   onLanguageChange: (language: AppLanguage) => void
   onFontChange: (font: AppFontName) => void
   onViewableDocumentExtensionsChange: (extensions: string[]) => void
+  onAskAiButtonActionChange: (action: AskAiButtonAction) => void
   onWorkbenchLayoutChange: (layout: WorkbenchLayoutSettings) => void
 }): React.JSX.Element {
   const location = useLocation()
@@ -149,11 +157,13 @@ function AppContent({
         language={language}
         font={font}
         viewableDocumentExtensions={viewableDocumentExtensions}
+        askAiButtonAction={askAiButtonAction}
         onThemeChange={onThemeChange}
         onModeChange={onColorModeChange}
         onLanguageChange={onLanguageChange}
         onFontChange={onFontChange}
         onViewableDocumentExtensionsChange={onViewableDocumentExtensionsChange}
+        onAskAiButtonActionChange={onAskAiButtonActionChange}
         workspaceRoot={workspace?.folder?.rootPath}
         onBack={() => navigate('/')}
       />
@@ -196,13 +206,11 @@ function AppContent({
         <MdxPreview
           workspace={workspace}
           setWorkspace={setWorkspace}
-          onOpenFile={openFile}
-          onOpenFolder={openFolder}
           onOpenPath={openPath}
           onRenamePath={renamePath}
           onDeletePath={deletePath}
-          opening={loading}
           workbenchLayout={workbenchLayout}
+          askAiButtonAction={askAiButtonAction}
           onWorkbenchLayoutChange={onWorkbenchLayoutChange}
         />
       ) : (
@@ -258,6 +266,7 @@ function AppContent({
         <Route path="/settings/documents" element={renderSettingsRoute('documents')} />
         <Route path="/settings/updates" element={renderSettingsRoute('updates')} />
         <Route path="/settings/skills" element={renderSettingsRoute('skills')} />
+        <Route path="/settings/ask-ai" element={renderSettingsRoute('ask-ai')} />
         <Route path="/settings/*" element={<Navigate to="/settings/language" replace />} />
         <Route path="*" element={previewRoute} />
       </Routes>

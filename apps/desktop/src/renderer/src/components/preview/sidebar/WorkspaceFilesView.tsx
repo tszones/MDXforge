@@ -10,20 +10,14 @@ import { WorkspaceFilesPanel } from './WorkspaceFilesPanel'
 
 export function WorkspaceFilesView({
   workspace,
-  onOpenFile,
-  onOpenFolder,
   onOpenPath,
   onRenamePath,
-  onDeletePath,
-  opening
+  onDeletePath
 }: {
   workspace: MdxWorkspace
-  onOpenFile: () => void
-  onOpenFolder: () => void
   onOpenPath: (filePath: string, workspaceRoot?: string, options?: { newTab?: boolean }) => void
   onRenamePath: (targetPath: string, nextName: string, workspaceRoot?: string) => Promise<void>
   onDeletePath: (targetPath: string, workspaceRoot?: string) => Promise<void>
-  opening: boolean
 }): React.JSX.Element {
   const file = workspace.file
   const workspaceRoot = workspace.folder?.rootPath
@@ -53,34 +47,26 @@ export function WorkspaceFilesView({
   return (
     <SidebarShell
       title={
-        <>
-          <div className="flex items-center gap-2 font-medium">
-            <span>{m.workbench_discover()}</span>
+        workspace.folder ? (
+          <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground focus-within:border-fd-primary/50 focus-within:text-fd-foreground">
+            <Search className="size-4 shrink-0" />
+            <SidebarFilterInput
+              activeTab="files"
+              fileFilterInputRef={fileFilterInputRef}
+              workspaceSearchInputRef={workspaceSearchInputRef}
+              fileFilterQuery={fileFilterQuery}
+              searchQuery=""
+              onFileFilterQueryChange={setFileFilterQuery}
+              onSearchQueryChange={() => undefined}
+            />
           </div>
-          {workspace.folder ? (
-            <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground focus-within:border-fd-primary/50 focus-within:text-fd-foreground">
-              <Search className="size-4 shrink-0" />
-              <SidebarFilterInput
-                activeTab="files"
-                fileFilterInputRef={fileFilterInputRef}
-                workspaceSearchInputRef={workspaceSearchInputRef}
-                fileFilterQuery={fileFilterQuery}
-                searchQuery=""
-                onFileFilterQueryChange={setFileFilterQuery}
-                onSearchQueryChange={() => undefined}
-              />
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground">
-              <FileText className="size-4" />
-              <span>{m.preview_single_file_preview()}</span>
-            </div>
-          )}
-        </>
+        ) : (
+          <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground">
+            <FileText className="size-4" />
+            <span>{m.preview_single_file_preview()}</span>
+          </div>
+        )
       }
-      onOpenFile={onOpenFile}
-      onOpenFolder={onOpenFolder}
-      opening={opening}
     >
       <WorkspaceFilesPanel
         activePath={file.path}

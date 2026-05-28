@@ -7,7 +7,13 @@ import {
   type FumadocsThemeName,
   isFumadocsThemeName
 } from '../lib/theme'
-import type { AppFontName, AppLanguage, AppSettings, WorkbenchLayoutSettings } from '../types'
+import type {
+  AppFontName,
+  AppLanguage,
+  AppSettings,
+  AskAiButtonAction,
+  WorkbenchLayoutSettings
+} from '../types'
 import { defaultViewableDocumentExtensions } from '../types'
 
 export function readInitialSettings(): Partial<AppSettings> {
@@ -22,12 +28,14 @@ export function useAppSettings(): {
   language: AppLanguage
   font: AppFontName
   viewableDocumentExtensions: string[]
+  askAiButtonAction: AskAiButtonAction
   workbenchLayout?: WorkbenchLayoutSettings
   setTheme: (theme: FumadocsThemeName) => Promise<void>
   setColorMode: (mode: ColorMode) => Promise<void>
   setLanguage: (language: AppLanguage) => Promise<void>
   setFont: (font: AppFontName) => Promise<void>
   setViewableDocumentExtensions: (extensions: string[]) => Promise<void>
+  setAskAiButtonAction: (action: AskAiButtonAction) => Promise<void>
   setWorkbenchLayout: (layout: WorkbenchLayoutSettings) => Promise<void>
 } {
   const initialSettings = readInitialSettings()
@@ -50,6 +58,9 @@ export function useAppSettings(): {
       ? initialSettings.viewableDocumentExtensions
       : [...defaultViewableDocumentExtensions]
   )
+  const [askAiButtonAction, setAskAiButtonActionState] = useState<AskAiButtonAction>(() =>
+    initialSettings.askAiButtonAction === 'open-sidebar' ? 'open-sidebar' : 'open-sidebar'
+  )
   const [workbenchLayout, setWorkbenchLayoutState] = useState<WorkbenchLayoutSettings | undefined>(
     () => initialSettings.workbenchLayout
   )
@@ -66,6 +77,7 @@ export function useAppSettings(): {
       setLanguageState(nextLanguage)
       setFontState(nextFont)
       setViewableDocumentExtensionsState(settings.viewableDocumentExtensions)
+      setAskAiButtonActionState(settings.askAiButtonAction)
       setWorkbenchLayoutState(settings.workbenchLayout)
       applyFumadocsTheme(nextTheme, nextColorMode)
       applyLanguage(nextLanguage)
@@ -116,6 +128,12 @@ export function useAppSettings(): {
     setViewableDocumentExtensionsState(settings.viewableDocumentExtensions)
   }
 
+  async function setAskAiButtonAction(action: AskAiButtonAction): Promise<void> {
+    setAskAiButtonActionState(action)
+    const settings = await window.api.setSettings({ askAiButtonAction: action })
+    setAskAiButtonActionState(settings.askAiButtonAction)
+  }
+
   async function setWorkbenchLayout(layout: WorkbenchLayoutSettings): Promise<void> {
     setWorkbenchLayoutState(layout)
     const settings = await window.api.setSettings({ workbenchLayout: layout })
@@ -128,12 +146,14 @@ export function useAppSettings(): {
     language,
     font,
     viewableDocumentExtensions,
+    askAiButtonAction,
     workbenchLayout,
     setTheme,
     setColorMode,
     setLanguage,
     setFont,
     setViewableDocumentExtensions,
+    setAskAiButtonAction,
     setWorkbenchLayout
   }
 }

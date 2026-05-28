@@ -183,7 +183,10 @@ export interface MdxWorkspace {
 export interface WorkbenchLayoutSettings {
   horizontal?: Record<string, number>
   centerVertical?: Record<string, number>
+  tocPinned?: boolean
 }
+
+export type AskAiButtonAction = 'open-sidebar'
 
 export interface AppSettings {
   theme: AppThemeName
@@ -191,6 +194,7 @@ export interface AppSettings {
   language: AppLanguage
   font: AppFontName
   viewableDocumentExtensions: string[]
+  askAiButtonAction: AskAiButtonAction
   workbenchLayout?: WorkbenchLayoutSettings
 }
 

@@ -3,14 +3,15 @@ import { NavLink } from 'react-router'
 import type { AppFontName } from '../lib/font'
 import type { ColorMode, FumadocsThemeName } from '../lib/theme'
 import { m } from '../paraglide/messages'
-import type { AppLanguage } from '../types'
+import type { AppLanguage, AskAiButtonAction } from '../types'
 import { AppearanceSettingsPage } from './settings/AppearanceSettingsPage'
+import { AskAiSettingsPage } from './settings/AskAiSettingsPage'
 import { DocumentsSettingsPage } from './settings/DocumentsSettingsPage'
 import { LanguageSettingsPage } from './settings/LanguageSettingsPage'
 import { SkillsSettingsPage } from './settings/SkillsSettingsPage'
 import { UpdateSettingsCard } from './UpdateSettingsCard'
 
-export type SettingsRoute = 'language' | 'appearance' | 'documents' | 'updates' | 'skills'
+export type SettingsRoute = 'language' | 'appearance' | 'documents' | 'updates' | 'skills' | 'ask-ai'
 
 interface SettingsPageProps {
   page: SettingsRoute
@@ -19,11 +20,13 @@ interface SettingsPageProps {
   language: AppLanguage
   font: AppFontName
   viewableDocumentExtensions: string[]
+  askAiButtonAction: AskAiButtonAction
   onThemeChange: (theme: FumadocsThemeName) => void
   onModeChange: (mode: ColorMode) => void
   onLanguageChange: (language: AppLanguage) => void
   onFontChange: (font: AppFontName) => void
   onViewableDocumentExtensionsChange: (extensions: string[]) => void
+  onAskAiButtonActionChange: (action: AskAiButtonAction) => void
   workspaceRoot?: string
   onBack: () => void
 }
@@ -35,11 +38,13 @@ export function SettingsPage({
   language,
   font,
   viewableDocumentExtensions,
+  askAiButtonAction,
   onThemeChange,
   onModeChange,
   onLanguageChange,
   onFontChange,
   onViewableDocumentExtensionsChange,
+  onAskAiButtonActionChange,
   workspaceRoot,
   onBack
 }: SettingsPageProps): React.JSX.Element {
@@ -68,6 +73,7 @@ export function SettingsPage({
             </SettingsNavLink>
             <SettingsNavLink to="/settings/updates">{m.settings_updates_title()}</SettingsNavLink>
             <SettingsNavLink to="/settings/skills">{m.settings_skills_title()}</SettingsNavLink>
+            <SettingsNavLink to="/settings/ask-ai">{m.settings_ask_ai_title()}</SettingsNavLink>
           </nav>
         </aside>
 
@@ -102,6 +108,12 @@ export function SettingsPage({
             />
           ) : null}
           {page === 'skills' ? <SkillsSettingsPage workspaceRoot={workspaceRoot} /> : null}
+          {page === 'ask-ai' ? (
+            <AskAiSettingsPage
+              action={askAiButtonAction}
+              onActionChange={onAskAiButtonActionChange}
+            />
+          ) : null}
         </div>
       </div>
     </section>
@@ -137,6 +149,7 @@ function settingsPageTitle(page: SettingsRoute): string {
   if (page === 'appearance') return m.settings_appearance_title()
   if (page === 'documents') return m.settings_documents_title()
   if (page === 'skills') return m.settings_skills_title()
+  if (page === 'ask-ai') return m.settings_ask_ai_title()
   return m.settings_updates_title()
 }
 
@@ -145,5 +158,6 @@ function settingsPageDescription(page: SettingsRoute): string {
   if (page === 'appearance') return m.settings_appearance_description()
   if (page === 'documents') return m.settings_documents_description()
   if (page === 'skills') return m.settings_skills_description()
+  if (page === 'ask-ai') return m.settings_ask_ai_description()
   return m.settings_updates_description()
 }

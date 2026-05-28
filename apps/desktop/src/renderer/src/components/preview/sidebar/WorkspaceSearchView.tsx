@@ -9,18 +9,12 @@ import { WorkspaceSearchPanel } from './WorkspaceSearchPanel'
 
 export function WorkspaceSearchView({
   workspace,
-  onOpenFile,
-  onOpenFolder,
   onOpenPath,
-  onDeletePath,
-  opening
+  onDeletePath
 }: {
   workspace: MdxWorkspace
-  onOpenFile: () => void
-  onOpenFolder: () => void
   onOpenPath: (filePath: string, workspaceRoot?: string, options?: { newTab?: boolean }) => void
   onDeletePath: (targetPath: string, workspaceRoot?: string) => Promise<void>
-  opening: boolean
 }): React.JSX.Element {
   const file = workspace.file
   const workspaceRoot = workspace.folder?.rootPath
@@ -40,27 +34,19 @@ export function WorkspaceSearchView({
   return (
     <SidebarShell
       title={
-        <>
-          <div className="flex items-center gap-2 font-medium">
-            <span>Search</span>
-          </div>
-          <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground focus-within:border-fd-primary/50 focus-within:text-fd-foreground">
-            <Search className="size-4 shrink-0" />
-            <SidebarFilterInput
-              activeTab="search"
-              fileFilterInputRef={fileFilterInputRef}
-              workspaceSearchInputRef={workspaceSearchInputRef}
-              fileFilterQuery=""
-              searchQuery={searchQuery}
-              onFileFilterQueryChange={() => undefined}
-              onSearchQueryChange={setSearchQuery}
-            />
-          </div>
-        </>
+        <div className="flex items-center gap-2 rounded-lg border bg-fd-secondary/50 px-2.5 py-2 text-fd-muted-foreground focus-within:border-fd-primary/50 focus-within:text-fd-foreground">
+          <Search className="size-4 shrink-0" />
+          <SidebarFilterInput
+            activeTab="search"
+            fileFilterInputRef={fileFilterInputRef}
+            workspaceSearchInputRef={workspaceSearchInputRef}
+            fileFilterQuery=""
+            searchQuery={searchQuery}
+            onFileFilterQueryChange={() => undefined}
+            onSearchQueryChange={setSearchQuery}
+          />
+        </div>
       }
-      onOpenFile={onOpenFile}
-      onOpenFolder={onOpenFolder}
-      opening={opening}
     >
       <WorkspaceSearchPanel
         activePath={file.path}

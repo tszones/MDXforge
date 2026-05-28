@@ -34,6 +34,7 @@ export type AppThemeName =
 export type AppColorMode = 'light' | 'dark'
 export type AppLanguage = 'system' | 'zh-CN' | 'en-US'
 export type AppFontName = 'system' | 'bricolage' | 'serif' | 'mono'
+export type AskAiButtonAction = 'open-sidebar'
 
 export interface AppSettings {
   theme: AppThemeName
@@ -41,6 +42,7 @@ export interface AppSettings {
   language: AppLanguage
   font: AppFontName
   viewableDocumentExtensions: string[]
+  askAiButtonAction: AskAiButtonAction
   windowState: AppWindowState
   workbenchLayout: WorkbenchLayoutSettings
 }
@@ -67,6 +69,7 @@ const defaultAppSettings: AppSettings = {
   language: 'en-US',
   font: 'system',
   viewableDocumentExtensions: [...defaultViewableDocumentExtensions],
+  askAiButtonAction: 'open-sidebar',
   windowState: {
     width: 900,
     height: 670
@@ -110,6 +113,10 @@ function normalizeWorkbenchLayout(value: unknown): WorkbenchLayoutSettings {
   }
 }
 
+function normalizeAskAiButtonAction(value: unknown): AskAiButtonAction {
+  return value === 'open-sidebar' ? value : 'open-sidebar'
+}
+
 function normalizeLayoutMap(value: unknown): Record<string, number> | undefined {
   if (!value || typeof value !== 'object') return undefined
   const entries = Object.entries(value).flatMap(([key, size]) => {
@@ -129,6 +136,7 @@ export function getAppSettings(): AppSettings {
     viewableDocumentExtensions: normalizeViewableDocumentExtensions(
       store.get('viewableDocumentExtensions')
     ),
+    askAiButtonAction: normalizeAskAiButtonAction(store.get('askAiButtonAction')),
     windowState: store.get('windowState'),
     workbenchLayout: normalizeWorkbenchLayout(store.get('workbenchLayout'))
   }
@@ -145,6 +153,9 @@ export function setAppSettings(settings: Partial<AppSettings>): AppSettings {
       'viewableDocumentExtensions',
       normalizeViewableDocumentExtensions(settings.viewableDocumentExtensions)
     )
+  }
+  if (settings.askAiButtonAction) {
+    store.set('askAiButtonAction', normalizeAskAiButtonAction(settings.askAiButtonAction))
   }
   if (settings.windowState) store.set('windowState', settings.windowState)
   if (settings.workbenchLayout)

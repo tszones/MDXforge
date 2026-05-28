@@ -1,7 +1,6 @@
-import { BookOpen, Bot, PanelLeftClose, PanelRightClose, Search } from 'lucide-react'
+import { BookOpen, Search, X } from 'lucide-react'
 import { m } from '../../paraglide/messages'
 import type { SidebarTab } from '../preview/sidebar/useWorkspaceSidebarTabs'
-import type { RightSidebarTab } from './RightSidebar'
 import { WorkbenchIconButton, WorkbenchTabIconButton } from './WorkbenchIconButton'
 
 export function WorkbenchLeftPanelHeader({
@@ -15,10 +14,6 @@ export function WorkbenchLeftPanelHeader({
 }): React.JSX.Element {
   return (
     <WorkbenchPanelHeader>
-      <WorkbenchIconButton label={m.preview_collapse_sidebar()} onClick={onCollapse}>
-        <PanelLeftClose className="size-4" />
-      </WorkbenchIconButton>
-      <WorkbenchHeaderSeparator />
       <WorkbenchTabIconButton
         active={activeTab === 'files'}
         label={m.workbench_discover()}
@@ -33,36 +28,28 @@ export function WorkbenchLeftPanelHeader({
       >
         <Search className="size-4" />
       </WorkbenchTabIconButton>
+      <div className="flex-1" />
+      <WorkbenchIconButton label={m.preview_collapse_sidebar()} onClick={onCollapse}>
+        <X className="size-4" />
+      </WorkbenchIconButton>
     </WorkbenchPanelHeader>
   )
 }
 
 export function WorkbenchRightPanelHeader({
-  activeTab,
-  onOpenAi,
   onCollapse
 }: {
-  activeTab: RightSidebarTab
-  onOpenAi: () => void
   onCollapse: () => void
 }): React.JSX.Element {
   return (
-    <WorkbenchPanelHeader>
+    <div className="flex h-10 items-center justify-end px-3 pt-2">
       <WorkbenchIconButton label={m.preview_collapse_sidebar()} onClick={onCollapse}>
-        <PanelRightClose className="size-4" />
+        <X className="size-4" />
       </WorkbenchIconButton>
-      <WorkbenchHeaderSeparator />
-      <WorkbenchTabIconButton active={activeTab === 'ai'} label={m.workbench_ai()} onClick={onOpenAi}>
-        <Bot className="size-4" />
-      </WorkbenchTabIconButton>
-    </WorkbenchPanelHeader>
+    </div>
   )
 }
 
 function WorkbenchPanelHeader({ children }: { children: React.ReactNode }): React.JSX.Element {
-  return <div className="flex h-8 items-center gap-1 border-b px-2">{children}</div>
-}
-
-function WorkbenchHeaderSeparator(): React.JSX.Element {
-  return <div className="mx-1 h-5 w-px bg-fd-border" />
+  return <div className="flex h-10 items-center gap-1 px-3 pt-2">{children}</div>
 }
