@@ -23,8 +23,8 @@ const api = {
   getInitialSettings,
   openMdxFile: () => ipcRenderer.invoke(IpcChannels.mdx.openFile),
   openMdxFolder: () => ipcRenderer.invoke(IpcChannels.mdx.openFolder),
-  openMdxPath: (filePath: string, workspaceRoot?: string) =>
-    ipcRenderer.invoke(IpcChannels.mdx.openPath, filePath, workspaceRoot),
+  openMdxPath: (filePath: string, workspaceRoot?: string, refreshFolder?: boolean) =>
+    ipcRenderer.invoke(IpcChannels.mdx.openPath, filePath, workspaceRoot, refreshFolder),
   renameMdxPath: (targetPath: string, nextName: string, workspaceRoot?: string) =>
     ipcRenderer.invoke(IpcChannels.mdx.renamePath, targetPath, nextName, workspaceRoot),
   deleteMdxPath: (targetPath: string, workspaceRoot?: string) =>

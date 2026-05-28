@@ -9,7 +9,11 @@ export function useWorkbenchTabs({
 }: {
   workspace: MdxWorkspace
   setWorkspace: (workspace: MdxWorkspace | null) => void
-  openPath: (filePath: string, workspaceRoot?: string) => Promise<MdxWorkspace | null>
+  openPath: (
+    filePath: string,
+    workspaceRoot?: string,
+    refreshFolder?: boolean
+  ) => Promise<MdxWorkspace | null>
 }): {
   tabs: WorkbenchDocumentTab[]
   activeTabId: string | null
@@ -41,7 +45,7 @@ export function useWorkbenchTabs({
       return
     }
 
-    const nextWorkspace = await openPath(filePath, workspaceRoot)
+    const nextWorkspace = await openPath(filePath, workspaceRoot, false)
     if (!nextWorkspace) return
 
     const tab = toTab(nextWorkspace)

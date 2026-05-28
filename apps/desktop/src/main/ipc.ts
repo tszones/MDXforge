@@ -73,20 +73,23 @@ export function registerAppIpc(options: {
     }
     return workspace
   })
-  ipcMain.handle(IpcChannels.mdx.openPath, async (_, filePath: string, workspaceRoot?: string) => {
-    const workspace = await readMdxWorkspace(filePath, workspaceRoot)
-    setCurrentExtensionManifest(workspace.extensions ?? null)
-    const mainWindow = getMainWindow()
-    if (mainWindow) {
-      watchMdxWorkspace(
-        filePath,
-        workspace.folder?.rootPath,
-        mainWindow,
-        setCurrentExtensionManifest
-      )
+  ipcMain.handle(
+    IpcChannels.mdx.openPath,
+    async (_, filePath: string, workspaceRoot?: string, refreshFolder = true) => {
+      const workspace = await readMdxWorkspace(filePath, workspaceRoot, { refreshFolder })
+      setCurrentExtensionManifest(workspace.extensions ?? getCurrentExtensionManifest())
+      const mainWindow = getMainWindow()
+      if (mainWindow) {
+        watchMdxWorkspace(
+          filePath,
+          workspace.folder?.rootPath ?? workspaceRoot,
+          mainWindow,
+          setCurrentExtensionManifest
+        )
+      }
+      return workspace
     }
-    return workspace
-  })
+  )
   ipcMain.handle(
     IpcChannels.mdx.renamePath,
     async (_, targetPath: string, nextName: string, workspaceRoot?: string) => {

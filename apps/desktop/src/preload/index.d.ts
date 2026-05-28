@@ -241,7 +241,11 @@ export interface AppAPI {
   getInitialSettings: () => AppSettings | null
   openMdxFile: () => Promise<MdxWorkspace | null>
   openMdxFolder: () => Promise<MdxWorkspace | null>
-  openMdxPath: (filePath: string, workspaceRoot?: string) => Promise<MdxWorkspace>
+  openMdxPath: (
+    filePath: string,
+    workspaceRoot?: string,
+    refreshFolder?: boolean
+  ) => Promise<MdxWorkspace>
   renameMdxPath: (
     targetPath: string,
     nextName: string,

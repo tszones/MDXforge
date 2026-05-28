@@ -47,7 +47,11 @@ export function useWorkspaceActions(): {
   setError: (error: string | null) => void
   openFile: () => Promise<void>
   openFolder: () => Promise<void>
-  openPath: (filePath: string, workspaceRoot?: string) => Promise<MdxWorkspace | null>
+  openPath: (
+    filePath: string,
+    workspaceRoot?: string,
+    refreshFolder?: boolean
+  ) => Promise<MdxWorkspace | null>
   renamePath: (targetPath: string, nextName: string, workspaceRoot?: string) => Promise<void>
   deletePath: (targetPath: string, workspaceRoot?: string) => Promise<void>
 } {
@@ -87,8 +91,12 @@ export function useWorkspaceActions(): {
     await openWithLoader(() => window.api.openMdxFolder())
   }
 
-  async function openPath(filePath: string, workspaceRoot?: string): Promise<MdxWorkspace | null> {
-    return openWithLoader(() => window.api.openMdxPath(filePath, workspaceRoot))
+  async function openPath(
+    filePath: string,
+    workspaceRoot?: string,
+    refreshFolder = true
+  ): Promise<MdxWorkspace | null> {
+    return openWithLoader(() => window.api.openMdxPath(filePath, workspaceRoot, refreshFolder))
   }
 
   async function renamePath(

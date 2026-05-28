@@ -35,21 +35,28 @@ export interface MdxWorkspace {
   extensions?: WorkspaceExtensionManifest
 }
 
+export interface ReadMdxWorkspaceOptions {
+  refreshFolder?: boolean
+}
+
 export async function readMdxWorkspace(
   inputPath: string,
-  workspaceRoot?: string
+  workspaceRoot?: string,
+  options: ReadMdxWorkspaceOptions = {}
 ): Promise<MdxWorkspace> {
+  const { refreshFolder = true } = options
   const resolvedPath = resolve(inputPath)
   const filePath = resolveMdxTarget(resolvedPath)
   if (!filePath) throw new Error(mainMessage('error_no_mdx_found', { filePath: inputPath }))
 
   const folderRoot = getWorkspaceRoot(resolvedPath, workspaceRoot)
+  const shouldReadFolder = refreshFolder && folderRoot !== null
   const file = await readMdxFile(filePath, folderRoot ?? undefined)
 
   return {
     file,
-    folder: folderRoot ? readMdxFolder(folderRoot) : undefined,
-    extensions: folderRoot ? readWorkspaceExtensionManifest(folderRoot) : undefined
+    folder: shouldReadFolder ? readMdxFolder(folderRoot) : undefined,
+    extensions: shouldReadFolder ? readWorkspaceExtensionManifest(folderRoot) : undefined
   }
 }
 
