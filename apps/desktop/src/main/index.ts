@@ -58,6 +58,8 @@ function createWindow(): void {
   mainWindow = new BrowserWindow({
     width: savedWindowState.width,
     height: savedWindowState.height,
+    minWidth: 900,
+    minHeight: 600,
     ...(typeof savedWindowState.x === 'number' && typeof savedWindowState.y === 'number'
       ? { x: savedWindowState.x, y: savedWindowState.y }
       : {}),
