@@ -78,7 +78,7 @@ export function MdxDocumentView({
       <div className="min-h-0 flex-1 overflow-auto">
         <article
           id="nd-page"
-          className="mx-auto flex min-h-full w-full max-w-[900px] flex-col gap-4 px-4 py-6 md:px-6 md:pt-8 xl:px-8 xl:pt-10"
+          className="mx-auto flex min-h-full w-full max-w-[900px] flex-col gap-4 py-6 pl-10 pr-10 md:pl-6 md:pr-6 md:pt-8 xl:pl-8 xl:pr-8 xl:pt-10"
           onContextMenu={openDocumentContextMenu}
         >
           <DocsTitle>{title}</DocsTitle>
