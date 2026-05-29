@@ -28,7 +28,7 @@ export function DocumentTocRail({
 
 function PinnedToc({ onUnpin }: { onUnpin: () => void }): React.JSX.Element {
   return (
-    <aside className="hidden h-full min-h-0 w-64 flex-col bg-fd-background pt-12 pe-4 pb-2 ps-5 xl:flex">
+    <aside className="hidden h-full min-h-0 w-64 flex-col bg-fd-background pt-12 pe-4 pb-2 ps-5 md:flex">
       <div className="mb-3 flex items-center gap-1.5 text-sm text-fd-muted-foreground">
         <Text className="size-4" />
         <span>{m.docs_toc()}</span>
@@ -54,7 +54,7 @@ function PinnedToc({ onUnpin }: { onUnpin: () => void }): React.JSX.Element {
 
 function HoverToc({ onPin }: { onPin: () => void }): React.JSX.Element {
   return (
-    <aside className="group/toc pointer-events-none absolute inset-y-0 right-3 hidden w-64 xl:block">
+    <aside className="group/toc pointer-events-none absolute inset-y-0 right-3 block w-64">
       <MiniTocRail />
       <div className="pointer-events-auto absolute right-4 top-1/2 max-h-[min(576px,calc(100%-4rem))] w-56 -translate-y-1/2 rounded-xl border bg-fd-card/95 p-4 text-sm opacity-0 shadow-lg backdrop-blur transition-opacity duration-200 group-hover/toc:opacity-100">
         <div className="mb-3 flex items-center justify-between gap-2">
