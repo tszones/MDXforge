@@ -10,6 +10,7 @@ out
 .eslintcache
 *.log*
 *.tsbuildinfo
+.pi/memory/project-memory.md
 C:/
 
 **/.wrangler

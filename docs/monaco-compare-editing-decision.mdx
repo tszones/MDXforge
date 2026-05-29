@@ -1,0 +1,299 @@
+---
+title: Monaco Compare 与轻度编辑定位
+description: 判断 MDXForge 是否适合集成 Monaco Diff Editor，以及它在产品中的边界。
+---
+
+# Monaco Compare 与轻度编辑定位
+
+MDXForge 可以集成 Monaco。  
+但它的定位不应是完整编辑器内核，而应是：
+
+> AI 文档审阅中的源码级对比与轻度修正工具。
+
+<Callout title="结论" type="info">
+Monaco 适合用于 Compare / Review Changes / Quick Edit。  
+不适合作为 MDXForge 的默认主编辑器。
+</Callout>
+
+## 为什么 Monaco 合适
+
+Monaco 的优势非常贴合“审阅 AI 修改”场景：
+
+- 内置 Diff Editor
+- 行级、词级差异显示成熟
+- Markdown / MDX 源码阅读体验好
+- 支持复制、选择、搜索
+- 大文件性能优于自研 diff UI
+- 用户对代码式 diff 心智熟悉
+
+MDXForge 的核心流程是：
+
+1. AI 生成或修改 MDX / Markdown
+2. 用户本地打开文档
+3. 用户审阅 AI 改了什么
+4. 用户接受、微调或拒绝修改
+5. 文件仍保存为 `.md` / `.mdx`
+
+Monaco Diff Editor 正好解决其中的关键问题：
+
+> AI 到底改了哪些源码？
+
+## Monaco 适合做什么
+
+### Compare / Review Changes
+
+最适合的形态是：
+
+```txt
+左侧：Original，只读
+右侧：Draft，可选编辑
+```
+
+用户可以：
+
+- 查看 AI 修改
+- 检查 frontmatter
+- 检查 MDX 组件 props
+- 检查代码块
+- 检查表格
+- 微调右侧 draft
+- 确认后 Accept 写回文件
+
+### Quick Edit
+
+Monaco 也可以用于轻度源码修正。
+
+适合：
+
+- 改错字
+- 改标题
+- 改描述
+- 改 frontmatter
+- 改短段落
+- 调整组件 props
+- 修复 MDX 语法错误
+- 快速保存后回到预览
+
+<Callout title="边界" type="warn">
+Monaco 可以做轻度编辑，但不应把 MDXForge 变成通用 IDE。
+</Callout>
+
+## 不适合首版做什么
+
+首版不建议做：
+
+- 多文件编辑
+- 项目级搜索替换
+- IntelliSense
+- LSP
+- 格式化系统
+- Git staging
+- Source Control 面板
+- 多编辑器分屏
+- VS Code 式快捷键体系
+- 插件化代码编辑环境
+
+这些能力会让产品从“AI 文档审阅工具”偏向“通用编辑器”。
+
+## Dialog 还是标签页
+
+Monaco Diff Editor 不适合放在 Dialog 里长期使用。
+
+Dialog 适合：
+
+- 选择对比来源
+- 粘贴待对比内容
+- 确认是否保存
+- 显示短提示
+
+Diff 审阅不适合 Dialog，因为它需要：
+
+- 大面积横向空间
+- 长时间阅读
+- 滚动
+- 搜索
+- 复制
+- 接受 / 拒绝
+- 可能切回其他文档参考
+
+更推荐的设计是：
+
+> Dialog 负责发起 Compare，标签页负责承载 Monaco Diff。
+
+## 推荐产品形态
+
+### Compare Tab
+
+在 Workbench 中打开一个独立标签页：
+
+```txt
+[ README.mdx ] [ Review Changes: README.mdx ]
+```
+
+标签页内容是 Monaco Diff Editor。
+
+顶部操作：
+
+- Accept
+- Reject
+- Save As
+- Preview
+- Close
+
+### Quick Edit Tab
+
+用户从预览进入快速编辑：
+
+```txt
+[ README.mdx ] [ Edit: README.mdx ]
+```
+
+编辑完成后：
+
+- Save → 写回 `.md` / `.mdx`
+- Cancel → 丢弃内存 draft
+- Preview → 回到渲染预览
+
+## 推荐数据模型
+
+```ts
+type WorkbenchTab =
+  | {
+      type: 'document'
+      id: string
+      file: MdxFile
+    }
+  | {
+      type: 'compare'
+      id: string
+      title: string
+      filePath: string
+      beforeTitle: string
+      afterTitle: string
+      before: string
+      after: string
+      editable: boolean
+    }
+  | {
+      type: 'edit'
+      id: string
+      title: string
+      filePath: string
+      original: string
+      draft: string
+    }
+```
+
+## 推荐 Monaco 配置
+
+```tsx
+<DiffEditor
+  original={before}
+  modified={after}
+  language="markdown"
+  theme={colorMode === 'dark' ? 'vs-dark' : 'vs'}
+  options={{
+    readOnly: true,
+    renderSideBySide: true,
+    wordWrap: 'on',
+    minimap: { enabled: false },
+    scrollBeyondLastLine: false
+  }}
+/>
+```
+
+如果允许修改 draft，可以让 modified side 可编辑：
+
+```tsx
+<DiffEditor
+  original={original}
+  modified={draft}
+  language="markdown"
+  options={{
+    originalEditable: false,
+    readOnly: false,
+    renderSideBySide: true,
+    wordWrap: 'on',
+    minimap: { enabled: false }
+  }}
+/>
+```
+
+## 集成注意事项
+
+### 懒加载
+
+Monaco 体积较大，不应进入首屏 bundle。
+
+建议：
+
+```tsx
+const MonacoDiffView = lazy(() => import('./MonacoDiffView'))
+```
+
+### 主题同步
+
+需要跟随 MDXForge 当前明暗主题：
+
+```ts
+theme={colorMode === 'dark' ? 'vs-dark' : 'vs'}
+```
+
+### MDX 语言
+
+首版可以先使用：
+
+```ts
+language="markdown"
+```
+
+后续再考虑注册 MDX language。
+
+### Electron / Vite worker
+
+Monaco 在 Electron + Vite 中需要实际验证 worker 加载。  
+如果使用 `@monaco-editor/react`，通常集成成本较低，但仍需跑 dev / build 验证。
+
+## 产品命名建议
+
+推荐命名：
+
+- Compare
+- Review Changes
+- Quick Edit
+- Source Review
+- 对比文档
+- 审阅修改
+- 快速修正
+
+不建议命名：
+
+- IDE
+- Editor Workspace
+- Source Control
+- Git Diff
+- Code Editor
+
+## 核心原则
+
+<TodoList>
+  <Todo checked>默认仍是渲染预览</Todo>
+  <Todo checked>编辑必须显式进入</Todo>
+  <Todo checked>保存必须显式触发</Todo>
+  <Todo checked>文件仍是 `.md` / `.mdx` source of truth</Todo>
+  <Todo checked>Monaco 只服务 Compare / Review / Quick Edit</Todo>
+  <Todo>避免扩展成完整 IDE</Todo>
+</TodoList>
+
+## 最终判断
+
+Monaco 可以用。  
+而且非常适合做源码级 diff 与轻度修正。
+
+但产品定位必须保持清楚：
+
+> Monaco 是 MDXForge 的审阅修改工具，不是默认编辑器内核。
+
+一句话：
+
+> 默认阅读，临时编辑，显式保存；Monaco 服务 AI 文档审阅，不把 MDXForge 变成 IDE。
