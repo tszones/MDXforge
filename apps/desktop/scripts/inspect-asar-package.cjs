@@ -1,5 +1,5 @@
 const { existsSync } = require('node:fs')
-const { resolve } = require('node:path')
+const { resolve, sep } = require('node:path')
 const asar = require('@electron/asar')
 
 const appAsarPath = process.argv[2]
@@ -18,7 +18,8 @@ if (!existsSync(resolvedAsarPath)) fail(`Missing app.asar: ${resolvedAsarPath}`)
 
 let content
 try {
-  content = asar.extractFile(resolvedAsarPath, 'package.json').toString('utf8')
+  const packageJsonPath = sep === '\\' ? 'package.json'.replaceAll('/', '\\') : 'package.json'
+  content = asar.extractFile(resolvedAsarPath, packageJsonPath).toString('utf8')
 } catch (error) {
   fail(`Cannot read package.json from app.asar: ${error.message}`)
 }

@@ -34,9 +34,9 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "postinstall": "electron-builder install-app-deps",
-    "build:unpack": "node ../../scripts/preflight-package-json.cjs && pnpm run build && node scripts/clean-dist.cjs && electron-builder --dir && node scripts/verify-app-asar.cjs dist/win-unpacked/resources/app.asar",
-    "build:win": "node ../../scripts/preflight-package-json.cjs && pnpm run build && node scripts/clean-dist.cjs && electron-builder --win && node scripts/verify-app-asar.cjs dist/win-unpacked/resources/app.asar",
-    "build:win64": "node ../../scripts/preflight-package-json.cjs && pnpm run build && node scripts/clean-dist.cjs && electron-builder --win --x64 && node scripts/verify-app-asar.cjs dist/win-unpacked/resources/app.asar",
+    "build:unpack": "node ../../scripts/preflight-package-json.cjs && pnpm run build && node scripts/build-win.cjs --dir",
+    "build:win": "node ../../scripts/preflight-package-json.cjs && pnpm run build && node scripts/build-win.cjs --win",
+    "build:win64": "node ../../scripts/preflight-package-json.cjs && pnpm run build && node scripts/build-win.cjs --win --x64",
     "build:mac": "node ../../scripts/preflight-package-json.cjs && pnpm run build && node scripts/clean-dist.cjs && electron-builder --mac",
     "build:linux": "node ../../scripts/preflight-package-json.cjs && pnpm run build && node scripts/clean-dist.cjs && electron-builder --linux"
   },

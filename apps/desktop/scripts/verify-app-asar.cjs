@@ -1,4 +1,5 @@
 const { existsSync } = require('node:fs')
+const { sep } = require('node:path')
 const { join, resolve } = require('node:path')
 const asar = require('@electron/asar')
 
@@ -12,10 +13,18 @@ function fail(message) {
   process.exit(1)
 }
 
+function normalizeAsarPath(relativePath) {
+  return sep === '\\' ? relativePath.replaceAll('/', '\\') : relativePath
+}
+
+function extractAsarFile(relativePath) {
+  return asar.extractFile(appAsarPath, normalizeAsarPath(relativePath))
+}
+
 function readPackageJsonFromAsar() {
   let content
   try {
-    content = asar.extractFile(appAsarPath, 'package.json').toString('utf8')
+    content = extractAsarFile('package.json').toString('utf8')
   } catch (error) {
     fail(`Cannot read package.json from ${appAsarPath}: ${error.message}`)
   }
@@ -34,7 +43,7 @@ function assertEqual(actual, expected, label) {
 function assertAsarFile(relativePath) {
   let file
   try {
-    file = asar.extractFile(appAsarPath, relativePath)
+    file = extractAsarFile(relativePath)
   } catch (error) {
     fail(`Missing ${relativePath} in app.asar: ${error.message}`)
   }

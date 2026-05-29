@@ -3,6 +3,13 @@ productName: MDXForge
 directories:
   buildResources: build
 files:
+  - package.json
+  - out/**
+  - messages/**
+  - resources/**
+  - bin/**
+  - node_modules/**
+  - '!node_modules/.cache/**'
   - '!**/.vscode/*'
   - '!src/*'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
