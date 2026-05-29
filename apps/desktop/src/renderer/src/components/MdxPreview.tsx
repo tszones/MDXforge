@@ -43,10 +43,15 @@ export function MdxPreview({
     [activeFile, workspace]
   )
 
-  function updateWorkbenchLayout(key: keyof WorkbenchLayoutSettings, layout: Layout | boolean): void {
+  function updateWorkbenchLayout(
+    key: keyof WorkbenchLayoutSettings,
+    layout: Layout | boolean,
+    bottomPanelOpen?: boolean
+  ): void {
     onWorkbenchLayoutChange({
       ...workbenchLayout,
-      [key]: layout
+      [key]: layout,
+      ...(typeof bottomPanelOpen === 'boolean' ? { bottomPanelOpen } : {})
     })
   }
 
@@ -58,7 +63,9 @@ export function MdxPreview({
       onLeftTabChange={setLeftSidebarTab}
       askAiButtonAction={askAiButtonAction}
       onHorizontalLayoutChange={(layout) => updateWorkbenchLayout('horizontal', layout)}
-      onCenterVerticalLayoutChange={(layout) => updateWorkbenchLayout('centerVertical', layout)}
+      onCenterVerticalLayoutChange={(layout, bottomPanelOpen) =>
+        updateWorkbenchLayout('centerVertical', layout, bottomPanelOpen)
+      }
       leftSidebar={
         <PreviewSidebar
           workspace={activeWorkspace}

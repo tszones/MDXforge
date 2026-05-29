@@ -15,6 +15,7 @@ export interface AppWindowState {
 export interface WorkbenchLayoutSettings {
   horizontal?: Record<string, number>
   centerVertical?: Record<string, number>
+  bottomPanelOpen?: boolean
   tocPinned?: boolean
 }
 
@@ -109,6 +110,7 @@ function normalizeWorkbenchLayout(value: unknown): WorkbenchLayoutSettings {
   return {
     horizontal: normalizeLayoutMap(layout.horizontal),
     centerVertical: normalizeLayoutMap(layout.centerVertical),
+    bottomPanelOpen: typeof layout.bottomPanelOpen === 'boolean' ? layout.bottomPanelOpen : undefined,
     tocPinned: typeof layout.tocPinned === 'boolean' ? layout.tocPinned : undefined
   }
 }

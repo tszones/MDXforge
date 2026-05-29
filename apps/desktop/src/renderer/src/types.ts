@@ -8,6 +8,7 @@ export type AskAiButtonAction = 'open-sidebar'
 export interface WorkbenchLayoutSettings {
   horizontal?: Record<string, number>
   centerVertical?: Record<string, number>
+  bottomPanelOpen?: boolean
   tocPinned?: boolean
 }
 
