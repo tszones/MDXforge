@@ -227,9 +227,9 @@ export function WorkbenchLayout({
 
   return (
     <div className="relative flex min-h-0 flex-1 bg-fd-background">
-      {/* Left toggle button (collapsed) */}
+      {/* Left toggle button (collapsed) — floating, does not occupy layout space */}
       {showLeftSidebar && leftCollapsed ? (
-        <div className="z-20 flex h-8 w-11 shrink-0 self-start justify-center">
+        <div className="absolute top-0 left-0 z-20 flex h-9 w-9 items-center justify-center">
           <WorkbenchIconButton label={m.preview_expand_sidebar()} onClick={toggleLeftPanel}>
             <PanelLeftOpen className="size-4" />
           </WorkbenchIconButton>
